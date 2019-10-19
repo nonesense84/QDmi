@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>sounds/click.wav</file>
+        <file>sounds/S_info.wav</file>
+        <file>sounds/S1_toofast.wav</file>
+        <file>sounds/S2_warning.wav</file>
+    </qresource>
+</RCC>

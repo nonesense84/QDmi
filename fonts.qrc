@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>fonts/FreeSans.ttf</file>
+        <file>fonts/FreeSansBold.ttf</file>
+        <file>fonts/FreeSansBoldOblique.ttf</file>
+        <file>fonts/FreeSansOblique.ttf</file>
+        <file>fonts/Segment7Standard.otf</file>
+    </qresource>
+</RCC>
