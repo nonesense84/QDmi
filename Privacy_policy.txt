@@ -1,11 +1,17 @@
 === Datenschutzerklärung ===
 
-QDmi erfüllt ausschließlich den Zweck Daten aus dem Eisenbahnsimulator unmittelbar anzuzeigen. Es werden keine Daten gesammelt oder an Dritte übertragen.
+QDmi erfüllt ausschließlich den Zweck Daten aus dem Eisenbahnsimulator unmittelbar anzuzeigen.
+Es werden keine Daten gesammelt oder an Dritte übertragen.
 
-Auf dem Gerät selber werden Einstellungen gespeichert, die der Benutzer vorgenommen hat. Dies erfüllt ausschließlich den Zweck, die Einstellungen beim Neustart der wieder Verfügung zu haben. Aus diese Daten werden nicht gesammelt  oder an Dritte übertragen.
+Auf dem Gerät selber werden Einstellungen gespeichert, die der Benutzer vorgenommen hat.
+Dies erfüllt ausschließlich den Zweck, die Einstellungen beim Neustart der wieder Verfügung zu haben.
+Aus diese Daten werden nicht gesammelt  oder an Dritte übertragen.
 
 === Privacy Policy ===
 
-QDmi exclusively fulfills the purpose of directly displaying data from the railway simulator. No data will be collected or transmitted to third parties.
+QDmi exclusively fulfills the purpose of directly displaying data from the railway simulator.
+No data will be collected or transmitted to third parties.
 
-On the device itself settings are saved, which are made by the user. This only serves the purpose of having the settings available again after restarting the app. These data are not collected or transmitted to third parties.
+On the device itself settings are saved, which are made by the user.
+This only serves the purpose of having the settings available again after restarting the app.
+These data are not collected or transmitted to third parties.
