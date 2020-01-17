@@ -8,7 +8,7 @@
 #include "zusiindicator.h"
 #include <QHostInfo>
 #include "era.h"
-#include "zusiPower.h"
+#include "zusipower.h"
 
 class zusi3Tcp: public QObject
 {
@@ -33,6 +33,7 @@ public slots:
     void cutZusiTelegram();
     void zusiDecoder();
     qint8 setIpadress(QString address);
+    void disconnectFromZusi();
 public:
     zusi3Tcp();
     zusiIndicator *myIndicators;

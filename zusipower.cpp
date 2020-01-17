@@ -9,21 +9,23 @@ void zusiPower::setVIst(qint16 V){
     syncPowerIndicator();
 }
 void zusiPower::setBaureihe(QString fahrzeug){
+    if(bdb) qDebug() << "Baureihe: " + fahrzeug;
     bool isLoko = false;
     int br = fahrzeug.toInt(&isLoko);
     if(isLoko){
-        // qDebug() << "Baureihe: " + fahrzeug;
         haveLokoInList = false;
         for(int i = 0; i < 37; i++){
-            if(skalen[i][0] == br){
+            if(skalen[i][0] == br){ //{424,150,150,1,25,25,2,},
                 haveLokoInList = true;
                 // Typ1 kN, Ty2 kN/FM, typ3 %, Typ4 Stufen {111,140,145,1,70,75,2,},
-                zMaxNumber = skalen[i][4];
-                zMaxLine = skalen[i][5];
+                zMaxNumber = skalen[i][5];
+                zMaxLine = skalen[i][6];
                 zMinNumber = skalen[i][1];
                 zMinLine = skalen[i][2];
+                zMinCorr = skalen[i][4];
+                zMaxCorr = skalen[i][8];
                 unitBraking = unitType[skalen[i][3]];
-                unitAccelerating= unitType[skalen[i][6]];
+                unitAccelerating= unitType[skalen[i][7]];
                 emit unitBrakingText(unitBraking);
                 emit unitAcceleratingText(unitAccelerating);
                 emit maxPowerPositiveNumber(zMaxNumber);
@@ -35,43 +37,50 @@ void zusiPower::setBaureihe(QString fahrzeug){
     }
 }
 
+qint16 zusiPower::calcPower(float power){
+    if(power > 0)
+        return static_cast<qint16>(ceil(static_cast<double>(power) / 100000 * zMaxCorr));
+    return static_cast<qint16>(ceil(static_cast<double>(power) / 100000 * zMinCorr));
+}
+
 void zusiPower::setZugkraftProAchse(float power){                  // 0x000A
-    zPAchsNew = static_cast<qint16>(ceil(static_cast<double>(power) / 1000));
+    if(bdb) qDebug() << "zPAchs roh: " + QString::number(power);
+    zPAchsNew = calcPower(power);
     if(zPAchs != zPAchsNew) zPAchs = zPAchsNew; syncPowerIndicator();
     if(bdb) qDebug() << "zPAchs: " + QString::number(zPAchs);
 }
 void zusiPower::setZugkraftSollGesammt(float power){               // 0x000B
-     zSollGesNew = static_cast<qint16>(ceil(static_cast<double>(power) / 1000));
+     zSollGesNew = calcPower(power);
      if(zSollGes != zSollGesNew) zSollGes = zSollGesNew; syncPowerIndicator();
      if(bdb) qDebug() << "zSollGes: " + QString::number(zSollGes);
 }
 void zusiPower::setZugkraftSollProAchse(float power){              // 0x000C
-   zSollPAchsNew = static_cast<qint16>(ceil(static_cast<double>(power) / 1000));
+   zSollPAchsNew = calcPower(power);
     if(zSollPAchs != zSollPAchsNew) zSollPAchs = zSollPAchsNew; syncPowerIndicator();
     if(bdb) qDebug() << "zSollPAchs: " + QString::number(zSollPAchs);
 }
 void zusiPower::setZugkraft(float power){
-    zGesNew = static_cast<qint16>(ceil(static_cast<double>(power) / 1000));
+    zGesNew = calcPower(power);
     if(zGes != zGesNew) zGes = zGesNew; syncPowerIndicator();
     if(bdb) qDebug() << "zGes: " + QString::number(zGes);
 }
 void zusiPower::setZugkraftGesammtSteuerwagen(float power){        // 0x007C
-    zGesStwgNew = static_cast<qint16>(ceil(static_cast<double>(power) / 1000));
+    zGesStwgNew = calcPower(power);
     if(zGesStwg != zGesStwgNew) zGesStwg = zGesStwgNew; syncPowerIndicator();
     if(bdb) qDebug() << "zGesStwg: " + QString::number(zGesStwg);
 }
 void zusiPower::setZugkraftProAchseSteuerwagen(float power){       // 0x007D
-    zPAchsStwgNew = static_cast<qint16>(ceil(static_cast<double>(power) / 1000));
+    zPAchsStwgNew = calcPower(power);
     if(zPAchsStwg != zPAchsStwgNew) zPAchsStwg = zPAchsStwgNew; syncPowerIndicator();
     if(bdb) qDebug() << "zPAchsStwg: " + QString::number(zPAchsStwg);
 }
 void zusiPower::setZugkraftSollGesammtSteuerwagen(float power){    // 0x007E
-    zSollGesStwgNew = static_cast<qint16>(ceil(static_cast<double>(power) / 1000));
+    zSollGesStwgNew = calcPower(power);
     if(zSollGesStwg !=zSollGesStwgNew) zSollGesStwg = zSollGesStwgNew; syncPowerIndicator();
     if(bdb) qDebug() << "zSollGesStwg: " + QString::number(zSollGesStwg);
 }
 void zusiPower::setZugkraftSollProAchseSteuerwagen(float power){   // 0x007F
-    zSollPAchsStwgNew = static_cast<qint16>(ceil(static_cast<double>(power) / 1000));
+    zSollPAchsStwgNew = calcPower(power);
     if(zSollPAchsStwg != zSollPAchsStwgNew) zSollPAchsStwg = zSollPAchsStwgNew; syncPowerIndicator();
     if(bdb) qDebug() << "zSollPAchsStwg: " + QString::number(zSollPAchsStwg);
 }
@@ -117,25 +126,36 @@ void zusiPower::syncPowerIndicator(){
         zNorm = 0;
         zNormStwg = 0;
     }
-    if((unitBraking == "kN" && maxAbs(zGes, zGesStwg) <= 0))
-        powerValuesToDecoder[0] = maxAbs(zGes, zGesStwg);
-    if((unitAccelerating == "kN" && maxAbs(zGes, zGesStwg) >= 0))
-        powerValuesToDecoder[0] = maxAbs(zGes, zGesStwg);
-    if((unitBraking == "kN/FM" && maxAbs(zPAchs, zPAchsStwg) <= 0))
-        powerValuesToDecoder[0] = maxAbs(zPAchs, zPAchsStwg);
-    if((unitAccelerating == "kN/FM" && maxAbs(zPAchs, zPAchsStwg) >= 0))
-        powerValuesToDecoder[0] = maxAbs(zPAchs, zPAchsStwg);
-
-    powerValuesToDecoder[1] = makeNormPlausible(zNorm, zNormStwg);
-    if((unitBraking == "kN" && maxAbs(zSollGes, zSollGesStwg) <= 0))
-        powerValuesToDecoder[2] = maxAbs(zSollGes, zSollGesStwg);
-    if((unitAccelerating == "kN" && maxAbs(zSollGes, zSollGesStwg) >= 0))
-        powerValuesToDecoder[2] = maxAbs(zSollGes, zSollGesStwg);
-    if((unitBraking == "kN/FM" && maxAbs(zSollPAchs, zSollPAchsStwg) <= 0))
-        powerValuesToDecoder[2] = maxAbs(zSollPAchs, zSollPAchsStwg);
-    if((unitAccelerating == "kN/FM" && maxAbs(zSollPAchs, zSollPAchsStwg) >= 0))
-        powerValuesToDecoder[2] = maxAbs(zSollPAchs, zSollPAchsStwg);
-    powerValuesToDecoder[3] = makeNormPlausible(zSollNorm, zSollNormStwg);
+    qint16 zGesMax = maxAbs(zGes, zGesStwg);
+    qint16 zPAchsMax = maxAbs(zPAchs, zPAchsStwg);
+    qint16 zSollMax = maxAbs(zSollGes, zSollGesStwg);
+    qint16 zSollPAchsMax = maxAbs(zSollPAchs, zSollPAchsStwg);
+    powerValuesToDecoder[0] = zPAchsMax;
+    powerValuesToDecoder[2] = zSollPAchsMax;
+    powerValuesToDecoder[1] = zPAchsMax;//makeNormPlausible(zNorm, zNormStwg);
+    powerValuesToDecoder[3] = zSollPAchsMax;//makeNormPlausible(zSollNorm, zSollNormStwg);
+    /*
+    if((unitBraking == "kN" && zGesMax <= 0))
+        powerValuesToDecoder[0] = zGesMax;
+    if((unitAccelerating == "kN" && zGesMax >= 0))
+        powerValuesToDecoder[0] = zGesMax;
+    if((unitBraking == "kN/FM" && zPAchsMax <= 0))
+        powerValuesToDecoder[0] = zPAchsMax;
+    if((unitAccelerating == "kN/FM" && zPAchsMax >= 0))
+        powerValuesToDecoder[0] = zPAchsMax;
+    */
+    //powerValuesToDecoder[1] = makeNormPlausible(zNorm, zNormStwg);
+    /*
+    if((unitBraking == "kN" && zSollMax <= 0))
+        powerValuesToDecoder[2] = zSollMax;
+    if((unitAccelerating == "kN" && zSollMax >= 0))
+        powerValuesToDecoder[2] = zSollMax;
+    if((unitBraking == "kN/FM" && zSollPAchsMax<= 0))
+        powerValuesToDecoder[2] = zSollPAchsMax;
+    if((unitAccelerating == "kN/FM" && zSollPAchsMax>= 0))
+        powerValuesToDecoder[2] = zSollPAchsMax;
+    */
+    //powerValuesToDecoder[3] = makeNormPlausible(zSollNorm, zSollNormStwg);
     emit newPowerValues(powerValuesToDecoder);
 
     //qDebug() <<  "x0009;x000A;x000B;x000C;x007C;x007D;x007E;x007F;x0090;x0091;x0093;x0094;V";

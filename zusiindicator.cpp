@@ -5,6 +5,9 @@ zusiIndicator::zusiIndicator(QObject *parent) : QObject(parent){
     lmElBlinkTestTimer->setSingleShot(true);
     connect(lmElBlinkTestTimer,  SIGNAL(timeout()),this,SLOT(setLzbElAuftrag12()));
 }
+void zusiIndicator::setZugbeeinflussungssystem(QString value){
+    lzbVorhanden = value.contains("LZB");
+}
 void zusiIndicator::setMelderbild(uint8_t value){
 //    qDebug() << "MelderbildRoh:  " + QString::number(value);
     if(lm1000Hz > 0 && value == 0){
@@ -495,7 +498,7 @@ void zusiIndicator::calcLmBlau(){
     if(lmS > 0 || lm1000Hz > 1 || lmEnde > 0 || lmG > 0 || ZwangsbremsungAktiv){
         //QTimer::singleShot(10,this,SLOT(calcLmBlau()));
         lm85 = lm70 = lm55 = 0;
-        if(!ktp && ZwangsbremsungAktiv) lm500Hz = lm1000Hz = 5;
+        if(!ktp && ZwangsbremsungAktiv && !lmS && !lzbVorhanden) lm500Hz = lm1000Hz = 5;
     }
     else{
         lm85 = lm70 = lm55 = 0;

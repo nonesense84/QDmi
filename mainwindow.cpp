@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->settingsTitel->setBorderThickness(0);
     ui->settingsTitel->addTextMessage(" Einstellungen",era::grey,era::black,0);
     ui->zusiIpTitel->setBorderThickness(0);
-    ui->zusiIpTitel->addTextMessage(" Zusi3 IP-Adresse",era::grey,era::black,1);
+    ui->zusiIpTitel->addTextMessage(" Zusi 3 IP-Adresse",era::grey,era::black,1);
     ui->systemVersionTitel->setBorderThickness(0);
     ui->systemVersionTitel->addTextMessage(" System Version",era::grey,era::black,1);
     ui->systemVersionComp1Name->setBorderThickness(0);
@@ -231,6 +231,7 @@ void MainWindow::connectMtdPower(){
     connect(myTcp->myPower,SIGNAL(maxPowerNegativeLine (qint16)),ui->widgetPower,SLOT(setAbsoluteBrakingMaximum(qint16)));
     connect(myTcp->myPower,SIGNAL(unitAcceleratingText(QString)),ui->widgetPower,SLOT(setUnitAcceleratingText(QString)));
     connect(myTcp->myPower,SIGNAL(unitBrakingText(QString)),ui->widgetPower,SLOT(setUnitBrakingText(QString)));
+    connect(mySep,SIGNAL(newPowerAbsolute(qint16)),ui->widgetPower,SLOT(setPowerRelative(qint16)));
 }
 void MainWindow::connectTimers(){
     longTimer  = new QTimer(this);
@@ -267,6 +268,7 @@ void MainWindow::setPzbLzbNtc(){
 void MainWindow::arrowF4Clicked(){
     settings->setValue("mainwindow/height", this->height());
     settings->setValue("mainwindow/width", this->width());
+    myTcp->disconnectFromZusi();
     this->close();
 }
 void MainWindow::arrowF5Clicked(){ui->fieldDG->setCurrentIndex(1);}
@@ -304,11 +306,10 @@ void MainWindow::settingsCloseClicked(){
 void MainWindow::applyClicked(QString data){
     data.remove("_");
     if(activeDataEntryItem == "IP-Address"){
-        ui->zusiIpOkBtn->setText("",era::grey,era::black,QFont::Light);
         if (myTcp->setIpadress(data) == 0)
             settings->setValue("zusiIp",data);
+        //dataString = "";
     }
-    dataString = "";
 }
 void MainWindow::addItemToData(QString item){
     bool hasUnderline = false;
@@ -450,7 +451,7 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 }
 void MainWindow::configureSettingsWindow(){
     QStringList tdList = { "1000m ERA", "4000m DB" };
-    QStringList gaugeList = { "Hacken ERA", "Dreieck DB" };
+    QStringList gaugeList = { "Haken ERA", "Dreieck DB" };
     ui->pulldown_targetdistance->addItems(tdList);
     ui->pulldown_gauge->addItems(gaugeList);
     ui->pulldown_targetdistance->setCurrentIndex(settings->value("pulldown_targetdistance").toInt());

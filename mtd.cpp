@@ -74,7 +74,7 @@ void mtd::setStates(QVector<quint8> states){
         emit newIconG3(indicatorFiles[9][0],indicatorFiles[9][1]);  // indPantoUp indPantoUpArrow
         emit newIconBehavG3(true, 2, (InfPanto & 0xf0) > 0);        // Behavior is blinking, if one panto is rising
     }
-    if((InfPanto & 0x0f) == 0){  // No pantographs is up
+    if((InfPanto & 0x0f) == 0){  // No pantographs are up
         emit newIconG3(indicatorFiles[2][0],indicatorFiles[2][1]);  // indPantoUp indBlanc
         emit newIconBehavG3(true, 2, false);
     }

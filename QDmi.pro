@@ -6,7 +6,7 @@
 
 QT       += core gui svg network multimedia
 #ifdef Q_OS_ANDROID
-QT       += androidextras
+#QT       += androidextras
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 

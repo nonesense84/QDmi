@@ -50,29 +50,38 @@ void sep::readingPendingSpeed(){
         QByteArray datagram;
         datagram.resize(udpSocketSpeed->pendingDatagramSize());
         udpSocketSpeed->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
-        if(datagram.size() >= 2){
+        if(datagram.size() >= 5){
             quint16 speed = static_cast<quint8>(datagram[0]) +
                            (static_cast<quint8>(datagram[1])<<8);
             emit newSpeed(static_cast<qreal>(speed));
             //qDebug() << "got new speed";
+            qint16 forceRel = 0;
+            quint8 brakingForceRel = static_cast<quint8>(datagram[3]);
+            quint8 tractiveForceRel = static_cast<quint8>(datagram[4]);
+
+            if(brakingForceRel != 0) forceRel = static_cast<qint16>(brakingForceRel * -1);
+            if(tractiveForceRel != 0) forceRel = static_cast<qint16>(tractiveForceRel);
+            qDebug() << forceRel;
+            emit newPowerAbsolute(forceRel);
         }
     }
 }
 
 void sep::readingPendingMtd(){
     while (udpSocketMtd->hasPendingDatagrams()) {
-        QVector<quint8> lmsToDecoder(7,0);
+        QVector<quint8> lmsToDecoder(12,0);
         QByteArray datagram;
         datagram.resize(udpSocketMtd->pendingDatagramSize());
         udpSocketMtd->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
-        if(datagram.size() >= 3){
-            lmsToDecoder[0] = (datagram[0] >> 4) & 0x0f;    //IndDsd
-            lmsToDecoder[1] =  datagram[0]       & 0x0f;    //IndDsdFb
-            lmsToDecoder[2] = (datagram[1] >> 4) & 0x0f;    //IndDorTav  (Auch blinken)
-            lmsToDecoder[3] =  datagram[1]       & 0x0f;    //IndPhantoUp
-            lmsToDecoder[4] = (datagram[2] >> 4) & 0x0f;    //IndPhantoDown
-            lmsToDecoder[5] =  datagram[2]       & 0x0f;    //IndMtMsO
-            lmsToDecoder[6] = (datagram[3] >> 4) & 0x0f;    //IndMtHvtl
+        if(datagram.size() >= 4){
+            lmsToDecoder[0] = 1;                             // Sifa faulty
+            lmsToDecoder[1] = (datagram[0] >> 4) & 0x0f;     //IndDsd
+            lmsToDecoder[2] = (datagram[0]       & 0x0f) * 2;//IndDsdAcu
+            lmsToDecoder[2] = (datagram[1] >> 4) & 0x0f;     //IndDsdFb
+            lmsToDecoder[6] = (datagram[2] >> 4) & 0x0f;     //IndPhantoUp
+            lmsToDecoder[7] = !((datagram[3] >> 4) & 0x0f);     //IndMtMsO
+            lmsToDecoder[8] =  datagram[3]       & 0x0f;     //IndMtHvtl
+          //lmsToDecoder[9] =  datagram[1]       & 0x0f;     //IndDorTav //Muss noch auf MTD-Seite angepasst werden
         }
         emit newMtdIndicators(lmsToDecoder);
     }

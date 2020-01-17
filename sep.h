@@ -15,6 +15,7 @@ signals:
     void newLzbIndicators(QVector<quint8> lmsToDecoder);
     void newLzbValues(QVector<quint8> lmsToDecoder);
     void newSpeed(qreal speed);
+    void newPowerAbsolute(qint16 power);
     void newMtdIndicators(QVector<quint8> lmsToDecoder);
 
 private:

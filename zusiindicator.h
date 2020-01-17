@@ -27,6 +27,7 @@ private:
     bool restriktiv = false;
     bool afbAn = false;
     bool ersatzauftrag = false, falschfahrauftrag = false, lzbNothalt = false, lzbHaltUeberfahren = false;
+    bool lzbVorhanden;
     QTimer *lmElBlinkTestTimer;
 
 private slots:
@@ -134,6 +135,7 @@ public slots:
     void setLmBAnUndUeAus(uint8_t value);
     void setZwangsbremsungAktiv(uint8_t value);
     void setFzgVMax(uint16_t value);
+    void setZugbeeinflussungssystem(QString value);
     //====
 };
 

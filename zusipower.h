@@ -45,54 +45,68 @@ private:
     qint16 zMaxLine = 0;
     qint16 zMinNumber = 0;
     qint16 zMinLine = 0;
+    qint16 zMaxCorr = 100;
+    qint16 zMinCorr = 100;
     QString unitBraking = "";
     QString unitAccelerating= "";
     QString unitType[5] = {"","kN", "kN/FM", "%", "Stufen"};
     bool bdb = false; // Basic debug
-    qint16 skalen[38][7] = {       // Typ1 kN, Ty2 kN/FM, typ3 %, Typ4 Stufen
-        {101,140,145,1,70,75,2,},
-        {103,90,90,1,50,50,2,},
-        {111,140,145,1,70,75,2,},
-        {112,140,145,1,70,75,2,},
-        {143,140,145,1,70,75,2,},
-        {145,150,150,1,80,85,2,},
-        {146,140,145,1,70,75,2,},
-        {147,320,320,1,320,320,1,},
-        {152,150,150,1,80,80,2,},
-        {155,200,212,1,60,86,2,},
-        {182,150,150,1,300,300,1,},
-        {185,140,145,1,70,75,2,},
-        {186,140,145,1,300,300,1,},
-        {187,320,320,1,320,320,1,},
-        {189,140,145,1,70,75,2,},
-        {182,240,250,1,300,300,1,},
-        {1016,240,250,1,300,300,1,},
-        {1116,240,240,1,300,300,1,},
-        {183,240,240,1,300,300,1,},
-        {1216,240,240,1,300,300,1,},
-        {193,140,150,1,350,350,1,},
-        {218,5,7,4,15,15,4,},
-        {246,140,145,1,300,300,1,},
-        {285,140,145,1,300,300,1,},
-        {245,140,145,1,300,300,1,},
-        {401,150,150,1,50,50,2,},
-        {403,100,100,3,100,100,3,},
-        {406,100,100,3,100,100,3,},
-        {411,100,100,3,100,100,3,},
-        {415,100,100,3,100,100,3,},
-        {422,140,150,1,25,25,2,},
-        {423,150,150,1,25,25,2,},
-        {424,150,150,1,25,25,2,},
-        {425,150,150,1,25,25,2,},
-        {426,150,150,1,25,25,2,},
-        {430,140,150,1,25,25,2,},
-        {442,100,100,3,100,100,3,},
-        {445,150,150,1,300,300,1,}
+    qint16 skalen[49][9] = {       // Typ1 kN, Ty2 kN/FM, typ3 %, Typ4 Stufen
+      //{BR, Number-Max, Line-Max, Typ, Pre-Factor-Ac, Number-Min, Line-Min, Typ, Pre-Factor-Br}
+                                   { 101,140,145,1,400, 70, 75,2, 100},// Braking power adapted
+                                   { 103, 90, 90,1,300, 50, 50,2, 100},// Braking power adapted
+                                   { 111,140,145,1,400, 70, 75,2, 100},// Braking power adapted
+                                   { 112,140,145,1,400, 70, 75,2, 100},// Braking power adapted
+                                   { 114,140,145,1,400, 70, 75,2, 100},// Braking power adapted
+                                   { 120,140,145,1,400, 70, 75,2, 100},// Braking power adapted
+                                   { 128,140,145,1,400, 70, 75,2, 100},// Braking power adapted
+                                   { 143,140,145,1,400, 70, 75,2, 100},// Braking power adapted
+                                   { 145,150,150,1,400, 80, 85,2, 100},// Braking power adapted
+                                   { 146,140,145,1,400, 70, 75,2, 100},// Braking power adapted
+                                   { 147,320,320,1,400,320,320,1, 400},// Decoration vehicle
+                                   { 151,140,145,1,400, 70, 75,2, 100},// Braking power adapted
+                                   { 152,150,150,1,400, 80, 80,2, 100},// Braking power adapted
+                                   { 155,200,212,1,400, 60, 86,2, 100},// Braking power adapted
+                                   { 182,150,150,1,400,300,300,1, 400},// Braking power adapted
+                                   { 183,240,240,1,400,300,300,1, 400},// Braking power adapted
+                                   { 185,140,145,1,400, 70, 75,2, 100},// Braking power adapted
+                                   { 186,140,145,1,400,300,300,1, 400},// Braking power adapted
+                                   { 187,320,320,1,400,320,320,1, 400},// Braking power adapted
+                                   { 189,140,145,1,400, 70, 75,2, 100},// Braking power adapted
+                                   { 193,140,150,1,400,350,350,1, 400},// Braking power adapted
+                                   { 218,  5,  7,4,100, 15, 15,4, 100},// To do: Implement force step
+                                   { 246,140,145,1,400,300,300,1, 400},// Braking power adapted
+                                   { 245,140,145,1,400,300,300,1, 400},// Braking power adapted
+                                   { 285,140,145,1,400,300,300,1, 400},// Braking power adapted
+                                   { 401,150,150,1,400, 50, 50,2, 100},// Braking power adapted
+                                   { 402,150,150,1,400, 50, 50,2, 100},// Braking power adapted
+                                   { 403,100,100,3,533,100,100,3, 533},// Braking power adapted
+                                   { 406,100,100,3,533,100,100,3, 533},// Braking power adapted
+                                   { 411,100,100,3,800,100,100,3, 800},// Braking power adapted
+                                   { 412,100,100,3,800,100,100,3, 800},// Braking power adapted
+                                   { 415,100,100,3,800,100,100,3, 800},// Braking power adapted
+                                   { 422,140,150,1,789, 25, 25,2, 100},// Braking power adapted
+                                   { 423,150,150,1,789, 25, 25,2, 100},// Braking power adapted
+                                   { 424,150,150,1,800, 25, 25,2, 100},// Braking power adapted
+                                   { 425,150,150,1,800, 25, 25,2, 100},// Braking power adapted
+                                   { 426,150,150,1,800, 25, 25,2, 100},// Braking power adapted
+                                   { 430,140,150,1,789, 25, 25,2, 100},// Braking power adapted
+                                   { 442,100,100,3,100,100,100,3, 100},// Decoration vehicle
+                                   { 445,150,150,1,100,300,300,1, 100},// Decoration vehicle (KISS)
+                                   { 470,150,150,1,400,300,300,1, 400},// Braking power adapted
+                                   { 475,140,150,1,400,350,350,1, 400},// Braking power adapted
+                                   { 482,140,145,1,400, 70, 75,2, 100},// Braking power adapted
+                                   {1016,240,250,1,100,300,300,1, 100},// Taurus, not implemented
+                                   {1044,150,150,1,100,300,300,1, 100}, // Braking power adapted
+                                   {1116,150,150,1,400,300,300,1, 400},// Braking power adapted
+                                   {1144,150,150,1,100,300,300,1, 100},// Braking power adapted
+                                   {1216,150,150,1,400,300,300,1, 400} // Braking power adapted
     };
 private slots:
     void syncPowerIndicator();
     qint16 makeNormPlausible(qint16 A, qint16 B);
     qint16 maxAbs(qint16 A, qint16 B);
+    qint16 calcPower(float power);
 
 public slots:
     void setZugkraftProAchse(float power);                  // 0x000A
