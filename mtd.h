@@ -31,6 +31,7 @@ private:
     uint8_t InfDoorSystem;
     uint8_t InfDoorStatL;
     uint8_t InfDoorStatR;
+    uint8_t tractionType;
     QString indicatorFiles[10][2] = {
         {   ":/icons/sifa_off.svg",         ":/icons/blanc.svg",},
         {   ":/icons/doors_open.svg",       ":/icons/blanc.svg",},

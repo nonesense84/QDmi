@@ -44,7 +44,7 @@ qint8 zusi3Tcp::setIpadress(QString address){
         QTimer::singleShot(2500,this,SLOT(remooveTechMessage9()));
         return -1;
     }
-    qDebug() << address;
+    // qDebug() << address;
     QHostAddress zusiPc = QHostAddress(address);
     client->abort();
     client->connectToHost(zusiPc,1436);
@@ -85,18 +85,19 @@ qint8 zusi3Tcp::setIpadress(QString address){
         0x00, 0x00, 0x00, 0x00, 0x03, 0x00,              // <Kn>
         0x00, 0x00, 0x00, 0x00, 0x0A, 0x00,              // <Kn>
         0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00,  // Geschwindigkeit m/s
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x09, 0x00,  // Zugkraft gesammt
+      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x09, 0x00,  // Zugkraft gesammt
         0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x0A, 0x00,  // Zugkraft pro Achse
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x0B, 0x00,  // Zugkraft-soll gesammt
+      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x0B, 0x00,  // Zugkraft-soll gesammt
         0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x0C, 0x00,  // Zugkraft-Soll pro Achse
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x7C, 0x00,  // Steuerwagen: Zugkraft gesammt
+      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x7C, 0x00,  // Steuerwagen: Zugkraft gesammt
         0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x7D, 0x00,  // Steuerwagen: Zugkraft pro Achse
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x7E, 0x00,  // Steuerwagen: Zugkraft-soll gesammt
+      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x7E, 0x00,  // Steuerwagen: Zugkraft-soll gesammt
         0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x7F, 0x00,  // Steuerwagen: Zugkraft-Soll pro Achse
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x90, 0x00,  // Zug- und Brems-Gesamtkraftsoll normiert
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x91, 0x00,  // Steuerwagen: Zug- und Brems-Gesamtkraftsoll normiert
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x93, 0x00,  // Zug- und Brems-Gesamtkraftsoll absolut normiert
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x94, 0x00,  // Steuerwagen: Zug- und Brems-Gesamtkraftsoll absolut normiert
+      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x90, 0x00,  // Zug- und Brems-Gesamtkraftsoll normiert
+      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x91, 0x00,  // Steuerwagen: Zug- und Brems-Gesamtkraftsoll normiert
+      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x93, 0x00,  // Zug- und Brems-Gesamtkraftsoll absolut normiert
+      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x94, 0x00,  // Steuerwagen: Zug- und Brems-Gesamtkraftsoll absolut normiert
+        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x0E, 0x00,  // Fahrleitungsspannung
         0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x13, 0x00,  // Hauptschalter
         0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x15, 0x00,  // Fahrstufe
         0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x17, 0x00,  // AFB-Sollgeschwindigkeit
@@ -291,18 +292,20 @@ void zusi3Tcp::zusiDecoder(){
             case 0x0002: break;   // Druck Hauptluftleitung
             case 0x0003: break;   // Druck Bremszylinder
             case 0x0004: break;   // Druck Hauptluftbehälter
-            case 0x0009: myPower->setZugkraft(useData4Byte.Single);  break;                     //              Zugkraft gesammt
-            case 0x000A: myPower->setZugkraftProAchse(useData4Byte.Single);break;               //              Zugkraft pro Achse
-            case 0x000B: myPower->setZugkraftSollGesammt(useData4Byte.Single); break;           //              Zugkraft-Soll gesammt
+          //case 0x0009: myPower->setZugkraft(useData4Byte.Single);  break;                     //              Zugkraft gesammt
+            case 0x000A: myPower->setZugkraftProAchse(useData4Byte.Single);                     //              Zugkraft pro Achse
+                         zugkraftProAchs = useData4Byte.Single; guesTractionType(); break;
+          //case 0x000B: myPower->setZugkraftSollGesammt(useData4Byte.Single); break;           //              Zugkraft-Soll gesammt
             case 0x000C: myPower->setZugkraftSollProAchse(useData4Byte.Single); break;          //              Zugkraft-Soll pro Achse
-            case 0x007C: myPower->setZugkraftGesammtSteuerwagen(useData4Byte.Single); break;    // Steuerwagen: Zugkraft gesammt
+          //case 0x007C: myPower->setZugkraftGesammtSteuerwagen(useData4Byte.Single); break;    // Steuerwagen: Zugkraft gesammt
             case 0x007D: myPower->setZugkraftProAchseSteuerwagen(useData4Byte.Single); break;   // Steuerwagen: Zugkraft pro Achse
-            case 0x007E: myPower->setZugkraftSollGesammtSteuerwagen(useData4Byte.Single); break;// Steuerwagen: Zugkraft-soll gesammt
+          //case 0x007E: myPower->setZugkraftSollGesammtSteuerwagen(useData4Byte.Single); break;// Steuerwagen: Zugkraft-soll gesammt
             case 0x007F: myPower->setZugkraftSollProAchseSteuerwagen(useData4Byte.Single); break;// Steuerwagen: Zugkraft-Soll gesamt pro Achse
-            case 0x0090: myPower->setZugkraftSollNormiert(useData4Byte.Single); break;          //              Zug- und Brems-Gesamtkraft soll normiert
-            case 0x0091: myPower->setZugkraftSollNormiertSteuerwagen(useData4Byte.Single); break;// Steuerwagen: Zug- und Brems-Gesamtkraft soll normiert
-            case 0x0093: myPower->setZugkraftNormiert(useData4Byte.Single); break;              //              Zug- und Brems-Gesamtkraft absolut normiert
-            case 0x0094: myPower->setZugkraftNormiertSteuerwagen(useData4Byte.Single); break;// Steuerwagen: Zug- und Brems-Gesamtkraft absolut normiert
+          //case 0x0090: myPower->setZugkraftSollNormiert(useData4Byte.Single); break;          //              Zug- und Brems-Gesamtkraft soll normiert
+          //case 0x0091: myPower->setZugkraftSollNormiertSteuerwagen(useData4Byte.Single); break;// Steuerwagen: Zug- und Brems-Gesamtkraft soll normiert
+          //case 0x0093: myPower->setZugkraftNormiert(useData4Byte.Single); break;              //              Zug- und Brems-Gesamtkraft absolut normiert
+          //case 0x0094: myPower->setZugkraftNormiertSteuerwagen(useData4Byte.Single); break;// Steuerwagen: Zug- und Brems-Gesamtkraft absolut normiert
+            case 0x000E: fahrlSpng = useData4Byte.Single; guesTractionType(); break;
             case 0x0013:   // Hauptschalter
                 hauptschalter = useData4Byte.Single > 0;
                 myIndicators->setLmHauptschalter(hauptschalter);
@@ -682,4 +685,14 @@ void zusi3Tcp::setSammelschine(){
 }
 void zusi3Tcp::resetVehicleBlocking(){
     istVMaxErstesFahrzeug = true;
+}
+void zusi3Tcp::guesTractionType(){
+    if(fahrlSpng > 0){
+        tractionType = 1;
+        setMtdIndicator(tractionType, 12);
+    }
+    if(fahrlSpng <= 0 && zugkraftProAchs > 0){
+        tractionType = 2;
+        setMtdIndicator(tractionType, 12);
+    }
 }

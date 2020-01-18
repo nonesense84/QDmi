@@ -25,6 +25,7 @@ private slots:
     void remooveTechMessage10();
     void remooveTechMessage13();
     void resetVehicleBlocking();
+    void guesTractionType();
     int32_t readIntegerInRawAtPos(int pos);
     int32_t readIntegerAtPos(int pos);
     uint16_t readIdAtPos(int pos);
@@ -45,11 +46,14 @@ private:
     uint16_t VIst=0;
     uint16_t VSoll=0;
     uint16_t VMFzg=0;
+    float fahrlSpng;
+    float zugkraftProAchs;
+    uint8_t tractionType;
     //uint16_t VZiel=0;
-    float ZugkraftAbs=0;
-    float ZugkraftRel=0;
-    quint16 ZugkraftAbsMax=0;
-    quint16 ZugkraftAbsMaxFilter[7];
+    //float ZugkraftAbs=0;
+    //float ZugkraftRel=0;
+    //quint16 ZugkraftAbsMax=0;
+    //quint16 ZugkraftAbsMaxFilter[7];
     QTcpSocket *client;
     QByteArray incommingData;
     QByteArray compZusiPacket;

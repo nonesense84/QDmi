@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->systemVersionComp2Name->setTextFieldUsing(1, Qt::AlignRight);
     ui->systemVersionComp2Name->addTextMessage("github.com/nones",era::grey,era::darkBlue,1);
     ui->systemVersionComp1Version->setBorderThickness(0);
-    ui->systemVersionComp1Version->addTextMessage("1.0",era::grey,era::darkBlue,1);
+    ui->systemVersionComp1Version->addTextMessage("1.1",era::grey,era::darkBlue,1);
     ui->systemVersionComp2Version->setBorderThickness(0);
     ui->systemVersionComp2Version->addTextMessage("ense84/QDmi",era::grey,era::darkBlue,1);
     connect(ui->fieldF4,SIGNAL(clicked(bool)),this,SLOT(arrowF4Clicked()));

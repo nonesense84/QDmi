@@ -9,7 +9,7 @@ void zusiIndicator::setZugbeeinflussungssystem(QString value){
     lzbVorhanden = value.contains("LZB");
 }
 void zusiIndicator::setMelderbild(uint8_t value){
-//    qDebug() << "MelderbildRoh:  " + QString::number(value);
+    //qDebug() << "MelderbildRoh:  " + QString::number(value);
     if(lm1000Hz > 0 && value == 0){
         melderbild = 6;
     }
@@ -191,7 +191,7 @@ void zusiIndicator::setLm500Hz(uint8_t value){
     lm500Hz = value;
     //if(ZwangsbremsungAktiv) lm500Hz = 5;
     calcLmBlau();
-    qDebug() << "PZB 500Hz    " + QString::number(lm500Hz);
+    //qDebug() << "PZB 500Hz    " + QString::number(lm500Hz);
 }
 void zusiIndicator::setLmBefehl(uint8_t value){
     lmBefehl = value;//qDebug() << "Befehl 40:   " + QString::number(value);
@@ -244,12 +244,12 @@ void zusiIndicator::setEndeverfahren(uint8_t value){
 void zusiIndicator::setErsatzauftrag(uint8_t value){
     //qDebug() << "LZB Ersatzauftrag:    " + QString::number(value);
     if(value == 0){
-        emit removeMessage(31);
+        emit removeMessage(30);
         ersatzauftrag = 0;
         lmE40 = 0;
     }
     if(value >= 1){
-        if(ktp)emit newTextMessage(db::messages[31], db::textFontColors[31], db::textBgColors[28], 31);
+        if(ktp)emit newTextMessage(db::messages[30], db::textFontColors[30], db::textBgColors[28], 30);
         ersatzauftrag = 1;
         lmE40 = 1;
     }

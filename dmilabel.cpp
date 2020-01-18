@@ -282,7 +282,7 @@ void dmiLabel::paintDistance(QPainter *iconPainter, QRect centralArea){
                                    false));
     }
     QRect textRect = iconPainter->boundingRect(digitalDistPosition,Qt::AlignRight,QString::number(targetDistance));
-    digitalDistPosition.setLeft(56 - textRect.width());
+    digitalDistPosition.setLeft(45 - textRect.width());
     //iconPainter->drawText(digitalDistPosition,QString::number(targetDistance));
     //iconPainter->setPen(Qt::NoPen);
     quint16 targetDistanceAnalog = targetDistance;

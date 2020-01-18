@@ -73,7 +73,7 @@ void sep::readingPendingMtd(){
         QByteArray datagram;
         datagram.resize(udpSocketMtd->pendingDatagramSize());
         udpSocketMtd->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
-        if(datagram.size() >= 4){
+        if(datagram.size() >= 5){
             lmsToDecoder[0] = 1;                             // Sifa faulty
             lmsToDecoder[1] = (datagram[0] >> 4) & 0x0f;     //IndDsd
             lmsToDecoder[2] = (datagram[0]       & 0x0f) * 2;//IndDsdAcu
@@ -81,7 +81,9 @@ void sep::readingPendingMtd(){
             lmsToDecoder[6] = (datagram[2] >> 4) & 0x0f;     //IndPhantoUp
             lmsToDecoder[7] = !((datagram[3] >> 4) & 0x0f);     //IndMtMsO
             lmsToDecoder[8] =  datagram[3]       & 0x0f;     //IndMtHvtl
+            lmsToDecoder[12]= (datagram[4] >> 4) & 0x0f;     //tractionType     // Muss noch getestet werden!!!!!
           //lmsToDecoder[9] =  datagram[1]       & 0x0f;     //IndDorTav //Muss noch auf MTD-Seite angepasst werden
+
         }
         emit newMtdIndicators(lmsToDecoder);
     }

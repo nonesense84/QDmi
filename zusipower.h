@@ -52,7 +52,7 @@ private:
     QString unitType[5] = {"","kN", "kN/FM", "%", "Stufen"};
     bool bdb = false; // Basic debug
     qint16 skalen[49][9] = {       // Typ1 kN, Ty2 kN/FM, typ3 %, Typ4 Stufen
-      //{BR, Number-Max, Line-Max, Typ, Pre-Factor-Ac, Number-Min, Line-Min, Typ, Pre-Factor-Br}
+      //{BR, Number-Min, Line-Min, Typ, Pre-Factor-Br, Number-Max, Line-Max, Typ, Pre-Factor-Ac}
                                    { 101,140,145,1,400, 70, 75,2, 100},// Braking power adapted
                                    { 103, 90, 90,1,300, 50, 50,2, 100},// Braking power adapted
                                    { 111,140,145,1,400, 70, 75,2, 100},// Braking power adapted
