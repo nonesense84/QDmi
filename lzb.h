@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QColor>
-#include <QDebug>
 #include "db.h"
 class lzb : public QObject
 {
@@ -16,7 +15,7 @@ public slots:
     void setStates(QVector<quint8> states);
     void setAnalogValues(QVector<quint8> values);
     void setTextUsing(bool useAutomText);
-    void setVAct(qreal V);
+    void setVAct(quint16 V);
 
 private slots:
     void addIndicator(quint8 indId, quint8 blinking, bool invers);
@@ -33,6 +32,7 @@ signals:
     void newIcon6(QString lmOn, QString lmOff);
     void newIcon7(QString lmOn, QString lmOff);
     void newIconC9(QString lmOn, QString lmOff);
+    void newIconG10(QString lmOn, QString lmOff);
     void newIconBehav1(bool anabled, quint8 freq, bool inverse);
     void newIconBehav2(bool anabled, quint8 freq, bool inverse);
     void newIconBehav3(bool anabled, quint8 freq, bool inverse);
@@ -41,6 +41,7 @@ signals:
     void newIconBehav6(bool anabled, quint8 freq, bool inverse);
     void newIconBehav7(bool anabled, quint8 freq, bool inverse);
     void newIconBehavC9(bool anabled, quint8 freq, bool inverse);
+    void newIconBehavG10(bool anabled, quint8 freq, bool inverse);
     void newVTarget(quint16 vZiel, bool visible);
     void newVPermit(quint16 vSoll, bool visible);
     void newOverspeed(qreal vOverspeed, bool forcedBrake, bool warning);
@@ -75,6 +76,7 @@ private:
     quint8 actState;
     quint8 lastLimitMessage;
     quint8 indicatorField[7] = {255,255,255,255,255,255,255};
+    quint8 indicatorFieldBehav[7] = {255,255,255,255,255,255,255};
     quint8 actMessages[3];
     QString messages[63];
     qreal vAct = 0;

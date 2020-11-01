@@ -19,7 +19,7 @@ void lzb::setAnalogValues(QVector<quint8> values){
     }
 }
 
-void lzb::setVAct(qreal V){
+void lzb::setVAct(quint16 V){
     vAct = V;
     emit newOverspeed(vAct,  gue && zwangsbremsung, gue || ((vAct > vPerm) &&  vPerm > 0));
 }
@@ -177,7 +177,7 @@ void lzb::setStates(QVector<quint8> states){
         emit removeMessage(0);
     }
     emit newOverspeed(vAct,  gue && zwangsbremsung, gue || ((vAct > vPerm) &&  vPerm > 0));
-    for(quint8 i = 0; i <= 17; i++){     // Set all indicators but O/M/U/PZB/LZB
+    for(quint8 i = 0; i <= 21; i++){     // Set all indicators but O/M/U/PZB/LZB
         if(useTxtMsgByLm)
             if(i >= 1 && i <= 4) i = 5;
         if(states[i]  > 0){
@@ -197,41 +197,42 @@ void lzb::sentSpetLimitMessage(quint8 limit){
     }
 }
 void lzb::addIndicator(quint8 indId, quint8 blinking, bool invers){
+    // indId represents an indicatorFiles in db.h
     quint8 i = 0;
     bool indAllrUsed = false;
-    if(indId == 12){
-        //qDebug() << "STOPPPPPP!";
-    }
-    // Search for a position, this indicator is allready used. If it is, it hase to be emitted to the same place
+    // Search for a position, this indicator is allready used. ...
+    // If it is, there is noting left to do.
     for(i=0; i<=6; i++){
         if(indicatorField[i] == indId){
             indAllrUsed = true;
-            break;
-        }
-    }
-    // If the inidcator is not used jet, search for the first free field.
-    if(!indAllrUsed){
-        if((indId > 0) && (indId != 15) && (indId != 16)){
-            for(i=1; i<=6; i++){
-                if(indicatorField[i] == 255){
-                    indicatorField[i] = indId;
-                    break;
-                }
+            if(indicatorFieldBehav[i] == blinking){
+                return;
+            }
+            else{
+                break;
             }
         }
     }
-    if(indId == 15){
-        i = 6;  //"Ue" must be at pos 6
-        indicatorField[i] = indId;
+    // If the inidcator is not used jet, search for the first free field.
+    if((indId > 0) && (indId != 15) && (indId != 16) && (indId != 19) && !indAllrUsed){
+        for(i=1; i<=6; i++){
+            if(indicatorField[i] == 255)break;
+        }
     }
-    if(indId == 0){
-        i = 0;  // "B" must be at pos 1
-        indicatorField[i] = indId;
-    }
-    if(indId == 16){
+    if(indId == 15 || indId == 19)i = 6;    // "Ue" or "Ue GNT" must be at pos 6
+    if(indId == 0                )i = 0;    // "B" must be at field 1
+    if(indId == 16){                        // Era Brake
         emit newIconC9(db::indicatorFiles[16][0],db::indicatorFiles[16][1]);
         emit newIconBehav1(true, blinking, invers);
+        return;
     }
+    if(indId == 18){                        // Indicator GNT
+        emit newIconG10(db::indicatorFiles[18][0],db::indicatorFiles[18][1]);
+        emit newIconBehavG10(true, blinking, invers);
+        return;
+    }
+    indicatorField[i] = indId;
+    indicatorFieldBehav[i] = blinking;
     switch (i){
     case 0:
         emit newIcon1(db::indicatorFiles[indId][0], db::indicatorFiles[indId][0]);
