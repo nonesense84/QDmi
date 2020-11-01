@@ -20,7 +20,7 @@ public slots:
     void setVTarget(quint16 V, bool visible);
     void setOverspeed(qreal V, bool intervenation, bool overspeedWarning);
     qreal calcPosition(quint16 V);
-    void setVAct(qreal V);
+    void setVAct(quint16 V);
     void setDpi(qreal dpi);
     void setEraUse(bool useEra);
 

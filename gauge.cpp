@@ -12,8 +12,8 @@ void gauge::setDpi(qreal dpi){
     fontSiceNose = 37.0 * 96 / dpi;
 }
 
-void gauge::setVAct(qreal V){
-    vAct = static_cast<quint16> (V);
+void gauge::setVAct(quint16 V){
+    vAct = V;
     update();
     if(V > VMaxDial){
         showNeedle = false;
