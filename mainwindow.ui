@@ -3348,19 +3348,19 @@
   <customwidget>
    <class>gauge</class>
    <extends>QWidget</extends>
-   <header location="global">gauge.h</header>
+   <header>gauge.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>dmiLabel</class>
    <extends>QWidget</extends>
-   <header location="global">dmilabel.h</header>
+   <header>dmilabel.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>power</class>
    <extends>QWidget</extends>
-   <header location="global">power.h</header>
+   <header>power.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
