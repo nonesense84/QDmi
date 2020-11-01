@@ -104,7 +104,7 @@ public:
         Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,
         Qt::black, Qt::black, Qt::black, Qt::black, Qt::black
     };
-    const QString indicatorFiles[18][2] = {
+    const QString indicatorFiles[22][2] = {
         {   ":/icons/LmB_on.svg",       ":/icons/LmB_off.svg",},
         {   ":/icons/Lm85_on.svg",      ":/icons/Lm85_off.svg",},           // 0
         {   ":/icons/Lm70_on.svg",      ":/icons/Lm70_off.svg",},
@@ -122,7 +122,11 @@ public:
         {   ":/icons/LmEL_on.svg",      ":/icons/LmEL_off.svg",},
         {   ":/icons/LmUe_on.svg",      ":/icons/LmUe_off.svg",},
         {   ":/icons/ST_01.svg",        ":/icons/ST_01.svg",}, //Forced brake
-        {   ":/icons/LmEnde_on.svg",     ":/icons/LmEnde_off.svg",}
+        {   ":/icons/LmEnde_on.svg",     ":/icons/LmEnde_off.svg",},
+        {   ":/icons/LmGnt_on.svg",     ":/icons/LmGnt_off.svg",},
+        {   ":/icons/LmUe_Gnt_on.svg",     ":/icons/LmUe_Gnt_off.svg",},
+        {   ":/icons/LmG_Gnt_on.svg",     ":/icons/LmG_Gnt_off.svg",},
+        {   ":/icons/LmS_Gnt_on.svg",     ":/icons/LmS_Gnt_off.svg",},
     };
 }
 #endif // DB_H
