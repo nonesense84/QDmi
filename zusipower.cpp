@@ -4,17 +4,16 @@ zusiPower::zusiPower(QObject *parent) : QObject(parent){
     powerValuesToDecoder.resize(6);
 }
 
-void zusiPower::setVIst(qint16 V){
+void zusiPower::setVIst(quint16 V){
     VIst = V;
     syncPowerIndicator();
 }
 void zusiPower::setBaureihe(QString fahrzeug){
-    if(bdb) qDebug() << "Baureihe: " + fahrzeug;
     bool isLoko = false;
     int br = fahrzeug.toInt(&isLoko);
     if(isLoko){
         haveLokoInList = false;
-        for(int i = 0; i < 37; i++){
+        for(int i = 0; i < 52; i++){
             if(skalen[i][0] == br){ //{424,150,150,1,25,25,2,},
                 haveLokoInList = true;
                 // Typ1 kN, Ty2 kN/FM, typ3 %, Typ4 Stufen {111,140,145,1,70,75,2,},
@@ -43,66 +42,53 @@ qint16 zusiPower::calcPower(float power){
     return static_cast<qint16>(ceil(static_cast<double>(power) / 100000 * zMinCorr));
 }
 
-void zusiPower::setZugkraftProAchse(float power){                  // 0x000A
-    if(bdb) qDebug() << "zPAchs roh: " + QString::number(power);
+void zusiPower::setZugkraftProAchse(float power){
     zPAchsNew = calcPower(power);
     if(zPAchs != zPAchsNew) zPAchs = zPAchsNew; syncPowerIndicator();
-    if(bdb) qDebug() << "zPAchs: " + QString::number(zPAchs);
 }
 void zusiPower::setZugkraftSollGesammt(float power){               // 0x000B
      zSollGesNew = calcPower(power);
      if(zSollGes != zSollGesNew) zSollGes = zSollGesNew; syncPowerIndicator();
-     if(bdb) qDebug() << "zSollGes: " + QString::number(zSollGes);
 }
-void zusiPower::setZugkraftSollProAchse(float power){              // 0x000C
-   zSollPAchsNew = calcPower(power);
+void zusiPower::setZugkraftSollProAchse(float power){
+    zSollPAchsNew = calcPower(power);
     if(zSollPAchs != zSollPAchsNew) zSollPAchs = zSollPAchsNew; syncPowerIndicator();
-    if(bdb) qDebug() << "zSollPAchs: " + QString::number(zSollPAchs);
 }
 void zusiPower::setZugkraft(float power){
     zGesNew = calcPower(power);
     if(zGes != zGesNew) zGes = zGesNew; syncPowerIndicator();
-    if(bdb) qDebug() << "zGes: " + QString::number(zGes);
 }
 void zusiPower::setZugkraftGesammtSteuerwagen(float power){        // 0x007C
     zGesStwgNew = calcPower(power);
     if(zGesStwg != zGesStwgNew) zGesStwg = zGesStwgNew; syncPowerIndicator();
-    if(bdb) qDebug() << "zGesStwg: " + QString::number(zGesStwg);
 }
 void zusiPower::setZugkraftProAchseSteuerwagen(float power){       // 0x007D
     zPAchsStwgNew = calcPower(power);
     if(zPAchsStwg != zPAchsStwgNew) zPAchsStwg = zPAchsStwgNew; syncPowerIndicator();
-    if(bdb) qDebug() << "zPAchsStwg: " + QString::number(zPAchsStwg);
 }
 void zusiPower::setZugkraftSollGesammtSteuerwagen(float power){    // 0x007E
     zSollGesStwgNew = calcPower(power);
     if(zSollGesStwg !=zSollGesStwgNew) zSollGesStwg = zSollGesStwgNew; syncPowerIndicator();
-    if(bdb) qDebug() << "zSollGesStwg: " + QString::number(zSollGesStwg);
 }
 void zusiPower::setZugkraftSollProAchseSteuerwagen(float power){   // 0x007F
     zSollPAchsStwgNew = calcPower(power);
     if(zSollPAchsStwg != zSollPAchsStwgNew) zSollPAchsStwg = zSollPAchsStwgNew; syncPowerIndicator();
-    if(bdb) qDebug() << "zSollPAchsStwg: " + QString::number(zSollPAchsStwg);
 }
 void zusiPower::setZugkraftSollNormiert(float power){              // 0x0090
     zSollNormNew = static_cast<qint16>(ceil(static_cast<double>(power * 100)));
     if(zSollNorm != zSollNormNew) zSollNorm = zSollNormNew; syncPowerIndicator();
-    if(bdb) qDebug() << "zSollNorm: " + QString::number(zSollNorm);
 }
 void zusiPower::setZugkraftSollNormiertSteuerwagen(float power){   // 0x0091
     zSollNormStwgNew = static_cast<qint16>(ceil(static_cast<double>(power * 100)));
     if(zSollNormStwg != zSollNormStwgNew) zSollNormStwg = zSollNormStwgNew; syncPowerIndicator();
-    if(bdb) qDebug() << "zSollNormStwg: " + QString::number(zSollNormStwg);
 }
 void zusiPower::setZugkraftNormiert(float power){                  // 0x0093
     zNormNew = static_cast<qint16>(ceil(static_cast<double>(power * 100)));
     if(zNorm != zNormNew) zNorm = zNormNew; syncPowerIndicator();
-    if(bdb) qDebug() << "zNorm: " + QString::number(zNorm);
 }
 void zusiPower::setZugkraftNormiertSteuerwagen(float power){       // 0x0094
     zNormStwgNew = static_cast<qint16>(ceil(static_cast<double>(power * 100)));
     if(zNormStwg != zNormStwgNew) zNormStwg = zNormStwgNew; syncPowerIndicator();
-    if(bdb) qDebug() << "zNormStwg: " + QString::number(zNormStwg);
 }
 
 void zusiPower::syncPowerIndicator(){

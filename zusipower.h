@@ -2,7 +2,6 @@
 #define ZUSIPOWER_H
 
 #include <QObject>
-#include <QDebug>
 #include <QtMath>
 
 class zusiPower : public QObject
@@ -32,7 +31,7 @@ private:
     qint16 zSollNormStwg, zSollNormStwgNew = 0;    // 0x0091 (145) Steuerwagen: Zug- und Brems-Gesamtkraftsoll normiert
     qint16 zNorm, zNormNew = 0;                    // 0x0093 (147)              Zug- und Brems-Gesamtkraftsoll absolut normiert
     qint16 zNormStwg, zNormStwgNew = 0;            // 0x0094 (148) Steuerwagen: Zug- und Brems-Gesamtkraftsoll absolut normiert
-    qint16 VIst = 0;
+    quint16 VIst = 0;
     QVector<qint16> powerValuesToDecoder;
 
     qint16 zMaxPAchs = 1;
@@ -50,8 +49,7 @@ private:
     QString unitBraking = "";
     QString unitAccelerating= "";
     QString unitType[5] = {"","kN", "kN/FM", "%", "Stufen"};
-    bool bdb = false; // Basic debug
-    qint16 skalen[49][9] = {       // Typ1 kN, Ty2 kN/FM, typ3 %, Typ4 Stufen
+    qint16 skalen[52][9] = {       // Typ1 kN, Ty2 kN/FM, typ3 %, Typ4 Stufen
       //{BR, Number-Min, Line-Min, Typ, Pre-Factor-Br, Number-Max, Line-Max, Typ, Pre-Factor-Ac}
                                    { 101,140,145,1,400, 70, 75,2, 100},// Braking power adapted
                                    { 103, 90, 90,1,300, 50, 50,2, 100},// Braking power adapted
@@ -96,6 +94,10 @@ private:
                                    { 470,150,150,1,400,300,300,1, 400},// Braking power adapted
                                    { 475,140,150,1,400,350,350,1, 400},// Braking power adapted
                                    { 482,140,145,1,400, 70, 75,2, 100},// Braking power adapted
+                                   { 610,100,100,3,685,100,100,3, 400},// Braking power adapted
+                                   { 611,100,100,3,685,100,100,3, 400},// Braking power adapted
+                                   { 612,100,100,3,685,100,100,3, 400},// Braking power adapted
+                                   { 628,100,100,3,685,100,100,3, 400},// Braking power adapted
                                    {1016,240,250,1,100,300,300,1, 100},// Taurus, not implemented
                                    {1044,150,150,1,100,300,300,1, 100}, // Braking power adapted
                                    {1116,150,150,1,400,300,300,1, 400},// Braking power adapted
@@ -121,7 +123,7 @@ public slots:
     void setZugkraftSollNormiertSteuerwagen(float power);   // 0x0091
     void setZugkraftNormiert(float power);                  // 0x0093
     void setZugkraftNormiertSteuerwagen(float power);       // 0x0094
-    void setVIst(qint16 V);
+    void setVIst(quint16 V);
     void setBaureihe(QString fahrzeug);
 };
 
