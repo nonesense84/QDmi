@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QThread>
 #include <QFontDatabase>
 #include <QScreen>
 #include <QTimer>
@@ -36,9 +37,12 @@ private slots:
     void arrowUpClicked();
     void arrowDownClicked();
     void connectTimers();
+    void process();
     void connectPzbIcons();
     void connectMtdIcons();
     void connectMtdPower();
+    void connectTcpStuff();
+    void gotTcpConnectionFeedback(QString feedback);
     void setPzbLzbNtc();
     void settingsBtn1Clicked();
     void settingsBtn2Clicked();
@@ -67,12 +71,19 @@ private:
     sep *mySep;
     mtd *myMtd;
     zusi3Tcp *myTcp;
+    QThread* lzbThread = new QThread;
+    QThread* sepThread = new QThread;
+    QThread* mtdThread = new QThread;
+    QThread* tcpThread = new QThread;
     bool useDistEraForLzb;
     bool useHookForLzb;
     bool useTextFromPzb;
     QPoint lKilickPos;
     QString dataString = "";
     QString activeDataEntryItem = "";
+
+private: signals:
+    void newZusiIp(QString ip);
 
 protected:
   void resizeEvent ( QResizeEvent * event );

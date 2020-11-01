@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -18,6 +17,22 @@ MainWindow::MainWindow(QWidget *parent) :
     mySep = new sep();
     myMtd = new mtd();
     myTcp = new zusi3Tcp();
+    // https://wiki.qt.io/QThreads_general_usage
+    // https://mayaposch.wordpress.com/2011/11/01/how-to-really-truly-use-qthreads-the-full-explanation/
+    myLzb->moveToThread(lzbThread);
+    mySep->moveToThread(sepThread);
+    myMtd->moveToThread(mtdThread);
+    myTcp->moveToThread(tcpThread);
+    connect(tcpThread, SIGNAL(started()), myTcp, SLOT(process()));
+    connect(tcpThread, SIGNAL(started()), this, SLOT(process()));
+    connect(sepThread, SIGNAL(started()), mySep, SLOT(process()));
+    lzbThread->start();
+    sepThread->start();
+    mtdThread->start();
+    tcpThread->start();
+}
+
+void MainWindow::process(){
     qreal dotsPerInch = QApplication::screens().at(0)->logicalDotsPerInch();
     ui->widgetTacho->setDpi(dotsPerInch);
     ui->widgetPower->setDpi(dotsPerInch);
@@ -37,9 +52,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->systemVersionComp2Name->setTextFieldUsing(1, Qt::AlignRight);
     ui->systemVersionComp2Name->addTextMessage("github.com/nones",era::grey,era::darkBlue,1);
     ui->systemVersionComp1Version->setBorderThickness(0);
-    ui->systemVersionComp1Version->addTextMessage("1.1",era::grey,era::darkBlue,1);
+    ui->systemVersionComp1Version->addTextMessage("1.2",era::grey,era::darkBlue,1);
     ui->systemVersionComp2Version->setBorderThickness(0);
     ui->systemVersionComp2Version->addTextMessage("ense84/QDmi",era::grey,era::darkBlue,1);
+    qRegisterMetaType< QVector<quint8> >("QVector<quint8>");
+    qRegisterMetaType< QVector<qint16> >("QVector<qint16>");
     connect(ui->fieldF4,SIGNAL(clicked(bool)),this,SLOT(arrowF4Clicked()));
     connect(ui->fieldF5,SIGNAL(clicked(bool)),this,SLOT(arrowF5Clicked()));
     connect(ui->fieldE10,SIGNAL(clicked(bool)),this,SLOT(arrowUpClicked()));
@@ -82,14 +99,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(myTcp,SIGNAL(removeTechnicalMessage(quint8)),ui->FieldE5to9,SLOT(removeTextMessage(quint8)));
     connect(myTcp,SIGNAL(removeTechnicalMessage(quint8)),ui->FieldE8to9,SLOT(removeTextMessage(quint8)));
     connect(mySep,SIGNAL(newLzbValues(QVector<quint8>)),myLzb,SLOT(setAnalogValues(QVector<quint8>)));
-    connect(myTcp,SIGNAL(newLzbValues(QVector<quint8>)),myLzb,SLOT(setAnalogValues(QVector<quint8>)));
+    connect(myTcp->myIndicators,SIGNAL(newLzbValues(QVector<quint8>)),myLzb,SLOT(setAnalogValues(QVector<quint8>)));
     connect(mySep,SIGNAL(newMtdIndicators(QVector<quint8>)),myMtd,SLOT(setStates(QVector<quint8>)));
     connect(myTcp,SIGNAL(newMtdIndicators(QVector<quint8>)),myMtd,SLOT(setStates(QVector<quint8>)));
-    connect(mySep,SIGNAL(newSpeed(qreal)),ui->widgetTacho,SLOT(setVAct(qreal)));
-    connect(myTcp,SIGNAL(newSpeed(qreal)),ui->widgetTacho,SLOT(setVAct(qreal)));
-    connect(mySep,SIGNAL(newSpeed(qreal)),myLzb,SLOT(setVAct(qreal)));
-    connect(myTcp,SIGNAL(newSpeed(qreal)),myLzb,SLOT(setVAct(qreal)));
-
+    connect(mySep,SIGNAL(newSpeed(quint16)),ui->widgetTacho,SLOT(setVAct(quint16)));
+    connect(myTcp,SIGNAL(newSpeed(quint16)),ui->widgetTacho,SLOT(setVAct(quint16)));
+    connect(mySep,SIGNAL(newSpeed(quint16)),myLzb,SLOT(setVAct(quint16)));
+    connect(myTcp,SIGNAL(newSpeed(quint16)),myLzb,SLOT(setVAct(quint16)));
+    connect(myTcp,SIGNAL(newSimtime(QString)),ui->fieldG13,SLOT(setText(QString)));
     ui->settingsBtn1->setIcon(":/icons/lang_ena.svg",":/icons/lang_dis.svg");
     ui->settingsBtn2->setIcon(":/icons/volume_ena.svg", ":/icons/volume_dis.svg");
     ui->settingsBtn3->setIcon(":/icons/bright_ena.svg", ":/icons/bright_dis.svg");
@@ -166,10 +183,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->zusiIpBtn0->setText("0",era::grey,era::darkGrey,QFont::Light);
     ui->systemVersionClose->setAsButton(true);
     ui->systemVersionClose->setIcon(":/icons/X.svg");
+    ui->fieldG13->setText("--:--:--",era::grey,era::darkGrey,QFont::Light);
+    ui->fieldG13->setCustomFontFactor(0.24);
     connectTimers();
     connectPzbIcons();
     connectMtdIcons();
     connectMtdPower();
+    connectTcpStuff();
     ui->fieldA3->setIsDistanceScale();
     ui->fieldA3->setTargetDistance(0,false);
     ui->widgetTacho->setVMaxDial(400);
@@ -185,6 +205,7 @@ void MainWindow::connectPzbIcons(){
     connect(myLzb,SIGNAL(newIconBehav6(bool,quint8,bool)),ui->fieldCL6,SLOT(setWorking(bool,quint8,bool)));
     connect(myLzb,SIGNAL(newIconBehav7(bool,quint8,bool)),ui->fieldCL7,SLOT(setWorking(bool,quint8,bool)));
     connect(myLzb,SIGNAL(newIconBehavC9(bool,quint8,bool)),ui->fieldC9,SLOT(setWorking(bool,quint8,bool)));
+    connect(myLzb,SIGNAL(newIconBehavG10(bool,quint8,bool)),ui->fieldG10,SLOT(setWorking(bool,quint8,bool)));
     connect(myLzb,SIGNAL(newIcon1(QString,QString)),ui->fieldCL1,SLOT(setIcon(QString,QString)));
     connect(myLzb,SIGNAL(newIcon2(QString,QString)),ui->fieldCL2,SLOT(setIcon(QString,QString)));
     connect(myLzb,SIGNAL(newIcon3(QString,QString)),ui->fieldCL3,SLOT(setIcon(QString,QString)));
@@ -193,6 +214,7 @@ void MainWindow::connectPzbIcons(){
     connect(myLzb,SIGNAL(newIcon6(QString,QString)),ui->fieldCL6,SLOT(setIcon(QString,QString)));
     connect(myLzb,SIGNAL(newIcon7(QString,QString)),ui->fieldCL7,SLOT(setIcon(QString,QString)));
     connect(myLzb,SIGNAL(newIconC9(QString,QString)),ui->fieldC9,SLOT(setIcon(QString,QString)));
+    connect(myLzb,SIGNAL(newIconG10(QString,QString)),ui->fieldG10,SLOT(setIcon(QString,QString)));
     connect(myLzb,SIGNAL(newTextMessage(QString, QColor, QColor, quint8)),ui->FieldE5to7,SLOT(addTextMessage(QString, QColor, QColor, quint8)));
     connect(myLzb,SIGNAL(removeMessage(quint8)),ui->FieldE5to7,SLOT(removeTextMessage(quint8)));
     ui->fieldVZile100->setSegmentDigitToUse(3);
@@ -257,6 +279,16 @@ void MainWindow::connectTimers(){
     connect(shortTimer,SIGNAL(timeout()),ui->fieldG2,SLOT(updateBlinking2()));
     connect(shortTimer,SIGNAL(timeout()),this,SLOT(blinkCursor()));
 }
+void MainWindow::connectTcpStuff(){
+    connect(myTcp,SIGNAL(sendTcpConnectionFeedback(QString)),this,SLOT(gotTcpConnectionFeedback(QString)));
+    connect(this,SIGNAL(newZusiIp(QString)),myTcp,SLOT(setIpadress(QString)));
+}
+
+void MainWindow::gotTcpConnectionFeedback(QString feedback){
+    if(feedback.contains("."))settings->setValue("zusiIp",feedback);
+    if(feedback == "-2")      emit newZusiIp(settings->value("zusiIp").toString());
+
+}
 MainWindow::~MainWindow(){delete ui;}
 void MainWindow::setPzbLzbNtc(){
     ui->fieldB7->setIcon(":/icons/MO_19.svg");
@@ -268,7 +300,6 @@ void MainWindow::setPzbLzbNtc(){
 void MainWindow::arrowF4Clicked(){
     settings->setValue("mainwindow/height", this->height());
     settings->setValue("mainwindow/width", this->width());
-    myTcp->disconnectFromZusi();
     this->close();
 }
 void MainWindow::arrowF5Clicked(){ui->fieldDG->setCurrentIndex(1);}
@@ -306,9 +337,7 @@ void MainWindow::settingsCloseClicked(){
 void MainWindow::applyClicked(QString data){
     data.remove("_");
     if(activeDataEntryItem == "IP-Address"){
-        if (myTcp->setIpadress(data) == 0)
-            settings->setValue("zusiIp",data);
-        //dataString = "";
+        emit newZusiIp(data);
     }
 }
 void MainWindow::addItemToData(QString item){
@@ -461,7 +490,7 @@ void MainWindow::configureSettingsWindow(){
     ui->fieldVZile10->setVisib(settings->value("pulldown_gauge").toInt() == 1);
     ui->fieldVZile1->setVisib(settings->value("pulldown_gauge").toInt() == 1);
     ui->fieldA3->setEraUse(settings->value("pulldown_targetdistance").toInt() == 0);
-    myTcp->setIpadress(settings->value("zusiIp").toString());
+    emit newZusiIp(settings->value("zusiIp").toString());
 }
 void MainWindow::mousePressEvent(QMouseEvent *event){
     #ifdef Q_OS_WIN32

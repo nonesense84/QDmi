@@ -1,12 +1,18 @@
 #include "zusiindicator.h"
 
 zusiIndicator::zusiIndicator(QObject *parent) : QObject(parent){
+    lzbValuesToDecoder.resize(7);
     lmElBlinkTestTimer = new QTimer(this);
     lmElBlinkTestTimer->setSingleShot(true);
     connect(lmElBlinkTestTimer,  SIGNAL(timeout()),this,SLOT(setLzbElAuftrag12()));
 }
 void zusiIndicator::setZugbeeinflussungssystem(QString value){
     lzbVorhanden = value.contains("LZB");
+    if(!lzbVorhanden){  // Nach Wechsel von LZB- nach PZB Fahrzeug bleiben Fuhrungsgrößen sethen
+        setZielweg(-1);
+        lmB = 0; lmUe = 0;
+        setLzbZustand(0);
+    }
 }
 void zusiIndicator::setMelderbild(uint8_t value){
     //qDebug() << "MelderbildRoh:  " + QString::number(value);
@@ -18,20 +24,16 @@ void zusiIndicator::setMelderbild(uint8_t value){
     }
     //qDebug() << "MelderbildNeu:  " + QString::number(melderbild);
     restriktiv = (melderbild == 2) || (melderbild == 3) || (melderbild == 4);
-    calcLmBlau();
 }
 void zusiIndicator::setZustandZugsicherung(uint16_t value){
     //qDebug() << "Zustand Zugb.:      " + QString::number(value);
     zustandZugsicherung = value;
-    calcLmBlau();
+    QTimer::singleShot(200,this,SLOT(makeLzbLmDatagram()));
 }
 void zusiIndicator::setGrundZwangsbrmnsung(uint16_t value){//qDebug() << "ZB wegen ID: " + QString::number(value);
     if(LzbZustand == 3)value = 9;   //Workarround: Zusi does not set "Bremsgrund LZB-Halt überfahren (->9)". But luckily then "LzbZustand" is 3
     //qDebug() << "GrundZwangsbrmnsung:      " + QString::number(value);
     ZwangsbremsungAktiv = value > 0;
-    if(ZwangsbremsungAktiv > 0){
-        calcLmBlau();
-    }
     if(ktp == false) value = 0;
     switch (value){
     case 0:
@@ -108,7 +110,6 @@ void zusiIndicator::setGrundZwangsbrmnsung(uint16_t value){//qDebug() << "ZB weg
 void zusiIndicator::setZugart(uint8_t value){//qDebug() << "Zugart:    " + QString::number(value);
     zugart = value; // U_M_O 2_3_4  1_Undef
     if(zugart == 1 && ktp) emit newTextMessage(db::messages[46], db::textFontColors[46], db::textBgColors[46], 0);
-    calcLmBlau();
 }
 void zusiIndicator::setKlartextmeldungen(uint8_t value){//qDebug() << "Klartextmeldungen : " + QString::number(value);
     klartextmeldungen = value;
@@ -131,7 +132,6 @@ void zusiIndicator::setStatusStromabnehmer(uint8_t value){
     stromabn4Hebend = (value & 0x80) >> 7;
     if(value > 0)setLzbElAuftrag(22);
 }
-void zusiIndicator::setLmGetriebe(uint8_t value){}
 void zusiIndicator::setLmSchleudern(uint8_t value){
     //qDebug() << "Schl: " + QString::number(value);
     lmSchleudern = value;
@@ -140,35 +140,7 @@ void zusiIndicator::setLmGleiten(uint8_t value){
     //qDebug() << "Glei: " + QString::number(value);
     lmGleiten = value;
 }
-void zusiIndicator::setLmMgBremse(uint8_t value){}
-void zusiIndicator::setLmHBremse(uint8_t value){}
-void zusiIndicator::setLmRBremse(uint8_t value){}
-void zusiIndicator::setLmHochabbremsung(uint8_t value){}
-void zusiIndicator::setLmSchnellbremsung(uint8_t value){}
 void zusiIndicator::setLmUhrzeitDigital(uint8_t value){}
-void zusiIndicator::setLmDrehzahlverstellung(uint8_t value){}
-void zusiIndicator::setLmFahrtrichtungVor(uint8_t value){}
-void zusiIndicator::setLmFahrtrichtungZurueck(uint8_t value){}
-void zusiIndicator::setLmFahrtrichtungM(uint8_t value){}
-void zusiIndicator::setEntgleisung(uint8_t value){}
-void zusiIndicator::setStwgHauptschalter (uint8_t value){}
-void zusiIndicator::setLmSifa(uint8_t value){
-    //qDebug() << "Sifa-LM:    " + QString::number(value);
-    lmSifa = value;
-}
-void zusiIndicator::setSifaHupe(uint8_t value){
-    //qDebug() << "Sifa-Hupe:  " + QString::number(value);
-    SifaHupe = value;
-}
-void zusiIndicator::setSifaHauptschalter(uint8_t value){
-    //qDebug() << "Sifa-HS:    " + QString::number(value);
-    SifaHauptschalter = value;
-}
-void zusiIndicator::setSifaStoerschalter(uint8_t value){}
-void zusiIndicator::setSifaLuftabsperrhahn(uint8_t value){}
-void zusiIndicator::setPzbHauptschalter(uint8_t value){}
-void zusiIndicator::setPzbStoerschalter(uint8_t value){}
-void zusiIndicator::setPzbLuftabsperrhahn(uint8_t value){}
 void zusiIndicator::setLm1000Hz(uint8_t value){
     lm1000Hz = value;
     //if(ZwangsbremsungAktiv      && !ktp) lm1000Hz = 5;
@@ -177,29 +149,19 @@ void zusiIndicator::setLm1000Hz(uint8_t value){
     if(zustandZugsicherung == 3 &&  ktp) lm1000Hz = 0;
     if(melderbild == 0 && lm1000Hz  > 0) melderbild = 6;
     if(melderbild == 6 && lm1000Hz == 0) melderbild = 0;
-    calcLmBlau();
 }
-void zusiIndicator::setLmZugartU(uint8_t value){}    // Nicht benutzen!
-void zusiIndicator::setLmZugartM(uint8_t value){}    // Nicht benutzen!
-void zusiIndicator::setLmZugartO(uint8_t value){}    // Nicht benutzen!
 void zusiIndicator::setErsatzdatenWirksam(uint8_t value){
     if(value == 0)emit removeMessage(59);
     if(value >  0 && ktp)emit newTextMessage(db::messages[59], db::textFontColors[59], db::textBgColors[59], 59);
 }
-void zusiIndicator::setPzbHupe(uint8_t value){}
 void zusiIndicator::setLm500Hz(uint8_t value){
     lm500Hz = value;
     //if(ZwangsbremsungAktiv) lm500Hz = 5;
-    calcLmBlau();
-    //qDebug() << "PZB 500Hz    " + QString::number(lm500Hz);
 }
 void zusiIndicator::setLmBefehl(uint8_t value){
     lmBefehl = value;//qDebug() << "Befehl 40:   " + QString::number(value);
     if(Uebertragungsausfall == 2) lmBefehl = 5;
 }
-void zusiIndicator::setLmZugartLinksSBahn(uint8_t value){}
-void zusiIndicator::setLmZugartSBahn(uint8_t value){}
-void zusiIndicator::setLmZugartRechtsSBahn(uint8_t value){}
 void zusiIndicator::setLzbStoerschalter(uint8_t value){
     if(value == 0)emit removeMessage(32);
     if(value >  0 && ktp)emit newTextMessage(db::messages[32], db::textFontColors[32], db::textBgColors[59], 32);
@@ -239,7 +201,6 @@ void zusiIndicator::setEndeverfahren(uint8_t value){
         if(ktp)emit newTextMessage(db::messages[57], db::textFontColors[57], db::textBgColors[57], 57);
         if(!ktp)lmEnde = 1;
     }
-    if(!ktp)calcLmBlau();
 }
 void zusiIndicator::setErsatzauftrag(uint8_t value){
     //qDebug() << "LZB Ersatzauftrag:    " + QString::number(value);
@@ -253,7 +214,6 @@ void zusiIndicator::setErsatzauftrag(uint8_t value){
         ersatzauftrag = 1;
         lmE40 = 1;
     }
-    calcLmBlau();
 }
 void zusiIndicator::setFalschfahrauftrag(uint8_t value){
     //qDebug() << "LZB Falschfahrauftrag:    " + QString::number(value);
@@ -275,7 +235,6 @@ void zusiIndicator::setFalschfahrauftrag(uint8_t value){
         falschfahrauftrag = 1;
         lmE40 = 5;
     }
-    calcLmBlau();
 }
 void zusiIndicator::setVorsichtsauftrag(uint8_t value){
     if(value == 3 && lmV40Roh == 0)value = 0;   //Workarround: Even V40 is switched off in real and by setLmV40, Zusi still is sending 3 to this function
@@ -295,7 +254,6 @@ void zusiIndicator::setVorsichtsauftrag(uint8_t value){
         if(ktp)emit newTextMessage(db::messages[29], db::textFontColors[29], db::textBgColors[29], 29);
         lmV40 = 1;
     }
-    calcLmBlau();
 }
 void zusiIndicator::setLzbNothalt(uint8_t value){
     if(value >  0 && ktp)emit newTextMessage(db::messages[2], db::textFontColors[2], db::textBgColors[59], 2);
@@ -328,9 +286,7 @@ void zusiIndicator::setLzbNothalt(uint8_t value){
         if(ktp)emit newTextMessage(db::messages[38], db::textFontColors[38], db::textBgColors[38], 38);
         lmH = 1;
     }
-    calcLmBlau();
 }
-void zusiIndicator::setLzbRechnerausfall(uint8_t value){}
 void zusiIndicator::setLzbElAuftrag(uint8_t value){
     if(value == 0){
         emit removeMessage(27);//weitere beachten
@@ -376,9 +332,7 @@ void zusiIndicator::setLzbElAuftrag(uint8_t value){
         emit removeMessage(41);
         lmEl = 0;
     }
-    calcLmBlau();
 }
-void zusiIndicator::setLmH(uint8_t value){}    // Nicht benutzen!
 void zusiIndicator::setLmE40(uint8_t value){
     if(ersatzauftrag && value == 0){// Workarround: Ersatzauftrag does not get reset after end
         setErsatzauftrag(0);
@@ -388,7 +342,6 @@ void zusiIndicator::setLmE40(uint8_t value){
         setFalschfahrauftrag(0);
     }
 }
-void zusiIndicator::setLmEnde(uint8_t value){}// Nicht benutzen!
 void zusiIndicator::setLmB(uint8_t value){
     lmB = value;//qDebug() << "LZB B        " + QString::number(value);
 }
@@ -412,7 +365,6 @@ void zusiIndicator::setLmG(uint8_t value){
         emit removeMessage(61);
         if(ktp)emit newTextMessage(db::messages[5], db::textFontColors[5], db::textBgColors[5], 5);
     }
-    makeLzbLmDatagram();
 }
 void zusiIndicator::setLmEl(uint8_t value){
     //lmEl = value;//qDebug() << "LZB EL       " + QString::number(value);
@@ -430,13 +382,28 @@ void zusiIndicator::setLmS(uint8_t value){
         QTimer::singleShot(10,this,SLOT(setLmSDeleyed()));
     }
     else{
-    lmS = value;
-        makeLzbLmDatagram();
+        lmS = value;
     }
 }
 void zusiIndicator::setLmSDeleyed(){
     setLmS(lmSDelayed);
 }
+void  zusiIndicator::setLmGnt(uint8_t value){
+    lmGnt = value;
+}
+void  zusiIndicator::setLmGntUe(uint8_t value){
+    if(value == 2){lmGnt_Ue = 5;}
+    else          {lmGnt_Ue = value;}
+}
+void  zusiIndicator::setLmGntG(uint8_t value){
+    if(value == 2){lmGnt_G = 5;}
+    else          {lmGnt_G = value;}
+}
+void  zusiIndicator::setLmGntS(uint8_t value){
+    if(value == 2){lmGnt_S = 5;}
+    else          {lmGnt_S = value;}
+}
+
 void zusiIndicator::setLmPruefStoer(uint8_t value){
     lmPruefStoer = value;//qDebug() << "Prüf/Stör    " + QString::number(value);
 }
@@ -446,23 +413,24 @@ void zusiIndicator::setFahrtUeberLlzbHaltPerBefehl(uint16_t value){
 void zusiIndicator::setUebertragungsausfall(uint16_t value){
     Uebertragungsausfall = value;
 }
-void zusiIndicator::setVSoll(float value){
-    vSoll = value;//qDebug() << "V-Soll       " + QString::number(value);
+void zusiIndicator::setVSoll(int16_t value){
+    setLzbValue(value, 3);
 }
-void zusiIndicator::setVIst(float value){
+void zusiIndicator::setVIst(uint16_t value){
     vIst = value;
 }
-void zusiIndicator::setVZiel(float value){
+void zusiIndicator::setVZiel(int16_t value){
     if (value < 0) value = 0;
     if(vZiel > value && LzbZustand > 0){
         if(ktp)emit newTextMessage(db::messages[58], db::textFontColors[58], db::textBgColors[58], 58);
         QTimer::singleShot(2000,this,SLOT(remooveMessage58()));// Todo!: 20 Sekunden, nicht 2!
-        makeLzbLmDatagram();
     }
     vZiel = value;//qDebug() << "V-Ziel       " + QString::number(value);
+    setLzbValue(value, 1);
 }
-void zusiIndicator::setZielweg(float value){
-    zielweg = value;
+void zusiIndicator::setZielweg(int16_t value){
+    setLzbValue(value, 5);
+    emit newLzbValues(lzbValuesToDecoder);
     //qDebug() << "Zielweg        " + QString::number(zielweg);
 }
 void zusiIndicator::setAfbSoll(uint16_t value){
@@ -473,17 +441,7 @@ void zusiIndicator::setAfbAn(bool value){
     afbAn = value;
     emit newAfbSoll(afbSoll, afbAn);
 }
-void zusiIndicator::setCirEelkeModus(uint8_t value){
-    CirEelkeModus = value;//qDebug() << "CIR-ELKE     " + QString::number(value);
-}
-void zusiIndicator::setMfaAnzeigemodusZugdaten(uint8_t value){
-    MfaAnzeigemodusZugdaten = value;//qDebug() << "ZDE Anzeigen " + QString::number(value);
-}
-void zusiIndicator::setFunktionspruefungLaeuft(uint8_t value){}
-void zusiIndicator::setAlleMelderBlinken(uint8_t value){}
-void zusiIndicator::setAnzeigeDerFuehrungsgroessen(uint8_t value){}
-void zusiIndicator::setLmBAnUndUeAus(uint8_t value){}
-void zusiIndicator::setZwangsbremsungAktiv(uint8_t value){}
+
 void zusiIndicator::remooveMessage58(){
     emit removeMessage(58);
 }
@@ -492,40 +450,6 @@ void zusiIndicator::setLzbElAuftrag12(){
 }
 void zusiIndicator::setFzgVMax(uint16_t value){//qDebug() << "setFzgVMax    " + QString::number(value);
     emit newFzgVmaxTacho(value + 20);
-}
-void zusiIndicator::calcLmBlau(){
-    // Do not display blue indicators after a forced brake, as long as the "S" or blinking 1000Hz are displayed
-    if(lmS > 0 || lm1000Hz > 1 || lmEnde > 0 || lmG > 0 || ZwangsbremsungAktiv){
-        //QTimer::singleShot(10,this,SLOT(calcLmBlau()));
-        lm85 = lm70 = lm55 = 0;
-        if(!ktp && ZwangsbremsungAktiv && !lmS && !lzbVorhanden) lm500Hz = lm1000Hz = 5;
-    }
-    else{
-        lm85 = lm70 = lm55 = 0;
-        if(zustandZugsicherung == 6){//Funktionsprüfung
-            lm85 = 5;
-            lm70 = 5;
-            lm55 = 5;}
-        if(LzbZustand == 0) {//Keine LZB-Führung
-            if(zugart == 2 && zustandZugsicherung == 5 && melderbild > 1 && melderbild < 6 && !ktp)lm85 = 5;
-            if(zugart == 2 && zustandZugsicherung == 5 && melderbild > 1 && melderbild < 6 && ktp)lm55 = 5;
-            if(zugart == 3 && zustandZugsicherung == 5 && melderbild > 1 && melderbild < 5 && !ktp)lm85 = 13;
-            if(zugart == 3 && zustandZugsicherung == 5 && melderbild == 5)lm85 = 5;
-            if(zugart == 4 && zustandZugsicherung >= 5)lm85 = 5;
-            if(zugart == 4 && zustandZugsicherung == 5 && melderbild == 0)lm85 = 1;
-            if(zugart == 2 && zustandZugsicherung == 5 && melderbild > 1 && melderbild < 5 && !ktp)lm70 = 13;
-            if(zugart == 2 && zustandZugsicherung == 5 && melderbild == 5)lm70 = 5;
-            if(zugart == 3 && zustandZugsicherung >= 5)lm70 = 5;
-            if(zugart == 3 && zustandZugsicherung == 5 && melderbild == 0)lm70 = 1;
-            if(zugart == 4 && zustandZugsicherung == 5 && melderbild > 1 && melderbild < 5 && !ktp)lm70 = 13;
-            if(zugart == 4 && zustandZugsicherung == 5 && melderbild == 5)lm70 = 5;
-            if(zugart == 2 && zustandZugsicherung == 5 && (melderbild == 1 || melderbild == 6))lm55 = 5;
-            if(zugart == 2 && zustandZugsicherung == 5 && melderbild == 0)lm55 = 1;
-            if(zustandZugsicherung == 4 && melderbild == 0)lm55 = 5;
-        }
-        if(ktp)calcPzbTextmessages();
-    }
-    makeLzbLmDatagram();
 }
 
 void zusiIndicator::calcPzbTextmessages(){
@@ -612,7 +536,37 @@ void zusiIndicator::sentSpetLimitMessage(quint8 limit){
 }
 
 void zusiIndicator::makeLzbLmDatagram(){
-    QVector<quint8> lmsToDecoder(18,0);
+    // Do not display blue indicators after a forced brake, as long as the "S" or blinking 1000Hz are displayed
+    if(lmS > 0 || lm1000Hz > 1 || lmEnde > 0 || lmG > 0 || ZwangsbremsungAktiv){
+        lm85 = lm70 = lm55 = 0;
+        if(!ktp && ZwangsbremsungAktiv && !lmS && !lzbVorhanden) lm500Hz = lm1000Hz = 5;
+    }
+    else{
+        lm85 = lm70 = lm55 = 0;
+        if(zustandZugsicherung == 6){//Funktionsprüfung
+            lm85 = 5;
+            lm70 = 5;
+            lm55 = 5;}
+        if(LzbZustand == 0) {//Keine LZB-Führung
+            if(zugart == 2 && zustandZugsicherung == 5 && melderbild > 1 && melderbild < 6 && !ktp)lm85 = 5;
+            if(zugart == 2 && zustandZugsicherung == 5 && melderbild > 1 && melderbild < 6 && ktp)lm55 = 5;
+            if(zugart == 3 && zustandZugsicherung == 5 && melderbild > 1 && melderbild < 5 && !ktp)lm85 = 13;
+            if(zugart == 3 && zustandZugsicherung == 5 && melderbild == 5)lm85 = 5;
+            if(zugart == 4 && zustandZugsicherung >= 5)lm85 = 5;
+            if(zugart == 4 && zustandZugsicherung == 5 && melderbild == 0)lm85 = 1;
+            if(zugart == 2 && zustandZugsicherung == 5 && melderbild > 1 && melderbild < 5 && !ktp)lm70 = 13;
+            if(zugart == 2 && zustandZugsicherung == 5 && melderbild == 5)lm70 = 5;
+            if(zugart == 3 && zustandZugsicherung >= 5)lm70 = 5;
+            if(zugart == 3 && zustandZugsicherung == 5 && melderbild == 0)lm70 = 1;
+            if(zugart == 4 && zustandZugsicherung == 5 && melderbild > 1 && melderbild < 5 && !ktp)lm70 = 13;
+            if(zugart == 4 && zustandZugsicherung == 5 && melderbild == 5)lm70 = 5;
+            if(zugart == 2 && zustandZugsicherung == 5 && (melderbild == 1 || melderbild == 6))lm55 = 5;
+            if(zugart == 2 && zustandZugsicherung == 5 && melderbild == 0)lm55 = 1;
+            if(zustandZugsicherung == 4 && melderbild == 0)lm55 = 5;
+        }
+        if(ktp)calcPzbTextmessages();
+    }
+    QVector<quint8> lmsToDecoder(22,0);
     lmsToDecoder[0] = lmB;
     lmsToDecoder[1] = lm85;
     lmsToDecoder[2] = lm70;
@@ -631,7 +585,27 @@ void zusiIndicator::makeLzbLmDatagram(){
     lmsToDecoder[15] = lmUe;
     lmsToDecoder[16] = lmS;
     lmsToDecoder[17] = lmEnde;
-    emit newLzbIndicators(lmsToDecoder);
+    lmsToDecoder[18] = lmGnt;
+    lmsToDecoder[19] = lmGnt_Ue;
+    lmsToDecoder[20] = lmGnt_G;
+    lmsToDecoder[21] = lmGnt_S;
+    if(lmsToDecoder != lmsToDecoderOld){
+        lmsToDecoderOld = lmsToDecoder;
+        emit newLzbIndicators(lmsToDecoder);
+    }
+}
+void zusiIndicator::setLzbValue(int16_t input, uint8_t pos){
+    union { //Pos1/3 VZiel/Soll , //Pos5Entfernung
+      uint8_t byte[2];
+      uint16_t word;
+    } tmp;
+    if(pos == 5)lzbValuesToDecoder[0] = input > 0;  // Flag setzten, ob Führungsgrößen angezeigt werden
+    tmp.word = qFabs(input);
+    //qDebug() << "setLzbValue(input " + QString::number(tmp.word) + ", pos " + QString::number(pos) + ")";
+    if(tmp.byte[0] != lzbValuesToDecoder[pos] || tmp.byte[1] != lzbValuesToDecoder[pos + 1]){
+        lzbValuesToDecoder[pos    ] = tmp.byte[0];
+        lzbValuesToDecoder[pos + 1] = tmp.byte[1];
+    }
 }
 /*void zusiIndicator::makeLzbAnalogDatagram(){
     QVector<quint8> lzbValuesToDecoder(7,0);
