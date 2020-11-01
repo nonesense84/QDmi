@@ -24,6 +24,8 @@ public slots:
     void setBorderThickness(int height);
     void setIcon(QString filename);
     void setIcon(QString filenameActive, QString filenameInactive);
+    void setCustomFontFactor(qreal factor);
+    void setText(QString text);
     void setText(QString text, QColor textColor, QColor textColorDisabled, quint8 boldOrThin);
     void setTextFieldUsing(quint8 numFields);
     void setTextFieldUsing(quint8 numFields, quint8 alignment);
@@ -53,16 +55,17 @@ private:
     bool isTargetDistance = false;
     bool targetDistanceVisible = false;
     bool useEraStyle = true;
-    quint8 textStyle=75;   // Bold: 75, Normal 50
+    quint8 textStyle=QFont::Bold;   // Bold: 75, Normal 50
     QString labelText;
-    QColor labelTextColorEnab;
-    QColor labelTextColorDisab;
+    QColor labelTextColorEnab = era::grey;
+    QColor labelTextColorDisab = era::darkGrey;
     uint8_t msgTextAlign;
     QString fileForDistanceScale;
     quint16 distanceScale;
     quint16 targetDistance;
     quint8 segmentPosition;
     qreal fontFactor;
+    qreal customFontFactor = 0.3;
     quint8 numTextFields = 0;
     QString messageTexts[10];
     QString segmentText;

@@ -124,6 +124,15 @@ void dmiLabel::setIcon(QString filenameActive, QString filenameInactive){
     update();
 }
 
+void dmiLabel::setCustomFontFactor(qreal factor){
+    customFontFactor = factor;
+}
+
+void dmiLabel::setText(QString text){
+    labelText = text;
+    update();
+}
+
 void dmiLabel::setText(QString text, QColor textColorEnabled, QColor textColorDisabled, quint8 boldOrThin){
     textStyle = boldOrThin; //Normal (Not bold)
     labelText = text;
@@ -232,7 +241,7 @@ void dmiLabel::paintText(QPainter *iconPainter, QRect centralArea){
     int lineHeight = centralArea.height();
     int lineWidth = centralArea.width();
     QRect field(centralArea.x(),centralArea.y(),lineWidth, lineHeight);
-    iconPainter->save();
+    //iconPainter->save();
 
     if(isEnab){
         iconPainter->setPen(labelTextColorEnab);
@@ -241,7 +250,7 @@ void dmiLabel::paintText(QPainter *iconPainter, QRect centralArea){
         iconPainter->setPen(labelTextColorDisab);
     }
     iconPainter->setFont(QFont("FreeSans",
-                               static_cast<int>(fontFactor * 0.30 * lineHeight),
+                               static_cast<int>(fontFactor * customFontFactor * lineHeight),
                                textStyle,
                                false));
     if(alignLeft){
@@ -255,7 +264,7 @@ void dmiLabel::paintText(QPainter *iconPainter, QRect centralArea){
         //textRect.translate(0, field.height()/2 - textRect.height()/2);
         iconPainter->drawText(textRect,labelText);
     }
-    iconPainter->restore();
+    //iconPainter->restore();
 }
 
 void dmiLabel::paintDistance(QPainter *iconPainter, QRect centralArea){
