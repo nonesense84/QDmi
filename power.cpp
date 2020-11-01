@@ -8,6 +8,9 @@ power::power(QWidget *parent) : QWidget(parent){
     fontDescription = QFont("FreeSans",fontSiceDescription,QFont::Bold,false);
     fontDial = QFont("FreeSans",fontSiceDial,QFont::Bold,false);
     fontNose = QFont("FreeSans",fontSiceNose,QFont::Bold,false);
+    connect(attenuationTimer, SIGNAL(timeout()),this,SLOT(attenuationRoutine()));
+    attenuationTimer->setInterval(20);
+    attenuationTimer->start();
 }
 void power::setDpi(qreal dpi){
     fontDial.setPointSizeF(26.0 * 96.0 / dpi);
@@ -15,20 +18,31 @@ void power::setDpi(qreal dpi){
     fontDescription.setPointSizeF(17.0 * 96.0 / dpi);
 }
 
+void power::attenuationRoutine(){
+    //if(arcOpenRight == arcAccel) arcAccel = 0;
+    //arcAccel++;
+    if(arcAccel < arcAccelDest){
+        arcAccel++;
+    }
+    if(arcAccel > arcAccelDest){
+        arcAccel--;
+    }
+    update();
+}
+
 void power::setPowerRelative(qint16 P){
     if(P < -100) P = -100;
     if(P >  100) P = 100;
-    if(useAcceleratingRelative)arcAccel = static_cast<double>(arcOpenRight / 100.0 * P);
-    update();
+    if(useAcceleratingRelative)arcAccelDest = static_cast<double>(arcOpenRight / 100.0 * P);
 }
 void power::setPowerAbsolute(qint16 P){
     if(P > 0){
-        if(!useAcceleratingRelative)arcAccel = static_cast<double>(arcOpenRight / AbsoluteAccelerateMaximum * P);
-        if(arcAccel > arcOpenRight) arcAccel = arcOpenRight;
+        if(!useAcceleratingRelative)arcAccelDest = static_cast<double>(arcOpenRight / AbsoluteAccelerateMaximum * P);
+        if(arcAccel > arcOpenRight) arcAccelDest = arcOpenRight;
     }
     else{
-        if(!useBrakingRelative)arcAccel = static_cast<double>(arcOpenRight / AbsoluteBrakingMaximum * P);
-        if(arcAccel < arcOpenLeft) arcAccel = arcOpenLeft;
+        if(!useBrakingRelative)arcAccelDest = static_cast<double>(arcOpenRight / AbsoluteBrakingMaximum * P);
+        if(arcAccel < arcOpenLeft) arcAccelDest = arcOpenLeft;
     }
 }
 void power::setPowerRelativeSet(qint16 P){

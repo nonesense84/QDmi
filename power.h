@@ -6,6 +6,7 @@
 #include <QPainter>
 #include "era.h"
 #include <QDebug>
+#include <QTimer>
 
 class power : public QWidget
 {
@@ -27,7 +28,10 @@ public slots:
     void setDpi(qreal dpi);
     void setUnitAcceleratingText(QString unit);
     void setUnitBrakingText(QString unit);
+private slots:
+    void attenuationRoutine();
 private:
+    QTimer *attenuationTimer = new QTimer();
     QString unitUniversal = "%";
     QString unitBraking = "kN";
     QString uniteAccelerating = "kN/FM";
@@ -44,6 +48,7 @@ private:
     qreal AbsoluteAccelerateMaximum = 100;
     qreal AbsoluteBrakingMaximum = 100;
     qreal arcAccel = 0;
+    qreal arcAccelDest = 0;
     qreal arcAccelSet = 0;
     qreal dimensionMatrix = 480; // Hinterfragen, wie der Wert zusatnde kommt!
     quint16 widthPowerRing = 50;
