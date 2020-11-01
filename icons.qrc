@@ -70,5 +70,13 @@
         <file>icons/sifaWarn2.svg</file>
         <file>icons/doors_closed_inv.svg</file>
         <file>icons/panto_up_arr.svg</file>
+        <file>icons/LmGnt_on.svg</file>
+        <file>icons/LmGnt_off.svg</file>
+        <file>icons/LmG_Gnt_on.svg</file>
+        <file>icons/LmS_Gnt_on.svg</file>
+        <file>icons/LmUe_Gnt_off.svg</file>
+        <file>icons/LmUe_Gnt_on.svg</file>
+        <file>icons/LmG_Gnt_off.svg</file>
+        <file>icons/LmS_Gnt_off.svg</file>
     </qresource>
 </RCC>
