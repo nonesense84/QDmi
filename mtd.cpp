@@ -21,7 +21,7 @@ void mtd::setAnalogValues(QVector<qint16> values){
 }
 
 void mtd::setStates(QVector<quint8> states){
-    indSifaOff    = states[ 0] == 0;
+    indSifaOff    = states[ 0] >  0;
     indSifaOpto   = states[ 1] >  0;
     indSifaAudio  = states[ 2] == 1;
     indSifaBrake  = states[ 2] == 2;
