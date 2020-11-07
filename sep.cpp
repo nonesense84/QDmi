@@ -32,12 +32,12 @@ void sep::readingPendingLzb(){
 
 void sep::readingPendingPzb(){
     while (udpSocketPzb->hasPendingDatagrams()) {
-        QVector<quint8> lmsToDecoder(18,0);
+        QVector<quint8> lmsToDecoder(22,0);
         QByteArray datagram;
         datagram.resize(udpSocketPzb->pendingDatagramSize());
         udpSocketPzb->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
-        if(datagram.size() >= 9){
-            for(int i = 0; i < 9; i = i + 1){
+        if(datagram.size() >= 12){
+            for(int i = 0; i < 11; i = i + 1){
                 lmsToDecoder[i*2 +1] = (datagram[i]       & 0x0f);
                 lmsToDecoder[i*2  ] = (datagram[i] >> 4)  & 0x0f;
             }
