@@ -1,3 +1,4 @@
+# include <QDebug>
 #include "lzb.h"
 
 lzb::lzb(){
@@ -25,6 +26,7 @@ void lzb::setVAct(quint16 V){
 }
 
 void lzb::setStates(QVector<quint8> states){
+    //qDebug() << " =========== lzb::setStates =========== Anfang";
     emit gotLzbMessage();
     if(useTxtMsgByLm){
         if(states[ 1] > 0  && states[ 2] == 0 && states[03] == 0) zustLmBlau = ZugartO;
@@ -188,6 +190,7 @@ void lzb::setStates(QVector<quint8> states){
             removeIndicator(i);
         }
     }
+    //qDebug() << " =========== lzb::setStates =========== Ende";
 }
 void lzb::sentSpetLimitMessage(quint8 limit){
     if(limit != lastLimitMessage){
@@ -197,6 +200,7 @@ void lzb::sentSpetLimitMessage(quint8 limit){
     }
 }
 void lzb::addIndicator(quint8 indId, quint8 blinking, bool invers){
+    //qDebug() << "lzb::addIndicator";
     // indId represents an indicatorFiles in db.h
     quint8 i = 0;
     bool indAllrUsed = false;
