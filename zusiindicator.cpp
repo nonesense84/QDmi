@@ -5,7 +5,26 @@ zusiIndicator::zusiIndicator(QObject *parent) : QObject(parent){
     lmElBlinkTestTimer = new QTimer(this);
     lmElBlinkTestTimer->setSingleShot(true);
     connect(lmElBlinkTestTimer,  SIGNAL(timeout()),this,SLOT(setLzbElAuftrag12()));
+    debugtimer = new QTimer(this);
+    connect(debugtimer,          SIGNAL(timeout()),this,SLOT(debugblinkfunction()));
+    debugtimer->setInterval(1500);
+    //debugtimer->start();
 }
+
+void zusiIndicator::debugblinkfunction(){
+    lmE40 = 3;
+    if(lmH == 5){
+        lmH = 1;
+    }
+    else{
+        lmH = 5;
+    }
+    QVector<quint8> lmsToDecoder(22,0);
+    lmsToDecoder[9] = lmE40;
+    lmsToDecoder[7] = lmH;
+    emit newLzbIndicators(lmsToDecoder);
+}
+
 void zusiIndicator::setZugbeeinflussungssystem(QString value){
     lzbVorhanden = value.contains("LZB");
     if(!lzbVorhanden){  // Nach Wechsel von LZB- nach PZB Fahrzeug bleiben Fuhrungsgrößen sethen
@@ -28,7 +47,6 @@ void zusiIndicator::setMelderbild(uint8_t value){
 void zusiIndicator::setZustandZugsicherung(uint16_t value){
     //qDebug() << "Zustand Zugb.:      " + QString::number(value);
     zustandZugsicherung = value;
-    QTimer::singleShot(200,this,SLOT(makeLzbLmDatagram()));
 }
 void zusiIndicator::setGrundZwangsbrmnsung(uint16_t value){//qDebug() << "ZB wegen ID: " + QString::number(value);
     if(LzbZustand == 3)value = 9;   //Workarround: Zusi does not set "Bremsgrund LZB-Halt überfahren (->9)". But luckily then "LzbZustand" is 3

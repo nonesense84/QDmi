@@ -32,6 +32,7 @@ private:
     bool lzbVorhanden;
     QVector<quint8> lmsToDecoderOld;
     QTimer *lmElBlinkTestTimer;
+    QTimer *debugtimer;
     QVector<quint8> lzbValuesToDecoder;
 
 private slots:
@@ -39,9 +40,9 @@ private slots:
     void calcPzbTextmessages();
     void sentSpetLimitMessage(quint8 limit);
     //void makeLzbAnalogDatagram();
-    void makeLzbLmDatagram();
     void remooveMessage58();
     void setLzbElAuftrag12();
+    void debugblinkfunction();
 
 public:
     explicit zusiIndicator(QObject *parent = nullptr);
@@ -61,10 +62,10 @@ signals:
 
 public slots:
     void setMelderbild(uint8_t value);
-    void setZustandZugsicherung(uint16_t value);
     void setGrundZwangsbrmnsung(uint16_t value);
     void setZugart(uint8_t value);
     void setKlartextmeldungen(uint8_t value);
+    void setZustandZugsicherung(uint16_t value);
 
     //====
     void setLmHauptschalter(uint8_t value);
@@ -107,6 +108,7 @@ public slots:
     void setAfbAn(bool value);
     void setFzgVMax(uint16_t value);
     void setZugbeeinflussungssystem(QString value);
+    void makeLzbLmDatagram();
     //====
 };
 
