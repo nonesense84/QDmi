@@ -1,5 +1,5 @@
 #include "dmilabel.h"
-//#include <QDebug>
+#include <QDebug>
 #include <QtSvg>
 
 dmiLabel::dmiLabel(QWidget *parent) : QWidget(parent){
@@ -63,13 +63,10 @@ void dmiLabel::setEraUse(bool useEra){
     update();
 }
 
-void dmiLabel::updateBlinking1(){
-    timeToBlink1 = !timeToBlink1;
-    update();
-}
-
-void dmiLabel::updateBlinking2(){
-    timeToBlink2 = !timeToBlink2;
+void dmiLabel::updateBlinking(){
+    blinkerFast = !blinkerFast;
+    if(blinkerFast) blinkerSlow = !blinkerSlow;
+    //qDebug() <<  "dmiLabel::updateBlinking()                            " + QString::number(blinkerFast);
     update();
 }
 
@@ -367,10 +364,10 @@ void dmiLabel::paintTextMessages(QPainter *iconPainter, QRect centralArea){
 
 void dmiLabel::paintIcon(QPainter *iconPainter, QRect centralArea){
     centralArea = calcOptimalRect(centralArea,svgActive.viewBox());
-    if(((blinkFrequency == 1) &&  timeToBlink1 && !isInvert) ||
-       ((blinkFrequency == 1) && !timeToBlink1 &&  isInvert) ||
-       ((blinkFrequency == 2) &&  timeToBlink2 && !isInvert) ||
-       ((blinkFrequency == 2) && !timeToBlink2 &&  isInvert) ||
+    if(((blinkFrequency == 1) &&  blinkerSlow && !isInvert) ||
+       ((blinkFrequency == 1) && !blinkerSlow &&  isInvert) ||
+       ((blinkFrequency == 2) &&  blinkerFast && !isInvert) ||
+       ((blinkFrequency == 2) && !blinkerFast &&  isInvert) ||
        !isEnab){
         if(useSvgIcon)
             svgInactive.render(iconPainter, centralArea);

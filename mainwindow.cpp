@@ -256,27 +256,17 @@ void MainWindow::connectMtdPower(){
     connect(mySep,SIGNAL(newPowerAbsolute(qint16)),ui->widgetPower,SLOT(setPowerRelative(qint16)));
 }
 void MainWindow::connectTimers(){
-    longTimer  = new QTimer(this);
-    longTimer->setInterval(1000);
-    longTimer->start();
     shortTimer  = new QTimer(this);
     shortTimer->setInterval(500);
     shortTimer->start();
-    connect(longTimer, SIGNAL(timeout()),ui->fieldCL1,SLOT(updateBlinking1()));
-    connect(shortTimer,SIGNAL(timeout()),ui->fieldCL1,SLOT(updateBlinking2()));
-    connect(longTimer, SIGNAL(timeout()),ui->fieldCL2,SLOT(updateBlinking1()));
-    connect(shortTimer,SIGNAL(timeout()),ui->fieldCL2,SLOT(updateBlinking2()));
-    connect(longTimer, SIGNAL(timeout()),ui->fieldCL3,SLOT(updateBlinking1()));
-    connect(shortTimer,SIGNAL(timeout()),ui->fieldCL3,SLOT(updateBlinking2()));
-    connect(longTimer, SIGNAL(timeout()),ui->fieldCL4,SLOT(updateBlinking1()));
-    connect(shortTimer,SIGNAL(timeout()),ui->fieldCL4,SLOT(updateBlinking2()));
-    connect(longTimer, SIGNAL(timeout()),ui->fieldCL5,SLOT(updateBlinking1()));
-    connect(shortTimer,SIGNAL(timeout()),ui->fieldCL5,SLOT(updateBlinking2()));
-    connect(longTimer, SIGNAL(timeout()),ui->fieldCL6,SLOT(updateBlinking1()));
-    connect(shortTimer,SIGNAL(timeout()),ui->fieldCL6,SLOT(updateBlinking2()));
-    connect(longTimer, SIGNAL(timeout()),ui->fieldCL7,SLOT(updateBlinking1()));
-    connect(shortTimer,SIGNAL(timeout()),ui->fieldCL7,SLOT(updateBlinking2()));
-    connect(shortTimer,SIGNAL(timeout()),ui->fieldG2,SLOT(updateBlinking2()));
+    connect(shortTimer,SIGNAL(timeout()),ui->fieldCL1,SLOT(updateBlinking()));
+    connect(shortTimer,SIGNAL(timeout()),ui->fieldCL2,SLOT(updateBlinking()));
+    connect(shortTimer,SIGNAL(timeout()),ui->fieldCL3,SLOT(updateBlinking()));
+    connect(shortTimer,SIGNAL(timeout()),ui->fieldCL4,SLOT(updateBlinking()));
+    connect(shortTimer,SIGNAL(timeout()),ui->fieldCL5,SLOT(updateBlinking()));
+    connect(shortTimer,SIGNAL(timeout()),ui->fieldCL6,SLOT(updateBlinking()));
+    connect(shortTimer,SIGNAL(timeout()),ui->fieldCL7,SLOT(updateBlinking()));
+    connect(shortTimer,SIGNAL(timeout()),ui->fieldG2,SLOT(updateBlinking()));
     connect(shortTimer,SIGNAL(timeout()),this,SLOT(blinkCursor()));
 }
 void MainWindow::connectTcpStuff(){
@@ -291,11 +281,14 @@ void MainWindow::gotTcpConnectionFeedback(QString feedback){
 }
 MainWindow::~MainWindow(){delete ui;}
 void MainWindow::setPzbLzbNtc(){
-    ui->fieldB7->setIcon(":/icons/MO_19.svg");
-    ui->fieldC8->setIcon(":/icons/LE_02a.svg");
-    ui->fieldE_holder2->setCurrentIndex(1);
-    ui->fieldC_holder->setCurrentIndex(1);
-    ui->fieldC_holder2->setCurrentIndex(0);
+    if(mode != modePzbLzbNtc){
+        ui->fieldB7->setIcon(":/icons/MO_19.svg");
+        ui->fieldC8->setIcon(":/icons/LE_02a.svg");
+        ui->fieldE_holder2->setCurrentIndex(1);
+        ui->fieldC_holder->setCurrentIndex(1);
+        ui->fieldC_holder2->setCurrentIndex(0);
+        mode = modePzbLzbNtc;
+    }
 }
 void MainWindow::arrowF4Clicked(){
     settings->setValue("mainwindow/height", this->height());

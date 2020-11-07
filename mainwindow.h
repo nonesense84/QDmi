@@ -27,6 +27,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+#define modePzbLzbNtc  1
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -81,6 +82,7 @@ private:
     QPoint lKilickPos;
     QString dataString = "";
     QString activeDataEntryItem = "";
+    uint8_t  mode = 0;
 
 private: signals:
     void newZusiIp(QString ip);

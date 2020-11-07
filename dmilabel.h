@@ -16,8 +16,7 @@ public:
     dmiLabel(QWidget *parent = nullptr);
 
 public slots:
-    void updateBlinking1();
-    void updateBlinking2();
+    void updateBlinking();
     void setAsButton(bool asButton);
     void setAsButton(bool asButton, bool forDataEntry);
     void setVisib(bool visible);
@@ -86,8 +85,8 @@ private:
     quint8 blinkFrequency;
     //bool isBlinking = false;
     bool isInvert = false;
-    bool timeToBlink1 = false;
-    bool timeToBlink2 = false;
+    bool blinkerSlow = false;
+    bool blinkerFast = false;
     bool isButton = false;
     bool isDataEntryButton = false;
     bool alignLeft = false;
