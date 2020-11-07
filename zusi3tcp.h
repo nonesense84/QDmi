@@ -30,6 +30,8 @@ private slots:
     int32_t readIntegerAtPos(int pos);
     uint16_t readIdAtPos(int pos);
     void setSammelschine();
+    void transmitMtdIndicators();
+
 public slots:
     void cutZusiTelegram();
     void zusiDecoderFahrpult();
@@ -65,6 +67,7 @@ private:
     bool lastWasNewNode = false;
     bool istReisezug = false, hauptschalter = false;
     QVector<quint8> mtdLmsToDecoder;
+    QVector<quint8> mtdLmsToDecoderOld;
     QTime simtime;
     union { //Datentyp zur Abfrage des Knotens
       int8_t chr[4];
@@ -81,12 +84,6 @@ private:
 
     int16_t    layer = 0;
     uint16_t   nodeIds[6];
-    uint16_t   nodeId1 = 0;
-    uint16_t   nodeId2 = 0;
-    uint16_t   nodeId3 = 0;
-    uint16_t   nodeId4 = 0;
-    uint16_t   nodeId5 = 0;
-    uint16_t   nodeId6 = 0;
     uint16_t   atributeId = 0;
     QByteArray useDataComplex;
 

@@ -169,8 +169,6 @@ void zusi3Tcp::clientReadReady(){
     bool nodesChanged = false;
     int nodeCount = 0;
     int packetLength = 0;
-    static quint8 errorcounter = 0;
-    static qint64 incommingDataSizeOld = 0;
     incommingData.append(client->readAll());        // Add arrived data to the QByteArray to be parsed
     for(int i=0; i <= incommingData.size()-3;i++){
       packetLength = readIntegerInRawAtPos(i);      // Get length of accordin zusi docu 11.3.1.1
@@ -198,23 +196,7 @@ void zusi3Tcp::clientReadReady(){
             nodesChanged = false;
       }
     }
-    // Workarround: Since using multithreading, some data, coming from zusi, get lost sporadically.
-    // Adding a sleep helps, and if it does not help, we have here a mechanism, that checks if the
-    // data to be decoded becomes bigger and bigger. If that is the case we emit error code "-2".
- /*   if(incommingData.size() >= incommingDataSizeOld && incommingData.size() > 0){
-       errorcounter++;
-       if(errorcounter > 3){
-           incommingDataSizeOld = 0;
-           //qDebug() << "================== Data loose ==================               " + QString::number(incommingData.size());
-           emit sendTcpConnectionFeedback("-2");
-       }
-    }
-    else{
-        errorcounter = 0;
-    }
-    incommingDataSizeOld = incommingData.size();
-    QThread::msleep(1);*/
-    // Workarround end
+
 }
 
 int32_t zusi3Tcp::readIntegerInRawAtPos(int pos){
@@ -288,10 +270,11 @@ void zusi3Tcp::cutZusiTelegram(){
             i = i + packetLength + 3;
         }
     }
+    myIndicators->makeLzbLmDatagram();
+    transmitMtdIndicators();
 }
 
 void zusi3Tcp::zusiDecoderFahrpult(){
-    qDebug() << "need to decode";
     switch(nodeIds[2]){
         case 0x0001:      // Geschwindigkeit Meter/Sekunde
             if (checkHysterise(&VIst, useData4Byte.Single)){
@@ -693,19 +676,24 @@ bool zusi3Tcp::checkHysterise(float *output, float input, bool isRelative){
     }
     if(input != *output){
         *output = input;
+        qDebug () << "checkHysterise float";
         return true;
     }
     return false;
 }
 
 
-//emit newVTarget(static_cast<quint16>((values[2] << 8) + values[1]), (values[0] & 0x0f) > 0);
-//emit newVPermit(static_cast<quint16>((values[4] << 8) + values[3]), (values[0] & 0x0f) > 0);
-//emit newTarDist(static_cast<quint16>((values[6] << 8) + values[5]), (values[0] & 0x0f) > 0);
 void zusi3Tcp::setMtdIndicator(uint8_t value, uint8_t pos){
     if(mtdLmsToDecoder[pos] != value){
         mtdLmsToDecoder[pos] = value;
+    }
+}
+
+void zusi3Tcp::transmitMtdIndicators(){
+    if (mtdLmsToDecoderOld != mtdLmsToDecoder){
+        qDebug() << "==================  transmitMtdIndicators ========================";
         emit newMtdIndicators(mtdLmsToDecoder);
+        mtdLmsToDecoderOld = mtdLmsToDecoder;
     }
 }
 
