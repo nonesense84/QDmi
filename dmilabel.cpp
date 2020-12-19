@@ -39,7 +39,6 @@ void dmiLabel::setAsButton(bool asButton, bool forDataEntry){
 
 void dmiLabel::setTargetDistance(quint16 distance, bool visible){
     targetDistance = distance;
-    //isTargetDistance = visible;
     targetDistanceVisible = visible;
     update();
 }
@@ -54,20 +53,26 @@ void dmiLabel::setIsDistanceScale(){
         fileForDistanceScale = ":/icons/targetDistDb4000m.svg";
         distanceScale = 4000;
     }
-    update();
 }
 
 void dmiLabel::setEraUse(bool useEra){
     useEraStyle = useEra;
     if(isTargetDistance) setIsDistanceScale();
-    update();
+    updateLabel();
 }
 
 void dmiLabel::updateBlinking(){
     blinkerFast = !blinkerFast;
     if(blinkerFast) blinkerSlow = !blinkerSlow;
-    //qDebug() <<  "dmiLabel::updateBlinking()                            " + QString::number(blinkerFast);
-    update();
+    if((blinkFrequency != 0 && fileNameIsSet)){
+        update();
+    }
+}
+
+void dmiLabel::updateLabel(){
+    if(blinkFrequency == 0){
+        update();
+    }
 }
 
 void dmiLabel::setBorderThickness(int thickness){
@@ -76,49 +81,58 @@ void dmiLabel::setBorderThickness(int thickness){
 
 void dmiLabel::setVisib(bool visible){
     isVisible = visible;
-    update();
+    updateLabel();
 }
 
 void dmiLabel::setWorking(bool enabled, quint8 blinkingFreq, bool inverse){
-    isEnab = enabled;
-    blinkFrequency = blinkingFreq;
-    isInvert = inverse;
-    update();
+    if((enabled != isEnab) || (blinkingFreq != blinkFrequency) || (inverse != isInvert)){
+        isEnab = enabled;
+        blinkFrequency = blinkingFreq;
+        isInvert = inverse;
+        updateLabel();
+    }
 }
 
 void dmiLabel::setIcon(QString filename){
-    if(mimeFile.suffixForFileName(filename) == "svg"){
-        useSvgIcon = true;
-        svgActive.load(filename);
-        tmpFileName = filename;
+    if(filenameIconActive != filename){
+        if(mimeFile.suffixForFileName(filename) == "svg"){
+            useSvgIcon = true;
+            svgActive.load(filename);
+            fileNameIsSet = filename != "";
+        }
+        if(mimeFile.suffixForFileName(filename) == "png"){
+            useSvgIcon = false;
+            iconActive = QPixmap(filename);
+            iconInactive = QPixmap();
+            updateLabel();
+        }
+        filenameIconActive = filename;
+        updateLabel();
     }
-    if(mimeFile.suffixForFileName(filename) == "png"){
-        useSvgIcon = false;
-        iconActive = QPixmap(filename);
-        iconInactive = QPixmap();
-    }
-    update();
 }
 
 void dmiLabel::setIcon(QString filenameActive, QString filenameInactive){
-    useSvgIcon = false;
-    if((mimeFile.suffixForFileName(filenameActive) == "svg")&&mimeFile.suffixForFileName(filenameInactive) == "svg"){
-        useSvgIcon = true;
-        svgActive.load(filenameActive);
-        svgInactive.load(filenameInactive);
-        tmpFileName = filenameActive;
-    }
-    else{
-        if((mimeFile.suffixForFileName(filenameActive) == "png")&&mimeFile.suffixForFileName(filenameInactive) == "png"){
-            useSvgIcon = false;
-            iconActive = QPixmap(filenameActive);
-            iconInactive = QPixmap(filenameInactive);
+    if((filenameIconActive != filenameActive)||(filenameIconInactive != filenameInactive)){
+        useSvgIcon = false;
+        if((mimeFile.suffixForFileName(filenameActive) == "svg")&&mimeFile.suffixForFileName(filenameInactive) == "svg"){
+            useSvgIcon = true;
+            svgActive.load(filenameActive);
+            svgInactive.load(filenameInactive);
+            fileNameIsSet = filenameActive != "";
         }
         else{
-            //qDebug() << "Filenames for icons are inconsistent!";
+            if((mimeFile.suffixForFileName(filenameActive) == "png")&&mimeFile.suffixForFileName(filenameInactive) == "png"){
+                iconActive = QPixmap(filenameActive);
+                iconInactive = QPixmap(filenameInactive);
+            }
+            else{
+                //qDebug() << "Filenames for icons are inconsistent!";
+            }
         }
+        filenameIconActive = filenameActive;
+        filenameIconInactive = filenameInactive;
+        updateLabel();
     }
-    update();
 }
 
 void dmiLabel::setCustomFontFactor(qreal factor){
@@ -126,16 +140,20 @@ void dmiLabel::setCustomFontFactor(qreal factor){
 }
 
 void dmiLabel::setText(QString text){
-    labelText = text;
-    update();
+    if(labelText != text){
+        labelText = text;
+        update();
+    }
 }
 
 void dmiLabel::setText(QString text, QColor textColorEnabled, QColor textColorDisabled, quint8 boldOrThin){
-    textStyle = boldOrThin; //Normal (Not bold)
-    labelText = text;
-    labelTextColorEnab = textColorEnabled;
-    labelTextColorDisab = textColorDisabled;
-    update();
+    if((labelText != text)||(labelTextColorEnab != textColorEnabled)||(labelTextColorDisab != textColorDisabled)||(textStyle != boldOrThin)){
+        textStyle = boldOrThin; //Normal (Not bold)
+        labelText = text;
+        labelTextColorEnab = textColorEnabled;
+        labelTextColorDisab = textColorDisabled;
+        update();
+    }
 }
 
 void dmiLabel::setTextFieldUsing(quint8 numFields){
@@ -159,29 +177,25 @@ void dmiLabel::setSegmentText(quint16 value, bool textVisible){
     isSegment = textVisible;
     segmentText = QString::number(value);
     segmentText = segmentText.mid(segmentText.length() - segmentPosition,1);
-    update();
+    updateLabel();
 }
 
 void dmiLabel::addTextMessage(QString text, QColor textColor, QColor bgColor, quint8 msgId){
     if(!isTextField)setTextFieldUsing(1);
-    bool msgAllrUsed = false;
     for(quint8 i=0; i<10; i++){
         if(messageIds[i] == msgId){
-            msgAllrUsed = true;
-            break;
+            return; // Message allready in use
         }
     }
-    if (!msgAllrUsed){
-        for(quint8 i=0; i<10; i++){
-            if(messageIds[i] == 255){
-                messageTexts[i] = text;
-                messageBackQolors[i] = bgColor;
-                messageTextColors[i] = textColor;
-                messageIds[i] = msgId;
-                break;
-            }
+    for(quint8 i=0; i<10; i++){
+        if(messageIds[i] == 255){
+            messageTexts[i] = text;
+            messageBackQolors[i] = bgColor;
+            messageTextColors[i] = textColor;
+            messageIds[i] = msgId;
+            update();
+            return;
         }
-        update();
     }
 }
 
@@ -192,9 +206,9 @@ void dmiLabel::removeTextMessage(quint8 msgId){
             messageBackQolors[i] = era::darkBlue;
             messageTextColors[i] = era::darkBlue;
             messageIds[i] = 255;
+            update();
         }
     }
-    update();
 }
 
 void dmiLabel::paintEvent(QPaintEvent *)
@@ -238,8 +252,6 @@ void dmiLabel::paintText(QPainter *iconPainter, QRect centralArea){
     int lineHeight = centralArea.height();
     int lineWidth = centralArea.width();
     QRect field(centralArea.x(),centralArea.y(),lineWidth, lineHeight);
-    //iconPainter->save();
-
     if(isEnab){
         iconPainter->setPen(labelTextColorEnab);
     }
@@ -261,7 +273,6 @@ void dmiLabel::paintText(QPainter *iconPainter, QRect centralArea){
         //textRect.translate(0, field.height()/2 - textRect.height()/2);
         iconPainter->drawText(textRect,labelText);
     }
-    //iconPainter->restore();
 }
 
 void dmiLabel::paintDistance(QPainter *iconPainter, QRect centralArea){

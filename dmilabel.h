@@ -17,6 +17,7 @@ public:
 
 public slots:
     void updateBlinking();
+    void updateLabel();
     void setAsButton(bool asButton);
     void setAsButton(bool asButton, bool forDataEntry);
     void setVisib(bool visible);
@@ -48,7 +49,7 @@ signals:
     void txtBtnClicked(QString value);
 
 private:
-    QString tmpFileName;
+    bool fileNameIsSet;
     bool isTextField = false;
     bool isSegment = false;
     bool isTargetDistance = false;
@@ -56,6 +57,8 @@ private:
     bool useEraStyle = true;
     quint8 textStyle=QFont::Bold;   // Bold: 75, Normal 50
     QString labelText;
+    QString filenameIconActive;
+    QString filenameIconInactive;
     QColor labelTextColorEnab = era::grey;
     QColor labelTextColorDisab = era::darkGrey;
     uint8_t msgTextAlign;
@@ -82,7 +85,7 @@ private:
     QPixmap iconInactive;
     QSvgRenderer svgActive;
     QSvgRenderer svgInactive;
-    quint8 blinkFrequency;
+    quint8 blinkFrequency = 0;
     //bool isBlinking = false;
     bool isInvert = false;
     bool blinkerSlow = false;
