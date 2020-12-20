@@ -9,7 +9,7 @@ power::power(QWidget *parent) : QWidget(parent){
     fontDial = QFont("FreeSans",fontSiceDial,QFont::Bold,false);
     fontNose = QFont("FreeSans",fontSiceNose,QFont::Bold,false);
     connect(attenuationTimer, SIGNAL(timeout()),this,SLOT(attenuationRoutine()));
-    attenuationTimer->setInterval(20);
+    attenuationTimer->setInterval(40);
     attenuationTimer->start();
 }
 void power::setDpi(qreal dpi){
@@ -22,12 +22,15 @@ void power::attenuationRoutine(){
     //if(arcOpenRight == arcAccel) arcAccel = 0;
     //arcAccel++;
     if(arcAccel < arcAccelDest){
-        arcAccel++;
+        arcAccel = arcAccel + (arcAccelDest - arcAccel) * 0.05;
+        if((arcAccelDest - arcAccel) < 1)arcAccel = arcAccelDest;
+        update();
     }
     if(arcAccel > arcAccelDest){
-        arcAccel--;
+        arcAccel = arcAccel - (arcAccel - arcAccelDest) * 0.05;
+        if((arcAccel - arcAccelDest) < 1)arcAccel = arcAccelDest;
+        update();
     }
-    update();
 }
 
 void power::setPowerRelative(qint16 P){
@@ -49,7 +52,10 @@ void power::setPowerRelativeSet(qint16 P){
     if(P < -100) P = -100;
     if(P >  100) P = 100;
     if(useAcceleratingRelative)arcAccelSet = arcOpenRight / 100.0 * P;
-    update();
+    if(powerRelativeSet != P){
+        update();
+        powerRelativeSet = P;
+    }
 }
 void power::setPowerAbsoluteSet(qint16 P){
    if(P > 0){

@@ -45,6 +45,7 @@ private:
     bool useAcceleratingRelative;
 
     int side;
+    qint16 powerRelativeSet;
     qreal AbsoluteAccelerateMaximum = 100;
     qreal AbsoluteBrakingMaximum = 100;
     qreal arcAccel = 0;
