@@ -22,12 +22,17 @@ void lzb::setAnalogValues(QVector<quint8> values){
 
 void lzb::setVAct(quint16 V){
     vAct = V;
-    emit newOverspeed(vAct,  gue && zwangsbremsung, gue || ((vAct > vPerm) &&  vPerm > 0));
+    emit newOverspeed(overspeed || ((vAct > vPerm) &&  vPerm > 0));
+    emit newIntervenation(intervenation);
 }
 
 void lzb::setStates(QVector<quint8> states){
-    //qDebug() << " =========== lzb::setStates =========== Anfang";
     emit gotLzbMessage();
+    intervenation = ((states[12] > 1 && states[13] > 1) || states[ 6] >  0);
+    overspeed = states[ 8] >  1;
+    emit newOverspeed(overspeed || ((vAct > vPerm) &&  vPerm > 0));
+    emit newIntervenation(intervenation);
+    emit newVMaxReducing(states[ 8] >  0);
     if(useTxtMsgByLm){
         if(states[ 1] > 0  && states[ 2] == 0 && states[03] == 0) zustLmBlau = ZugartO;
         if(states[ 1] == 0 && states[ 2] >  0 && states[03] == 0) zustLmBlau = ZugartM;
@@ -45,9 +50,8 @@ void lzb::setStates(QVector<quint8> states){
         tausendBeinfl = (states[12] == 1 && states[13] == 0);
         fuenfhuBeinfl = (states[12] == 0 && states[13] == 1);
         zweitauBeinfl = states[11] == 1;
-        zwangsbremsung = ((states[12] > 1 && states[13] > 1) || states[ 6] >  0);
         stoerschalter = (states[12] >  1 && states[13] == 0);
-        gue = states[ 8] >  0;
+
         //showLzb = states[18] >  0;
 
         switch (zugart){
@@ -165,32 +169,31 @@ void lzb::setStates(QVector<quint8> states){
                 lastLimitMessage = 0;
             }
         }
+        if(intervenation && !intervenationEmitted){
+            //emit newIconC9(db::indicatorFiles[16][0],db::indicatorFiles[16][1]);
+            //emit newIconBehavC9(true, 0, false);
+            emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
+            intervenationEmitted = true;
+        }
+        else{
+            if(intervenationEmitted){
+                removeIndicator(6);
+                //emit newIconC9("","");
+                //emit newIconBehavC9(false, 0, false);
+                emit removeMessage(0);
+                intervenationEmitted = false;
+            }
+        }
     }
-    if(zwangsbremsung){
-        //addIndicator(6,false);
-        emit newIconC9(db::indicatorFiles[16][0],db::indicatorFiles[16][1]);
-        emit newIconBehavC9(true, 0, false);
-        emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
-    }
-    else{
-        removeIndicator(6);
-        emit newIconC9("","");
-        emit newIconBehavC9(false, 0, false);
-        emit removeMessage(0);
-    }
-    emit newOverspeed(vAct,  gue && zwangsbremsung, gue || ((vAct > vPerm) &&  vPerm > 0));
-    for(quint8 i = 0; i <= 21; i++){     // Set all indicators but O/M/U/PZB/LZB
-        if(useTxtMsgByLm)
-            if(i >= 1 && i <= 4) i = 5;
+    for(quint8 i = 0; i <= 21; i++){
+        if(useTxtMsgByLm && i == 1) i = 5;// Set all indicators but O/M/U/PZB/LZB
         if(states[i]  > 0){
             addIndicator(i, ((states[i] & 0x06 ) >> 1),(states[i] & 0x08) > 0);
-
         }
         else{
             removeIndicator(i);
         }
     }
-    //qDebug() << " =========== lzb::setStates =========== Ende";
 }
 void lzb::sentSpetLimitMessage(quint8 limit){
     if(limit != lastLimitMessage){
@@ -227,7 +230,7 @@ void lzb::addIndicator(quint8 indId, quint8 blinking, bool invers){
     if(indId == 0                )i = 0;    // "B" must be at field 1
     if(indId == 16){                        // Era Brake
         emit newIconC9(db::indicatorFiles[16][0],db::indicatorFiles[16][1]);
-        emit newIconBehav1(true, blinking, invers);
+        emit newIconBehavC9(true, blinking, invers);
         return;
     }
     if(indId == 18){                        // Indicator GNT
@@ -276,6 +279,7 @@ void lzb::removeIndicator(quint8 indId){
         }
     }
     if(indId == 16){
+        emit newIconC9("", "");
         emit newIconBehavC9(false, 0, false);
     }
     switch (i){

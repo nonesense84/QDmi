@@ -44,7 +44,9 @@ signals:
     void newIconBehavG10(bool anabled, quint8 freq, bool inverse);
     void newVTarget(quint16 vZiel, bool visible);
     void newVPermit(quint16 vSoll, bool visible);
-    void newOverspeed(qreal vOverspeed, bool forcedBrake, bool warning);
+    void newOverspeed(bool warning);
+    void newIntervenation(bool intervenation);
+    void newVMaxReducing(bool vMaxReducing);
     void newTarDist(quint16 zielEntf, bool visible);
     void gotLzbMessage();
 
@@ -62,12 +64,13 @@ private:
     #define Stoerbetrieb 4
     bool useTxtMsgByLm = false;
     bool blauBlink = false;
-    bool zwangsbremsung = false;
+    bool intervenation = false;
     bool tausendBeinfl = false;
     bool fuenfhuBeinfl = false;
     bool zweitauBeinfl = false;
-    bool gue = false;
+    bool overspeed = false;
     bool restriktiv = false;
+    bool intervenationEmitted = false;
     //bool showLzb;
     quint8 stoerschalter;
     quint8 zugart = 2;
@@ -82,8 +85,6 @@ private:
     qreal vAct = 0;
     quint16 vPerm;
     quint16 vDest;
-
-
 
 private slots:
     void sentSpetLimitMessage(quint8 limit);
