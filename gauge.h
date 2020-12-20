@@ -18,12 +18,13 @@ public slots:
     void setVPerm(quint16 V, bool visible);
     void setVSet(quint16 V, bool visible);
     void setVTarget(quint16 V, bool visible);
-    void setOverspeed(qreal V, bool intervenation, bool overspeedWarning);
+    void setIntervenation(bool intervenation);
+    void setOverspeed(bool intervenation);
     qreal calcPosition(quint16 V);
     void setVAct(quint16 V);
     void setDpi(qreal dpi);
     void setEraUse(bool useEra);
-
+    void setCsmReducing(bool reducing);
 private:
     int VMaxDial;
     quint16 vAct, vPerm, vSet, vTarget, vOverspeed;
@@ -36,6 +37,7 @@ private:
     bool useHook = true;
     bool pointerRed = false;
     bool pointerOrange = false;
+    bool csmYellow = false;
     qreal arcOpenTotal = 288;   // 288° 0 to Vmax
     qreal startPosZero = -234; //-(144 + 90)
     qreal dimensionMatrix = 548;

@@ -3,7 +3,7 @@
 gauge::gauge(QWidget *parent) : QWidget(parent)
 {
     QFontDatabase::addApplicationFont(":/fonts/FreeSans.ttf");
-    setVMaxDial(180);
+    setVMaxDial(400);
     setVPerm(0, false);
     setVAct(0.0);
 }
@@ -13,44 +13,67 @@ void gauge::setDpi(qreal dpi){
 }
 
 void gauge::setVAct(quint16 V){
-    vAct = V;
-    update();
-    if(V > VMaxDial){
-        showNeedle = false;
-    }
-    else{
-        posNeedle = calcPosition(static_cast<quint16> (V));
-        showNeedle = true;
+    if(V != vAct){
+        vAct = V;
+        if(V > VMaxDial){
+            showNeedle = false;
+        }
+        else{
+            posNeedle = calcPosition(V);
+            showNeedle = true;
+        }
+        if(pointerOrange||pointerRed)posOverspeed = calcPosition(V);;
     }
 }
 
 void gauge::setVPerm(quint16 V, bool visible){
-    vPerm = static_cast<quint16> (V);
-    csgVisible = visible;
-    posCsg = calcPosition(V);
-    update();
+    if((V != vPerm) || (visible != csgVisible)){
+        vPerm = V;
+        csgVisible = visible;
+        posCsg = calcPosition(V);
+        update();
+    }
 }
 
 void gauge::setVSet(quint16 V, bool visible){
-    vSet = static_cast<quint16> (V);
-    vSetVisible = visible;
-    posVSet = calcPosition(V);
-    update();
+    if((V != vSet) || (visible != vSetVisible)){
+        vSet = V;
+        vSetVisible = visible;
+        posVSet = calcPosition(V);
+        update();
+    }
 }
 
 void gauge::setVTarget(quint16 V, bool visible){
-    vTarget = static_cast<quint16> (V);
-    csgVisible = visible;
-    posTarget = calcPosition(V);
-    update();
+    if((V != vTarget) || (visible != csgVisible)){
+        vTarget = V;
+        csgVisible = visible;
+        posTarget = calcPosition(V);
+        update();
+    }
 }
 
-void gauge::setOverspeed(qreal V, bool intervenation, bool overspeedWarning){
-    vOverspeed = static_cast<quint16> (V);
-    posOverspeed = static_cast<qreal> (V) / static_cast<qreal> (VMaxDial) * static_cast<qreal> (arcOpenTotal);
-    pointerRed = intervenation;
-    pointerOrange = overspeedWarning;
-    update();
+void gauge::setIntervenation(bool intervenation){
+    if(pointerRed != intervenation){
+        posOverspeed = calcPosition(vAct);
+        pointerRed = intervenation;
+        update();
+    }
+}
+
+void gauge::setOverspeed(bool overspeedWarning){
+    if(overspeedWarning != pointerOrange){
+        posOverspeed = calcPosition(vAct);
+        pointerOrange = overspeedWarning;
+        update();
+    }
+}
+
+void gauge::setCsmReducing(bool reducing){
+    if(reducing != csmYellow){
+        csmYellow = reducing;
+        update();
+    }
 }
 
 qreal gauge::calcPosition(quint16 V){
@@ -68,8 +91,9 @@ qreal gauge::calcPosition(quint16 V){
 }
 
 void gauge::setVMaxDial(quint16 V){
+    quint16 newVMaxDial = 0;
     if (V < 251){
-        VMaxDial = 250;
+        newVMaxDial = 250;
         scaleDegStep = 23.04;
         scaleDegStepSmall = 23.04;
         numShortLines = 13;
@@ -77,7 +101,7 @@ void gauge::setVMaxDial(quint16 V){
         numNumbers = 13;
     }
     if (V < 181){
-        VMaxDial = 180;
+        newVMaxDial = 180;
         scaleDegStep = 32.0;
         scaleDegStepSmall = 32.0;
         numShortLines = 9;
@@ -85,7 +109,7 @@ void gauge::setVMaxDial(quint16 V){
         numNumbers = 10;
     }
     if (V < 141){
-        VMaxDial = 140;
+        newVMaxDial = 140;
         scaleDegStep = 41.14;
         scaleDegStepSmall = 41.14;
         numShortLines = 7;
@@ -93,18 +117,26 @@ void gauge::setVMaxDial(quint16 V){
         numNumbers = 8;
     }
     if (V > 250){
-        VMaxDial = 400;
+        newVMaxDial = 400;
         scaleDegStep = 48;
         scaleDegStepSmall = 9.6;
         numShortLines = 40;
         numLongLines = 9;
         numNumbers = 7;
     }
-    setVAct(vAct);
-    setVPerm(vPerm, csgVisible);
-    setVSet(vSet, vSetVisible);
-    setVTarget(vTarget, csgVisible);
-    setOverspeed(vOverspeed, pointerRed, pointerOrange);
+    if(VMaxDial != newVMaxDial){
+        VMaxDial = newVMaxDial;
+        setVAct(vAct+1);
+        setVAct(vAct-1);
+        setVPerm(vPerm+1, csgVisible);
+        setVPerm(vPerm-1, csgVisible);
+        setVSet(vSet+1, vSetVisible);
+        setVSet(vSet-1, vSetVisible);
+        setVTarget(vTarget+1, csgVisible);
+        setVTarget(vTarget-1, csgVisible);
+        setOverspeed(!pointerOrange);
+        setOverspeed(!pointerOrange);
+    }
 }
 
 void gauge::setEraUse(bool useEra){
@@ -234,21 +266,30 @@ void gauge::paintEvent(QPaintEvent *)
     // Draw nose ===============================================
     painter.save();
     painter.setPen(Qt::NoPen);
-    painter.setBrush(era::grey);
-    if(pointerRed)painter.setBrush(era::red);
-    if(pointerOrange)painter.setBrush(era::orange);
+    if(pointerRed){
+        painter.setBrush(era::red);
+    }
+    else{
+        if(pointerOrange){
+            painter.setBrush(era::orange);
+        }
+        else{
+            painter.setBrush(era::grey);
+        }
+    }
     painter.drawEllipse(-diamNose,-diamNose,diamNose*2,diamNose*2);
-    painter.restore();
+    //painter.restore();
     // Draw needle ===============================================
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(era::grey);
-    if(pointerOrange)painter.setBrush(era::orange);
-    if(pointerRed)painter.setBrush(era::red);
-    painter.save();
-    painter.rotate(startPosZero);
-    painter.rotate(posNeedle);
-    if (showNeedle)
+    //painter.setPen(Qt::NoPen);
+    //painter.setBrush(era::grey);
+    //if(pointerOrange)painter.setBrush(era::orange);
+    //if(pointerRed)painter.setBrush(era::red);
+    //painter.save();
+    if (showNeedle){
+        painter.rotate(startPosZero);
+        painter.rotate(posNeedle);
         painter.drawConvexPolygon(speedPointer, 8);
+    }
     painter.restore();
     // Draw nose text===========================================
     painter.save();
@@ -267,7 +308,7 @@ void gauge::paintEvent(QPaintEvent *)
         painter.rotate(posCsg);
         if(useHook){
             int t = int(dimensionMatrix) - widthCsgRing;
-            if(posOverspeed > posCsg){
+            if((posOverspeed > posCsg) && (pointerRed || pointerOrange)){
                 if(pointerRed){
                     painter.setPen(QPen(era::red, lenHook, Qt::SolidLine, Qt::FlatCap,Qt::BevelJoin));
                 }
@@ -276,9 +317,12 @@ void gauge::paintEvent(QPaintEvent *)
                 }
                 painter.drawArc(-(t-22)/2,-(t-22)/2,(t-22),(t-22), 0,  static_cast<int>(posCsg-posOverspeed)*16);
             }
-            if(posCsg > posTarget){ // If permitted speed is bigger than target speed, we have to draw the upper part bright grey:
+            if(posCsg > posTarget){ // If permitted speed is bigger than target speed, we have to draw
+                                    // the upper part bright grey or yellow, when CSM is reducing
                 // First the hook
-                painter.setPen(QPen(era::grey, lenHook, Qt::SolidLine, Qt::FlatCap,Qt::BevelJoin));
+                QColor hookColor = era::grey;
+                if(csmYellow) hookColor = era::yellow;
+                painter.setPen(QPen(hookColor, lenHook, Qt::SolidLine, Qt::FlatCap,Qt::BevelJoin));
                 painter.drawArc(-(t-22)/2,-(t-22)/2,(t-22),(t-22), -22, 44);
                 painter.restore();
                 // Then lower part from zero to target speed:
@@ -286,7 +330,7 @@ void gauge::paintEvent(QPaintEvent *)
                 painter.setPen(QPen(era::darkGrey, widthCsgRing));
                 painter.drawArc(-t/2,-t/2,t,t,4*16, static_cast<int>(-(posTarget+3.0)*16));
                 // Finaly the upper part from permitted to target speed:
-                painter.setPen(QPen(era::grey, widthCsgRing));
+                painter.setPen(QPen(hookColor, widthCsgRing));
                 painter.rotate((posTarget+6.0));
                 painter.drawArc(-t/2,-t/2,t,t,4*16, static_cast<int>(-(posCsg-posTarget-4)*16));
             }
