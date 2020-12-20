@@ -17,22 +17,21 @@ private:
     lmSDelayed = 0, lmH = 0, lmE40 = 0, lmB = 0, lmUe = 0, lmG = 0, lmEl = 0, lmEnde = 0,
     lmHauptschalter = 0, lmGetriebe = 0, lmSchleudern = 0, lmGleiten = 0,
     lmUhrzeitDigital = 0, StwgHauptschalter = 0, lmSifa = 0, SifaHupe = 0,
-    SifaStoerschalter = 0, SifaLuftabsperrhahn = 0, ErsatzdatenWirksam = 0, LzbZustand = 0,
-    Falschfahrauftrag = 0, Vorsichtauftrag = 0, LzbNothalt = 0, LzbRechnerausfall = 0,
-    LzbElAuftrag = 0, lmEL = 0, lmV40 = 0, lmPruefStoer = 0, stromabn1Oben = 0,
+    SifaStoerschalter = 0, SifaLuftabsperrhahn = 0, ErsatzdatenWirksam = 0, lzbZustand = 0,
+    falschfahrauftrag = 0, vorsichtauftrag = 0, lzbNothalt = 0, lzbRechnerausfall = 0,
+    lzbElAuftrag = 0, lmEL = 0, lmV40 = 0, lmPruefStoer = 0, stromabn1Oben = 0,
     stromabn2Oben = 0, stromabn3Oben = 0, stromabn4Oben = 0, stromabn1Hebend = 0,
     stromabn2Hebend = 0,stromabn3Hebend = 0,stromabn4Hebend = 0, ZwangsbremsungAktiv = 0,
-    lmV40Roh = 0, lmGnt = 0, lmGnt_Ue = 0, lmGnt_G = 0, lmGnt_S = 0;
-    uint16_t zustandZugsicherung = 0,  Uebertragungsausfall = 0, FahrtUeberLlzbHaltPerBefehl = 0, afbSoll = 0;
+    lmV40Roh = 0, lmGnt = 0, lmGnt_Ue = 0, lmGnt_G = 0, lmGnt_S = 0, endeverfahren = 0;
+    uint16_t zustandZugsicherung = 0,  Uebertragungsausfall = 0, FahrtUeberLlzbHaltPerBefehl = 0, afbSoll = 0, grundZwangsbrmnsung = 0;
     float vZiel = 0, vIst = 0;
     quint8 lastLimitMessage;
     bool restriktiv = false;
     bool afbAn = false;
-    bool ersatzauftrag = false, falschfahrauftrag = false, lzbNothalt = false, lzbHaltUeberfahren = false;
+    bool ersatzauftrag = false, lzbHaltUeberfahren = false;
     bool lzbVorhanden;
     QVector<quint8> lmsToDecoderOld;
     QTimer *lmElBlinkTestTimer;
-    QTimer *debugtimer;
     QVector<quint8> lzbValuesToDecoder;
 
 private slots:
@@ -42,7 +41,6 @@ private slots:
     //void makeLzbAnalogDatagram();
     void remooveMessage58();
     void setLzbElAuftrag12();
-    void debugblinkfunction();
 
 public:
     explicit zusiIndicator(QObject *parent = nullptr);
@@ -66,7 +64,7 @@ public slots:
     void setZugart(uint8_t value);
     void setKlartextmeldungen(uint8_t value);
     void setZustandZugsicherung(uint16_t value);
-
+    void clearData();
     //====
     void setLmHauptschalter(uint8_t value);
     void setStatusStromabnehmer(uint8_t value);
