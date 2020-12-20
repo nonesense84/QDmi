@@ -66,7 +66,6 @@ private:
     QSettings *settings;
     Ui::MainWindow *ui;
     quint8 position;
-    QTimer *longTimer;
     QTimer *shortTimer;
     lzb *myLzb;
     sep *mySep;
@@ -89,6 +88,9 @@ private: signals:
 
 protected:
   void resizeEvent ( QResizeEvent * event );
+
+signals:
+    void newDotsPerInch(qreal dpi);
 };
 
 #endif // MAINWINDOW_H

@@ -36,6 +36,7 @@ void MainWindow::process(){
     qreal dotsPerInch = QApplication::screens().at(0)->logicalDotsPerInch();
     ui->widgetTacho->setDpi(dotsPerInch);
     ui->widgetPower->setDpi(dotsPerInch);
+    ui->widgetPower->setDpi(dotsPerInch);
     ui->FieldE5to7->setTextFieldUsing(3);       // Bring PZB/LZB Inidicators in front.
     ui->FieldE5to9->setTextFieldUsing(5);
     ui->FieldE8to9->setTextFieldUsing(2);
@@ -52,7 +53,7 @@ void MainWindow::process(){
     ui->systemVersionComp2Name->setTextFieldUsing(1, Qt::AlignRight);
     ui->systemVersionComp2Name->addTextMessage("github.com/nones",era::grey,era::darkBlue,1);
     ui->systemVersionComp1Version->setBorderThickness(0);
-    ui->systemVersionComp1Version->addTextMessage("1.2",era::grey,era::darkBlue,1);
+    ui->systemVersionComp1Version->addTextMessage("1.2B3",era::grey,era::darkBlue,1);
     ui->systemVersionComp2Version->setBorderThickness(0);
     ui->systemVersionComp2Version->addTextMessage("ense84/QDmi",era::grey,era::darkBlue,1);
     qRegisterMetaType< QVector<quint8> >("QVector<quint8>");
@@ -93,6 +94,7 @@ void MainWindow::process(){
     connect(myTcp->myIndicators,SIGNAL(removeMessage(quint8)),ui->FieldE5to7,SLOT(removeTextMessage(quint8)));
     connect(myTcp->myIndicators,SIGNAL(removeTechnicalMessage(quint8)),ui->FieldE8to9,SLOT(removeTextMessage(quint8)));
     connect(myTcp->myIndicators,SIGNAL(newAfbSoll(quint16, bool)),ui->widgetTacho,SLOT(setVSet(quint16, bool)));
+    connect(mySep,SIGNAL(newFzgVmaxTacho(quint16)),ui->widgetTacho,SLOT(setVMaxDial(quint16)));
     connect(myTcp->myIndicators,SIGNAL(newFzgVmaxTacho(quint16)),ui->widgetTacho,SLOT(setVMaxDial(quint16)));
     connect(myTcp,SIGNAL(newTechnicalMessage(QString, QColor, QColor, quint8)),ui->FieldE8to9,SLOT(addTextMessage(QString, QColor, QColor, quint8)));
     connect(myTcp,SIGNAL(newTechnicalMessage(QString, QColor, QColor, quint8)),ui->FieldE5to9,SLOT(addTextMessage(QString, QColor, QColor, quint8)));
@@ -106,7 +108,9 @@ void MainWindow::process(){
     connect(myTcp,SIGNAL(newSpeed(quint16)),ui->widgetTacho,SLOT(setVAct(quint16)));
     connect(mySep,SIGNAL(newSpeed(quint16)),myLzb,SLOT(setVAct(quint16)));
     connect(myTcp,SIGNAL(newSpeed(quint16)),myLzb,SLOT(setVAct(quint16)));
-    connect(myTcp,SIGNAL(newSimtime(QString)),ui->fieldG13,SLOT(setText(QString)));
+    connect(myTcp,SIGNAL(newSimTime(QString)),ui->fieldG13,SLOT(setText(QString)));
+    connect(mySep,SIGNAL(newSimTime(QString)),ui->fieldG13,SLOT(setText(QString)));
+    connect(myTcp,SIGNAL(newZugnummer(QString)),ui->fieldG11,SLOT(setText(QString)));
     ui->settingsBtn1->setIcon(":/icons/lang_ena.svg",":/icons/lang_dis.svg");
     ui->settingsBtn2->setIcon(":/icons/volume_ena.svg", ":/icons/volume_dis.svg");
     ui->settingsBtn3->setIcon(":/icons/bright_ena.svg", ":/icons/bright_dis.svg");
@@ -183,6 +187,8 @@ void MainWindow::process(){
     ui->zusiIpBtn0->setText("0",era::grey,era::darkGrey,QFont::Light);
     ui->systemVersionClose->setAsButton(true);
     ui->systemVersionClose->setIcon(":/icons/X.svg");
+    ui->fieldG11->setText("",era::grey,era::darkGrey,QFont::Light);
+    ui->fieldG11->setCustomFontFactor(0.24);
     ui->fieldG13->setText("--:--:--",era::grey,era::darkGrey,QFont::Light);
     ui->fieldG13->setCustomFontFactor(0.24);
     connectTimers();
@@ -225,7 +231,9 @@ void MainWindow::connectPzbIcons(){
     connect(myLzb,SIGNAL(newVTarget(quint16, bool)),ui->fieldVZile1,SLOT(setSegmentText(quint16, bool)));
     connect(myLzb,SIGNAL(newVTarget(quint16, bool)),ui->widgetTacho,SLOT(setVTarget(quint16, bool)));
     connect(myLzb,SIGNAL(newVPermit(quint16, bool)),ui->widgetTacho,SLOT(setVPerm(quint16, bool)));
-    connect(myLzb,SIGNAL(newOverspeed(qreal, bool, bool)),ui->widgetTacho,SLOT(setOverspeed(qreal, bool, bool)));
+    connect(myLzb,SIGNAL(newVMaxReducing(bool)),ui->widgetTacho,SLOT(setCsmReducing(bool)));
+    connect(myLzb,SIGNAL(newOverspeed(bool)),ui->widgetTacho,SLOT(setOverspeed(bool)));
+    connect(myLzb,SIGNAL(newIntervenation(bool)),ui->widgetTacho,SLOT(setIntervenation(bool)));
     connect(myLzb,SIGNAL(newTarDist(quint16, bool)),ui->fieldA3,SLOT(setTargetDistance(quint16, bool)));
     connect(myLzb,SIGNAL(gotLzbMessage()),this,SLOT(setPzbLzbNtc()));
 }
@@ -266,7 +274,8 @@ void MainWindow::connectTimers(){
     connect(shortTimer,SIGNAL(timeout()),ui->fieldCL5,SLOT(updateBlinking()));
     connect(shortTimer,SIGNAL(timeout()),ui->fieldCL6,SLOT(updateBlinking()));
     connect(shortTimer,SIGNAL(timeout()),ui->fieldCL7,SLOT(updateBlinking()));
-    connect(shortTimer,SIGNAL(timeout()),ui->fieldG2,SLOT(updateBlinking()));
+    connect(shortTimer,SIGNAL(timeout()),ui->fieldG2,SLOT(updateBlinking()));       // Doors
+    //connect(shortTimer,SIGNAL(timeout()),ui->fieldG13,SLOT(updateBlinking()));
     connect(shortTimer,SIGNAL(timeout()),this,SLOT(blinkCursor()));
 }
 void MainWindow::connectTcpStuff(){
@@ -293,7 +302,7 @@ void MainWindow::setPzbLzbNtc(){
 void MainWindow::arrowF4Clicked(){
     settings->setValue("mainwindow/height", this->height());
     settings->setValue("mainwindow/width", this->width());
-    this->close();
+    QApplication::quit();
 }
 void MainWindow::arrowF5Clicked(){ui->fieldDG->setCurrentIndex(1);}
 void MainWindow::arrowUpClicked(){}
