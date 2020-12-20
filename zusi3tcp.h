@@ -30,6 +30,7 @@ private slots:
     int32_t readIntegerAtPos(int pos);
     uint16_t readIdAtPos(int pos);
     void setSammelschine();
+    void setZugnummer(QString nummer);
     void transmitMtdIndicators();
 
 public slots:
@@ -39,6 +40,7 @@ public slots:
     void setIpadress(QString address);
     void disconnectFromZusi();
     void process();
+    void reconnect();
 public:
     zusi3Tcp();
     zusiIndicator *myIndicators;
@@ -46,6 +48,7 @@ public:
 
 private:
     QString ipAddress;
+    QString zugnummer;
     bool istVMaxErstesFahrzeug = true;
     uint8_t ipHostPart = 1;
     uint16_t VIst=0;
@@ -55,7 +58,6 @@ private:
     uint8_t stromabnehmerLok;
     uint8_t stromabnehmerSteuerwagen;
     float zugkraftProAchs;
-    uint8_t tractionType;
     //uint16_t VZiel=0;
     //float ZugkraftAbs=0;
     //float ZugkraftRel=0;
@@ -104,7 +106,8 @@ private:
 public: signals:
     void newLzbIndicators(QVector<quint8> lmsToDecoder);
     void newSpeed(quint16 speed);
-    void newSimtime(QString simtime);
+    void newSimTime(QString simtime);
+    void newZugnummer(QString simtime);
     void newMtdIndicators(QVector<quint8> lmsToDecoder);
     void newTechnicalMessage(QString text, QColor forColor, QColor bgColor, quint8 id);
     void removeTechnicalMessage(quint8 id);
