@@ -37,7 +37,7 @@ void mtd::setStates(QVector<quint8> states){
     tractionType  = states[12];
     if(!initialized)initialize();
 
-    if(InfDoorSystem > 1){
+    if(InfDoorSystem > 0){
         if((InfDoorStatL < 4 && InfDoorStatL > 0) || (InfDoorStatR < 4 && InfDoorStatR > 0)){
             emit newIconG2(indicatorFiles[1][0],indicatorFiles[1][1]);  // doors are open
             emit newIconBehavG2(true, 0, false);
@@ -53,7 +53,7 @@ void mtd::setStates(QVector<quint8> states){
     }
     else{
         emit newIconG2(indicatorFiles[1][1],indicatorFiles[1][1]);  // no doors
-        emit newIconBehavG2(false, 2, false);
+        emit newIconBehavG2(false, 0, false);
     }
     if(indSifaOpto){      // akt    fr  invers
         emit newIconBehavE3(true, 0, false);
@@ -73,12 +73,19 @@ void mtd::setStates(QVector<quint8> states){
     emit newIconBehavG1(indSifaOff, 0, false);
     if(tractionType == 1){
         if((InfPanto & 0x0f) > 0){  // One or more pantographs are up or rising
-            emit newIconG3(indicatorFiles[9][0],indicatorFiles[9][1]);  // indPantoUp indPantoUpArrow
-            emit newIconBehavG3(true, 2, (InfPanto & 0xf0) > 0);        // Behavior is blinking, if one panto is rising
+            if((InfPanto & 0xf0) > 0){
+                emit newIconG3(indicatorFiles[9][1],indicatorFiles[0][1]);  // indPantoUpArrow indBlanc
+                emit newIconBehavG3(true, 0, false);
+            }
+            else{
+                emit newIconG3(indicatorFiles[9][0],indicatorFiles[0][1]);  // indPantoUp indBlanc
+                emit newIconBehavG3(true, 0, false);
+            }
+
         }
         if((InfPanto & 0x0f) == 0){  // No pantographs are up
             emit newIconG3(indicatorFiles[2][0],indicatorFiles[2][1]);  // indPantoUp indBlanc
-            emit newIconBehavG3(true, 2, false);
+            emit newIconBehavG3(true, 0, false);
         }
     }
     else{
