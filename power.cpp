@@ -94,6 +94,16 @@ void power::setUnitBrakingText(QString unit){
         uniteBrakingAbsDef = unit;
     }
 }
+void power::setDriveMode(quint8 mode){
+    if(driveMode != mode){
+        driveMode = QString::number(mode);
+        update();
+    }
+}
+void power::setModeDisplay(bool show){
+    showDriveMode = show;
+    updateUnits();
+}
 void power::setRelativeAccelerateScale(){
     useAcceleratingRelative = true;
     setAbsoluteAccelerateMaximum(100);
@@ -188,7 +198,8 @@ void power::setAbsoluteBrakingMaximum(qint16 P){
     updateUnits();
 }
 void power::paintEvent(QPaintEvent *){
-    static QRectF centerUnitPos(-30,-32,60,50);
+    static QRectF centerUnitPos       (-60   , -32,120, 50);
+    static QRectF driveModePos        (-30   , -0 , 60, 50);
     static QRectF descriptionPos1     (-110  , 160,100, 50);
     static QRectF descriptionPos2     (  14  , 160,100, 50);
     static QRectF unitBrakingPos      ( -40.5, 185, 30, 25);
@@ -252,7 +263,15 @@ void power::paintEvent(QPaintEvent *){
     painter.setPen(Qt::white);
     painter.rotate(90);
     painter.setFont(fontNose);
-    painter.drawText(centerUnitPos, Qt::AlignCenter ,unitUniversal);
+    if(showDriveMode){
+        painter.setFont(fontDescription);
+        painter.drawText(centerUnitPos, Qt::AlignCenter ,"Stufe");
+        painter.setFont(fontNose);
+        painter.drawText(driveModePos, Qt::AlignCenter ,driveMode);
+    }
+    else{
+        painter.drawText(centerUnitPos, Qt::AlignCenter ,unitUniversal);
+    }
     painter.restore();
 
     // Draw unit seperator ========================================
@@ -291,24 +310,38 @@ void power::paintEvent(QPaintEvent *){
     painter.restore();
 }
 void power::updateUnits(){
-    if(useBrakingRelative && useAcceleratingRelative){
-        unitUniversal = uniteAcceleratingRelDef;
-        unitBraking = "";
-        uniteAccelerating = "";
+    if(useBrakingRelative && useAcceleratingRelative){ // Wenn beides rel., dann nur in der Mitte "%"
+        if(showDriveMode){
+            unitUniversal = "";
+            unitBraking = "%";
+            uniteAccelerating = "%";
+        }
+        else{
+            unitUniversal = "%";
+            unitBraking = "";
+            uniteAccelerating = "";
+        }
     }
-    if(!useBrakingRelative && !useAcceleratingRelative){
-        unitUniversal = "kN";
-        unitBraking = "";
-        uniteAccelerating = uniteAcceleratingAbsDef;
+    if(!useBrakingRelative && !useAcceleratingRelative){ // Wenn beides nicht rel., dann in der Mitte "kN" und rechts lokabhängig (kN oder kn/FM)
+        if(showDriveMode){
+            unitUniversal = "";
+            unitBraking = "kN";
+            uniteAccelerating = uniteAcceleratingAbsDef;
+        }
+        else{
+            unitUniversal = "kN";
+            unitBraking = "";
+            uniteAccelerating = uniteAcceleratingAbsDef;
+        }
     }
-    if(useBrakingRelative && !useAcceleratingRelative){
+    if(useBrakingRelative && !useAcceleratingRelative){ // Wenn br. rel., dann links "%", rechts kn/FM und in der Mitte ""
         unitUniversal = "";
         unitBraking = "%";
         uniteAccelerating = "kN/FM";
     }
-    if(!useBrakingRelative && useAcceleratingRelative){
+    if(!useBrakingRelative && useAcceleratingRelative){ // Wenn br. nicht rel., dann links lokabhängig (kN oder kn/FM), rechts "%" und in der Mitte ""
         unitUniversal = "";
         unitBraking = uniteBrakingAbsDef;
-        uniteAccelerating = uniteBrakingRelDef;
+        uniteAccelerating = "%";
     }
 }

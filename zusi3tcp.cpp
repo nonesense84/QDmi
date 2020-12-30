@@ -87,6 +87,9 @@ void zusi3Tcp::setIpadress(QString address){
         0x00, 0x00, 0x00, 0x00, 0x03, 0x00,              // <Kn>    // Befehl NEEDED_DATA
         0x00, 0x00, 0x00, 0x00, 0x0A, 0x00,              // <Kn>    // Untergruppe Führerstandsanzeigen
         0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00,  // Geschwindigkeit m/s
+        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x02, 0x00,  // Druck Hauptluftleitung
+        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x03, 0x00,  // Druck Bremszylinder
+        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x04, 0x00,  // Druck Hauptluftbehälter
       //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x09, 0x00,  // Zugkraft gesammt
         0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x0A, 0x00,  // Zugkraft pro Achse
       //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x0B, 0x00,  // Zugkraft-soll gesammt
@@ -131,17 +134,17 @@ void zusi3Tcp::checkClientConnection(){
     switch(client->state()){
     case QAbstractSocket::UnconnectedState:
         removeTechnicalMessage(11);
-        emit newTechnicalMessage("Verbindungsaufbau gescheitert", era::grey, era::darkBlue, 10);
+        emit newTechnicalMessage(" Verbindungsaufbau gescheitert", era::grey, era::darkBlue, 10);
         QTimer::singleShot(5000,this,SLOT(remooveTechMessage10()));
         break;
     case QAbstractSocket::HostLookupState:
         removeTechnicalMessage(10);
-        emit newTechnicalMessage("Verbindungsaufbau zu Zusi3", era::grey, era::darkBlue, 11);
+        emit newTechnicalMessage(" Verbindungsaufbau zu Zusi3", era::grey, era::darkBlue, 11);
         QTimer::singleShot(10,this,SLOT(checkClientConnection()));
         break;
     case QAbstractSocket::ConnectingState:
         removeTechnicalMessage(10);
-        emit newTechnicalMessage("Verbindungsaufbau zu Zusi3", era::grey, era::darkBlue, 11);
+        emit newTechnicalMessage(" Verbindungsaufbau zu Zusi3", era::grey, era::darkBlue, 11);
         QTimer::singleShot(10,this,SLOT(checkClientConnection()));
         break;
     case QAbstractSocket::ConnectedState:
@@ -284,10 +287,25 @@ void zusi3Tcp::zusiDecoderFahrpult(){
         case 0x000A:
             switch(nodeIds[2]){
                 case 0x0001:      // Geschwindigkeit Meter/Sekunde
-                    if (checkHysterise(&VIst, useData4Byte.Single)){
+                    if (checkHysterise(&VIst, mPerSecToKmh(useData4Byte.Single))){
                         emit newSpeed(VIst);
                         myIndicators->setVIst(VIst);
                         myPower->setVIst(VIst);
+                    }
+                    return;
+                case 0x0002:    // Druck Hauptluftleitung
+                    if (checkHysterise(&drHll, useData4Byte.Single * 10)){
+                        emit newHll(drHll);
+                    }
+                    return;
+                case 0x0003:    // Druck Bremszylinder
+                    if (checkHysterise(&drBrz, useData4Byte.Single * 10)){
+                        emit newBrz(drBrz);
+                    }
+                    return;
+                case 0x0004:    // Druck Hauptluftbehälter
+                    if (checkHysterise(&drHlb, useData4Byte.Single * 10)){
+                        emit newHlb(drHlb);
                     }
                     return;
                 case 0x0065:    // 11.3.3.3.4 Status Zugbeeinﬂussung
@@ -303,7 +321,6 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                                 case 0x0002: return;  // Tf-Nummer qDebug() << "Tf-Nummer: " + QString(useDataComplex);
                                 case 0x0003:   // Zugnummer
                                     setZugnummer(QString(useDataComplex));
-                                    qDebug() << "Zugnummer: " + QString(useDataComplex);
                                     return;
                                 case 0x0004:
                                     switch(nodeIds[5]){
@@ -583,9 +600,12 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                         setMtdIndicator(1,8);
                     }
                     return;
-                //case 0x0015: return;  // Fahrstufe
+                case 0x0015: // Fahrstufe
+                    //qDebug() << "Fahrstufe: " + QString::number(useData4Byte.Single);
+                    myPower->setFahrstufe(useData4Byte.Single);
+                    return;
                   case 0x0017:   // AFB-Sollgeschwindigkeit
-                    if(checkHysterise(&VSoll, useData4Byte.Single))
+                    if(checkHysterise(&VSoll, mPerSecToKmh(useData4Byte.Single)))
                         myIndicators->setAfbSoll(VSoll);
                     return;
                 //case 0x0020: return;  // Hohe Abbrems
@@ -620,7 +640,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                         case 0x0001:    // Fahrzeug
                             switch (nodeIds[4]){
                                 case 0x0005:    // Fahrzeug
-                                    if(checkHysterise(&VMFzg, useData4Byte.Single) && istVMaxErstesFahrzeug){
+                                    if(checkHysterise(&VMFzg, mPerSecToKmh(useData4Byte.Single)) && istVMaxErstesFahrzeug){
                                         myIndicators->setFzgVMax(VMFzg);
                                         istVMaxErstesFahrzeug = false;
                                         QTimer::singleShot(2000, this, SLOT(resetVehicleBlocking()));
@@ -673,8 +693,12 @@ void zusi3Tcp::zusiDecoderSecondaryInfos(){
     }
 }
 
+float zusi3Tcp::mPerSecToKmh(float input){
+    return ceil((input * 3.6 - 0.5));
+}
+
 bool zusi3Tcp::checkHysterise(uint16_t *output, float input){
-    uint16_t tmp = qFabs(ceil((input * 3.6 - 0.5)));
+    uint16_t tmp = qFabs(input);
     if(tmp != *output){
         *output = tmp;
         return true;

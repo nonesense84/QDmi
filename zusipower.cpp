@@ -3,17 +3,29 @@
 zusiPower::zusiPower(QObject *parent) : QObject(parent){
     powerValuesToDecoder.resize(6);
 }
-
+void zusiPower::setFahrstufe(float stufe){
+    qDebug() << "stufe: " + QString::number(stufe);
+    if(forwardDriveModeDisplay){
+        float roundToNearest = 0;
+        if(driveModeDivisor != 0)roundToNearest = 0.5;
+        qint8 driveMode = static_cast<qint8>(stufe / driveModeDivisor + roundToNearest + driveModeOffset);
+        if(driveMode < 0) driveMode = 0;
+        emit newDriveMode(static_cast<quint8>(driveMode));
+        qDebug() << "driveMode: " + QString::number(driveMode);
+    }
+}
 void zusiPower::setVIst(quint16 V){
     VIst = V;
     syncPowerIndicator();
 }
 void zusiPower::setBaureihe(QString fahrzeug){
     bool isLoko = false;
+    fahrzeug.replace('E', '1');
+    if(fahrzeug.indexOf(" ") > -1)fahrzeug.truncate(fahrzeug.indexOf(" "));
     int br = fahrzeug.toInt(&isLoko);
     if(isLoko){
         haveLokoInList = false;
-        for(int i = 0; i < 52; i++){
+        for(int i = 0; i < 68; i++){
             if(skalen[i][0] == br){ //{424,150,150,1,25,25,2,},
                 haveLokoInList = true;
                 // Typ1 kN, Ty2 kN/FM, typ3 %, Typ4 Stufen {111,140,145,1,70,75,2,},
@@ -24,13 +36,17 @@ void zusiPower::setBaureihe(QString fahrzeug){
                 zMinCorr = skalen[i][4];
                 zMaxCorr = skalen[i][8];
                 unitBraking = unitType[skalen[i][3]];
-                unitAccelerating= unitType[skalen[i][7]];
+                unitAccelerating = unitType[skalen[i][7]];
+                driveModeDivisor = skalen[i][10];
+                driveModeOffset = skalen[i][11];
+                forwardDriveModeDisplay = skalen[i][9] > 0;
                 emit unitBrakingText(unitBraking);
                 emit unitAcceleratingText(unitAccelerating);
                 emit maxPowerPositiveNumber(zMaxNumber);
                 emit maxPowerPositiveLine(zMaxLine);
                 emit maxPowerNegativeNumber(zMinNumber);
                 emit maxPowerNegativeLine(zMinLine);
+                emit hasDriveModeDisplay(forwardDriveModeDisplay);
             }
         }
     }
@@ -112,9 +128,9 @@ void zusiPower::syncPowerIndicator(){
         zNorm = 0;
         zNormStwg = 0;
     }
-    qint16 zGesMax = maxAbs(zGes, zGesStwg);
+  //qint16 zGesMax = maxAbs(zGes, zGesStwg);
     qint16 zPAchsMax = maxAbs(zPAchs, zPAchsStwg);
-    qint16 zSollMax = maxAbs(zSollGes, zSollGesStwg);
+  //qint16 zSollMax = maxAbs(zSollGes, zSollGesStwg);
     qint16 zSollPAchsMax = maxAbs(zSollPAchs, zSollPAchsStwg);
     powerValuesToDecoder[0] = zPAchsMax;
     powerValuesToDecoder[2] = zSollPAchsMax;

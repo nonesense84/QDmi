@@ -17,6 +17,7 @@ class zusi3Tcp: public QObject
 private slots:
     void setMtdIndicator(uint8_t value, uint8_t pos);
 
+    float mPerSecToKmh(float input);
     bool checkHysterise(uint16_t *output, float input);
     bool checkHysterise(float *output, float input, bool isRelative = false);
     void clientReadReady();
@@ -51,6 +52,9 @@ private:
     QString zugnummer;
     bool istVMaxErstesFahrzeug = true;
     uint8_t ipHostPart = 1;
+    uint16_t drHll=0;
+    uint16_t drHlb=0;
+    uint16_t drBrz=0;
     uint16_t VIst=0;
     uint16_t VSoll=0;
     uint16_t VMFzg=0;
@@ -106,6 +110,9 @@ private:
 public: signals:
     void newLzbIndicators(QVector<quint8> lmsToDecoder);
     void newSpeed(quint16 speed);
+    void newHll(quint16 Hll);
+    void newBrz(quint16 Brz);
+    void newHlb(quint16 Hlb);
     void newSimTime(QString simtime);
     void newZugnummer(QString simtime);
     void newMtdIndicators(QVector<quint8> lmsToDecoder);

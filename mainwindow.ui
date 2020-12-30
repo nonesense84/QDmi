@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>661</width>
-    <height>503</height>
+    <width>929</width>
+    <height>584</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -41,7 +41,7 @@
    <string>QDmi</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background:rgb(3,17,34)
+   <string notr="true">background:rgb(0,0,0)
 </string>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -67,7 +67,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>640</width>
+      <width>768</width>
       <height>480</height>
      </rect>
     </property>
@@ -108,6 +108,50 @@
         <string notr="true">background:rgb(3,17,34)
 </string>
        </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_16">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QWidget" name="fieldZ_DMI" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>160</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QWidget" name="fieldZ_Mano" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>32</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background:rgb(0,0,0)
+</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
      <item>
@@ -3279,6 +3323,67 @@
           </widget>
          </widget>
         </item>
+        <item>
+         <widget class="QWidget" name="manoHolder" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>64</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background:rgb(0,0,0)
+</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_18">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="manometer" name="widgetMano1" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>1</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="manometer" name="widgetMano2" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>1</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QWidget" name="manoHolder_Dummy" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>1</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>
@@ -3314,12 +3419,26 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QWidget" name="fieldY" native="true">
+         <widget class="QWidget" name="fieldY_DMI" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>117</horstretch>
+            <horstretch>160</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QWidget" name="fieldY_Mano" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>28</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background:rgb(0,0,0)
+</string>
           </property>
          </widget>
         </item>
@@ -3327,12 +3446,16 @@
          <widget class="QWidget" name="fieldYResize" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>5</horstretch>
+            <horstretch>4</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="cursor">
            <cursorShape>SizeFDiagCursor</cursorShape>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">background:rgb(0,0,0)
+</string>
           </property>
          </widget>
         </item>
@@ -3361,6 +3484,12 @@
    <class>power</class>
    <extends>QWidget</extends>
    <header>power.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>manometer</class>
+   <extends>QWidget</extends>
+   <header location="global">manometer.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

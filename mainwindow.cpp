@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowFlags(Qt::FramelessWindowHint);
     settings = new QSettings("QDmi", "QDmi");
     this->setGeometry(0,0,settings->value("mainwindow/width").toInt(),settings->value("mainwindow/height").toInt());
-    this->setGeometry(0,0,800,600);
+    this->setGeometry(0,0,768,480); // For 4:3 800*600. For 16:9 848*480
     #ifdef Q_OS_ANDROID
     QTimer::singleShot(1000,this,SLOT(showFullScreen()));
     QTimer::singleShot(500,this,SLOT(keepScreenOn()));
@@ -37,6 +37,8 @@ void MainWindow::process(){
     ui->widgetTacho->setDpi(dotsPerInch);
     ui->widgetPower->setDpi(dotsPerInch);
     ui->widgetPower->setDpi(dotsPerInch);
+    ui->widgetMano1->setDpi(dotsPerInch);
+    ui->widgetMano2->setDpi(dotsPerInch);
     ui->FieldE5to7->setTextFieldUsing(3);       // Bring PZB/LZB Inidicators in front.
     ui->FieldE5to9->setTextFieldUsing(5);
     ui->FieldE8to9->setTextFieldUsing(2);
@@ -53,7 +55,7 @@ void MainWindow::process(){
     ui->systemVersionComp2Name->setTextFieldUsing(1, Qt::AlignRight);
     ui->systemVersionComp2Name->addTextMessage("github.com/nones",era::grey,era::darkBlue,1);
     ui->systemVersionComp1Version->setBorderThickness(0);
-    ui->systemVersionComp1Version->addTextMessage("1.2B3",era::grey,era::darkBlue,1);
+    ui->systemVersionComp1Version->addTextMessage("1.2B11",era::grey,era::darkBlue,1);
     ui->systemVersionComp2Version->setBorderThickness(0);
     ui->systemVersionComp2Version->addTextMessage("ense84/QDmi",era::grey,era::darkBlue,1);
     qRegisterMetaType< QVector<quint8> >("QVector<quint8>");
@@ -108,6 +110,16 @@ void MainWindow::process(){
     connect(myTcp,SIGNAL(newSpeed(quint16)),ui->widgetTacho,SLOT(setVAct(quint16)));
     connect(mySep,SIGNAL(newSpeed(quint16)),myLzb,SLOT(setVAct(quint16)));
     connect(myTcp,SIGNAL(newSpeed(quint16)),myLzb,SLOT(setVAct(quint16)));
+    connect(myTcp,SIGNAL(newHlb(quint16)),ui->widgetMano1,SLOT(setPressure1(quint16)));
+    connect(myTcp,SIGNAL(newHll(quint16)),ui->widgetMano1,SLOT(setPressure2(quint16)));
+    connect(myTcp,SIGNAL(newBrz(quint16)),ui->widgetMano2,SLOT(setPressure1(quint16)));
+    ui->widgetMano2->setPointer2using(false);
+    ui->widgetMano1->setPointer1color(era::red);
+    ui->widgetMano1->setPointer2color(era::yellow);
+    ui->widgetMano2->setPointer1color(era::yellow);
+    ui->widgetMano1->setPonter1Label("Hauptluftbehälter");
+    ui->widgetMano1->setPonter2Label("Hauptluftleitung");
+    ui->widgetMano2->setPonter1Label("Bremszylinder");
     connect(myTcp,SIGNAL(newSimTime(QString)),ui->fieldG13,SLOT(setText(QString)));
     connect(mySep,SIGNAL(newSimTime(QString)),ui->fieldG13,SLOT(setText(QString)));
     connect(myTcp,SIGNAL(newZugnummer(QString)),ui->fieldG11,SLOT(setText(QString)));
@@ -261,7 +273,9 @@ void MainWindow::connectMtdPower(){
     connect(myTcp->myPower,SIGNAL(maxPowerNegativeLine (qint16)),ui->widgetPower,SLOT(setAbsoluteBrakingMaximum(qint16)));
     connect(myTcp->myPower,SIGNAL(unitAcceleratingText(QString)),ui->widgetPower,SLOT(setUnitAcceleratingText(QString)));
     connect(myTcp->myPower,SIGNAL(unitBrakingText(QString)),ui->widgetPower,SLOT(setUnitBrakingText(QString)));
-    connect(mySep,SIGNAL(newPowerAbsolute(qint16)),ui->widgetPower,SLOT(setPowerRelative(qint16)));
+    connect(myTcp->myPower,SIGNAL(unitBrakingText(QString)),ui->widgetPower,SLOT(setUnitBrakingText(QString)));
+    connect(myTcp->myPower,SIGNAL(hasDriveModeDisplay(bool)),ui->widgetPower,SLOT(setModeDisplay(bool)));
+    connect(myTcp->myPower,SIGNAL(newDriveMode(quint8)),ui->widgetPower,SLOT(setDriveMode(quint8)));
 }
 void MainWindow::connectTimers(){
     shortTimer  = new QTimer(this);
@@ -316,10 +330,16 @@ void MainWindow::settingsBtn6Clicked(){                                     // N
     ui->fieldDG->setCurrentIndex(7);
     dataString = settings->value("zusiIp").toString();
     activeDataEntryItem = "IP-Address";
+    ui->FieldE5to9->addTextMessage(" Auf eingegebene IP-Adresse tippen", era::grey, era::darkBlue, 8);
+    ui->FieldE8to9->addTextMessage(" Auf eingegebene IP-Adresse tippen", era::grey, era::darkBlue, 8);
 }
 void MainWindow::settingsBtn7Clicked(){this->showFullScreen();}
 void MainWindow::settingsBtn8Clicked(){keepScreenOn();}
 void MainWindow::settingsCloseClicked(){
+    if(ui->fieldDG->currentIndex() == 7){
+        ui->FieldE5to9->removeTextMessage(8);
+        ui->FieldE8to9->removeTextMessage(8);
+    }
     if(ui->fieldDG->currentIndex() == 6){
         settings->setValue("pulldown_gauge",ui->pulldown_gauge->currentIndex());
         settings->setValue("pulldown_targetdistance",ui->pulldown_targetdistance->currentIndex());
@@ -370,14 +390,14 @@ void MainWindow::resizeEvent(QResizeEvent* event)
     qreal multi;
     int windowHeight = ui->centralWidget->height();
     int windowWidth = ui->centralWidget->width();
-    if ((static_cast<qreal>(windowWidth) / static_cast<qreal>(windowHeight)) < (4.0/3.0)){
-        multi = static_cast<qreal>(windowWidth) / 640.0;
+    if ((static_cast<qreal>(windowWidth) / static_cast<qreal>(windowHeight)) < (16.0/10.0)){ //  (4.0/3.0)
+        multi = static_cast<qreal>(windowWidth) / 768.0;    // 640.0
     }
     else{
-        multi = static_cast<qreal>(windowHeight) / 480.0;
+        multi = static_cast<qreal>(windowHeight) / 480.0;   // 480.0
     }
-    ui->centralView->setGeometry(0,0,static_cast<int>(640*multi)
-                                    ,static_cast<int>(480*multi));
+    ui->centralView->setGeometry(0,0,static_cast<int>(768*multi)    // 640
+                                    ,static_cast<int>(480*multi));  // 480
     ui->fieldA1->setBorderThickness(static_cast<int>(multi + 0.75));
     ui->fieldA3->setBorderThickness(static_cast<int>(multi + 0.75));
     ui->fieldA4->setBorderThickness(static_cast<int>(multi + 0.75));

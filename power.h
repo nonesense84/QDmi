@@ -28,6 +28,9 @@ public slots:
     void setDpi(qreal dpi);
     void setUnitAcceleratingText(QString unit);
     void setUnitBrakingText(QString unit);
+    void setModeDisplay(bool show);
+    void setDriveMode(quint8 mode);
+
 private slots:
     void attenuationRoutine();
 private:
@@ -37,12 +40,12 @@ private:
     QString uniteAccelerating = "kN/FM";
 
     QString uniteAcceleratingAbsDef = "kN/FM";
-    QString uniteAcceleratingRelDef = "%";
     QString uniteBrakingAbsDef = "kN";
-    QString uniteBrakingRelDef = "%";
+    QString driveMode = "";
 
-    bool useBrakingRelative;
-    bool useAcceleratingRelative;
+    bool useBrakingRelative = true;
+    bool useAcceleratingRelative = true;
+    bool showDriveMode = false;
 
     int side;
     qint16 powerRelativeSet;

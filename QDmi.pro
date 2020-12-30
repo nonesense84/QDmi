@@ -32,6 +32,7 @@ SOURCES += \
     gauge.cpp \
     dmilabel.cpp \
     lzb.cpp \
+    manometer.cpp \
     sep.cpp \
     mtd.cpp \
     zusi3tcp.cpp \
@@ -45,6 +46,7 @@ HEADERS += \
     era.h \
     dmilabel.h \
     lzb.h \
+    manometer.h \
     sep.h \
     mtd.h \
     zusi3tcp.h \
