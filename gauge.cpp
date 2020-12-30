@@ -17,12 +17,14 @@ void gauge::setVAct(quint16 V){
         vAct = V;
         if(V > VMaxDial){
             showNeedle = false;
+            update();
         }
         else{
             posNeedle = calcPosition(V);
             showNeedle = true;
+            update();
         }
-        if(pointerOrange||pointerRed)posOverspeed = calcPosition(V);;
+        if(pointerOrange||pointerRed)posOverspeed = calcPosition(V);
     }
 }
 
