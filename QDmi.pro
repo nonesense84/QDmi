@@ -6,12 +6,16 @@
 
 QT       += core gui svg network multimedia
 #ifdef Q_OS_ANDROID
-#QT       += androidextras
+QT       += androidextras
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = QDmi
 TEMPLATE = app
+ANDROID_VERSION_CODE = 13
+ANDROID_VERSION_NAME = "1.2"
+ANDROID_TARGET_SDK_VERSION = 29
+APP_NAME = QDmi
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -72,5 +76,16 @@ RESOURCES += \
     icons.qrc \
     sunds.qrc
 
-ANDROID_ABIS = armeabi-v7a
+ANDROID_ABIS = armeabi-v7a arm64-v8a
+
+DISTFILES += \
+    android/AndroidManifest.xml \
+    android/build.gradle \
+    android/gradle/wrapper/gradle-wrapper.jar \
+    android/gradle/wrapper/gradle-wrapper.properties \
+    android/gradlew \
+    android/gradlew.bat \
+    android/res/values/libs.xml
+
+ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
