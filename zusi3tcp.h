@@ -42,6 +42,13 @@ public slots:
     void disconnectFromZusi();
     void process();
     void reconnect();
+    void addKnotenAnfang(QVector<unsigned char> *vector, unsigned char knoten);
+    void addKnotenEnde(QVector<unsigned char> *vector);
+    void addAtribut(QVector<unsigned char> *vector, unsigned char id, unsigned char atribut);
+    void addAtribut(QVector<unsigned char> *vector, unsigned char atribut);
+    void addTextAtribut(QVector<unsigned char> *vector, quint16 id, QString text);
+    void setUseManometer(bool use);
+
 public:
     zusi3Tcp();
     zusiIndicator *myIndicators;
@@ -50,6 +57,7 @@ public:
 private:
     QString ipAddress;
     QString zugnummer;
+    bool useManometer = true;
     bool istVMaxErstesFahrzeug = true;
     uint8_t ipHostPart = 1;
     uint16_t drHll=0;
@@ -62,6 +70,7 @@ private:
     uint8_t stromabnehmerLok;
     uint8_t stromabnehmerSteuerwagen;
     float zugkraftProAchs;
+    float zugkraftProAchsSteuerwagen;
     //uint16_t VZiel=0;
     //float ZugkraftAbs=0;
     //float ZugkraftRel=0;

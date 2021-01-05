@@ -45,15 +45,29 @@ void zusi3Tcp::setIpadress(QString address){
         QTimer::singleShot(2500,this,SLOT(remooveTechMessage9()));
         emit sendTcpConnectionFeedback("-1");
     }
-    // qDebug() << address;
     QHostAddress zusiPc = QHostAddress(address);
     ipAddress = address;
     client->abort();
     client->connectToHost(zusiPc,1436);
-    constexpr static const unsigned char  Anmeldung2[] = { 0x00, 0x00, 0x00, 0x00, 0x1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1, 0x00, 0x04, 0x00, 0x00, 0x00, 0x1, 0x00, 0x2, 0x00, 0x04, 0x00, 0x00, 0x00, 0x2, 0x00, 0x2, 0x00, 0xA, 0x00,
-                            0x00, 0x00, 0x3, 0x00, 0x51, 0x44, 0x6D, 0x69, 0x0, 0x0, 0x0, 0x0, 0x5, 0x00, 0x00, 0x00, 0x04, 0x00, 0x32, 0x2E, 0x30, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
-                          };
-    constexpr static const unsigned char trainData[] =
+    QVector<unsigned char> anmeldung;
+    QVector<unsigned char> abfrage;
+
+    addKnotenAnfang(&anmeldung, 0x01);  //<Kn>  Verbindungsaufbau
+    addKnotenAnfang(&anmeldung, 0x01);  //<Kn>  Befehl HELLO
+    addAtribut(&anmeldung, 0x01, 0x02); // Protokoll-Version
+    addAtribut(&anmeldung, 0x02, 0x02); // Client-Typ: [1: Zusi| 2: Fahrpult]
+    addTextAtribut(&anmeldung, 0x03, "QDmi");
+    addTextAtribut(&anmeldung, 0x04, "1.2");
+    addKnotenEnde(&anmeldung);
+    addKnotenEnde(&anmeldung);
+    QByteArray anmeldArr;
+    for(int i = 0; i < anmeldung.length(); i++){
+        anmeldArr.append(static_cast<char>(anmeldung[i]));
+    }
+    client->write(anmeldArr);
+
+
+ /* constexpr static const unsigned char trainData[] =
              { 0x00, 0x00, 0x00, 0x00, 0x02, 0x00,              // <Kn> Client-Anwendung 02
                0x00, 0x00, 0x00, 0x00, 0x0A, 0x01,              // <Kn> Befehl INPUT
                0x00, 0x00, 0x00, 0x00, 0x02, 0x00,              // <Kn> Zugbeeinflussung einstellen
@@ -80,56 +94,90 @@ void zusi3Tcp::setIpadress(QString address){
                0xFF, 0xFF, 0xFF, 0xFF,
                0xFF, 0xFF, 0xFF, 0xFF
              };
-    client->write((const char*)Anmeldung2,sizeof (Anmeldung2));
-    //qDebug() << (" Rregistration required data");
-    constexpr static const unsigned char Abfrage2[] = {
-        0x00, 0x00, 0x00, 0x00, 0x02, 0x00,              // <Kn>    // Client-Anwendung 02
-        0x00, 0x00, 0x00, 0x00, 0x03, 0x00,              // <Kn>    // Befehl NEEDED_DATA
-        0x00, 0x00, 0x00, 0x00, 0x0A, 0x00,              // <Kn>    // Untergruppe Führerstandsanzeigen
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00,  // Geschwindigkeit m/s
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x02, 0x00,  // Druck Hauptluftleitung
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x03, 0x00,  // Druck Bremszylinder
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x04, 0x00,  // Druck Hauptluftbehälter
-      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x09, 0x00,  // Zugkraft gesammt
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x0A, 0x00,  // Zugkraft pro Achse
-      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x0B, 0x00,  // Zugkraft-soll gesammt
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x0C, 0x00,  // Zugkraft-Soll pro Achse
-      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x7C, 0x00,  // Steuerwagen: Zugkraft gesammt
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x7D, 0x00,  // Steuerwagen: Zugkraft pro Achse
-      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x7E, 0x00,  // Steuerwagen: Zugkraft-soll gesammt
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x7F, 0x00,  // Steuerwagen: Zugkraft-Soll pro Achse
-      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x90, 0x00,  // Zug- und Brems-Gesamtkraftsoll normiert
-      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x91, 0x00,  // Steuerwagen: Zug- und Brems-Gesamtkraftsoll normiert
-      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x93, 0x00,  // Zug- und Brems-Gesamtkraftsoll absolut normiert
-      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x94, 0x00,  // Steuerwagen: Zug- und Brems-Gesamtkraftsoll absolut normiert
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x0E, 0x00,  // Fahrleitungsspannung
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x23, 0x00,  // Zeit
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x13, 0x00,  // Hauptschalter
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x15, 0x00,  // Fahrstufe
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x17, 0x00,  // AFB-Sollgeschwindigkeit
-      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x20, 0x00,  // LM Hochabbremsung Aus/Ein
-      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x1b, 0x00,  // LM Schleudern
-      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x1c, 0x00,  // LM Gleiten
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x36, 0x00,  // AFB an
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x55, 0x00,  // Stromabnehmer
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x64, 0x00,  // SIFA
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x65, 0x00,  // Zugsicherung
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x66, 0x00,  // Türen
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x88, 0x00,  // Steuerwagen: Stromabnehmer
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x8e, 0x00,  // Status Zugverband
-        0xFF, 0xFF, 0xFF, 0xFF,
-        0x00, 0x00, 0x00, 0x00, 0x0C, 0x00,              // <Kn>    // Untergruppe Programmdaten
-        0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x02, 0x00,  // Aktuelle Zugnummer
-      //0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x05, 0x00,  // 1: Zug neu übernommen
-        0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF,
-        0xFF, 0xFF, 0xFF, 0xFF
-        };
-    client->write((const char*)Abfrage2,sizeof (Abfrage2));
+    */
+    addKnotenAnfang(&abfrage, 0x02);// <Kn>    // Client-Anwendung 02
+    addKnotenAnfang(&abfrage, 0x03);// <Kn>    // Befehl NEEDED_DATA
+    addKnotenAnfang(&abfrage, 0x0A);// <Kn>    // Untergruppe Führerstandsanzeigen
+    addAtribut(&abfrage, 0x01);  // Geschwindigkeit m/s
+    if(useManometer)addAtribut(&abfrage, 0x02);  // Druck Hauptluftleitung
+    if(useManometer)addAtribut(&abfrage, 0x03);  // Druck Bremszylinder
+    if(useManometer)addAtribut(&abfrage, 0x04);  // Druck Hauptluftbehälter
+  //addAtribut(&abfrage, 0x09);  // Zugkraft gesammt
+    addAtribut(&abfrage, 0x0A);  // Zugkraft pro Achse
+  //addAtribut(&abfrage, 0x0B);  // Zugkraft-soll gesammt
+    addAtribut(&abfrage, 0x0C);  // Zugkraft-Soll pro Achse
+  //addAtribut(&abfrage, 0x7C);  // Steuerwagen: Zugkraft gesammt
+    addAtribut(&abfrage, 0x7D);  // Steuerwagen: Zugkraft pro Achse
+  //addAtribut(&abfrage, 0x7E);  // Steuerwagen: Zugkraft-soll gesammt
+    addAtribut(&abfrage, 0x7F);  // Steuerwagen: Zugkraft-Soll pro Achse
+  //addAtribut(&abfrage, 0x90);  // Zug- und Brems-Gesamtkraftsoll normiert
+  //addAtribut(&abfrage, 0x91);  // Steuerwagen: Zug- und Brems-Gesamtkraftsoll normiert
+  //addAtribut(&abfrage, 0x93);  // Zug- und Brems-Gesamtkraftsoll absolut normiert
+  //addAtribut(&abfrage, 0x94);  // Steuerwagen: Zug- und Brems-Gesamtkraftsoll absolut normiert
+    addAtribut(&abfrage, 0x0E);  // Fahrleitungsspannung
+    addAtribut(&abfrage, 0x23);  // Zeit
+    addAtribut(&abfrage, 0x13);  // Hauptschalter
+    addAtribut(&abfrage, 0x15);  // Fahrstufe
+    addAtribut(&abfrage, 0x85);  // Steuerwagen: Fahrstufe
+    addAtribut(&abfrage, 0x17);  // AFB-Sollgeschwindigkeit
+  //addAtribut(&abfrage, 0x20);  // LM Hochabbremsung Aus/Ein
+  //addAtribut(&abfrage, 0x1b);  // LM Schleudern
+  //addAtribut(&abfrage, 0x1c);  // LM Gleiten
+    addAtribut(&abfrage, 0x36);  // AFB an
+    addAtribut(&abfrage, 0x55);  // Stromabnehmer
+    addAtribut(&abfrage, 0x64);  // SIFA
+    addAtribut(&abfrage, 0x65);  // Zugsicherung
+    addAtribut(&abfrage, 0x66);  // Türen
+    addAtribut(&abfrage, 0x88);  // Steuerwagen: Stromabnehmer
+    addAtribut(&abfrage, 0x8e);  // Status Zugverband
+    addKnotenEnde(&abfrage);
+    addKnotenAnfang(&abfrage, 0x0C);
+    addAtribut(&abfrage, 0x02);  // Aktuelle Zugnummer
+  //addAtribut(&abfrage, 0x05);  // 1: Zug neu übernommen
+    addKnotenEnde(&abfrage);
+    addKnotenEnde(&abfrage);
+    addKnotenEnde(&abfrage);
+    QByteArray abfrageArr;
+    for(int i = 0; i < abfrage.length(); i++){
+        abfrageArr.append(static_cast<char>(abfrage[i]));
+    }
+    client->write(abfrageArr);
     QTimer::singleShot(0,this,SLOT(checkClientConnection()));
     emit sendTcpConnectionFeedback(address);
 }
 
+void zusi3Tcp::addKnotenAnfang(QVector<unsigned char> *vector, unsigned char knoten){
+    vector->append({0x00, 0x00, 0x00, 0x00});
+    vector->append(knoten);
+    vector->append(0x00);
+}
+void zusi3Tcp::addKnotenEnde(QVector<unsigned char> *vector){
+    vector->append({0xFF, 0xFF, 0xFF, 0xFF});
+}
+void zusi3Tcp::addAtribut(QVector<unsigned char> *vector, unsigned char id, unsigned char atribut){
+    vector->append({0x04, 0x00, 0x00, 0x00});
+    vector->append(id);
+    vector->append(0x00);
+    vector->append(atribut);
+    vector->append(0x00);
+}
+void zusi3Tcp::addTextAtribut(QVector<unsigned char> *vector, quint16 id, QString text){
+    quint32 len = static_cast<quint32>(text.length()) + 2;
+    vector->append(static_cast< unsigned char>( len & 0x000000ff));
+    vector->append(static_cast< unsigned char>((len & 0x0000ff00) >> 8));
+    vector->append(static_cast< unsigned char>((len & 0x00ff0000) >> 16));
+    vector->append(static_cast< unsigned char>((len & 0xff000000) >> 24));
+    vector->append(static_cast< unsigned char>(  id & 0x00ff));
+    vector->append(static_cast< unsigned char>(( id & 0xff00) >> 8));
+    for(int i = 0; i < text.length(); i++){
+        vector->append(static_cast<unsigned char>(text.at(i).toLatin1()));
+    }
+}
+void zusi3Tcp::addAtribut(QVector<unsigned char> *vector, unsigned char atribut){
+    vector->append({0x04, 0x00, 0x00, 0x00, 0x01, 0x00});
+    vector->append(atribut);
+    vector->append(0x00);
+}
 void zusi3Tcp::checkClientConnection(){
     switch(client->state()){
     case QAbstractSocket::UnconnectedState:
@@ -581,7 +629,8 @@ void zusi3Tcp::zusiDecoderFahrpult(){
               //case 0x000B: myPower->setZugkraftSollGesammt(useData4Byte.Single); return;           //              Zugkraft-Soll gesammt
                 case 0x000C: myPower->setZugkraftSollProAchse(useData4Byte.Single); return;          //              Zugkraft-Soll pro Achse
               //case 0x007C: myPower->setZugkraftGesammtSteuerwagen(useData4Byte.Single); return;    // Steuerwagen: Zugkraft gesammt
-                case 0x007D: myPower->setZugkraftProAchseSteuerwagen(useData4Byte.Single); return;   // Steuerwagen: Zugkraft pro Achse
+                case 0x007D: myPower->setZugkraftProAchseSteuerwagen(useData4Byte.Single);           // Steuerwagen: Zugkraft pro Achse
+                            zugkraftProAchsSteuerwagen = useData4Byte.Single; guesTractionType(); return;
               //case 0x007E: myPower->setZugkraftSollGesammtSteuerwagen(useData4Byte.Single); return;// Steuerwagen: Zugkraft-soll gesammt
                 case 0x007F: myPower->setZugkraftSollProAchseSteuerwagen(useData4Byte.Single); return;// Steuerwagen: Zugkraft-Soll gesamt pro Achse
               //case 0x0090: myPower->setZugkraftSollNormiert(useData4Byte.Single); return;          //              Zug- und Brems-Gesamtkraft soll normiert
@@ -601,7 +650,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                     }
                     return;
                 case 0x0015: // Fahrstufe
-                    //qDebug() << "Fahrstufe: " + QString::number(useData4Byte.Single);
+                case 0x0085: // Steuerwagen: Fahrstufe
                     myPower->setFahrstufe(useData4Byte.Single);
                     return;
                   case 0x0017:   // AFB-Sollgeschwindigkeit
@@ -712,7 +761,6 @@ bool zusi3Tcp::checkHysterise(float *output, float input, bool isRelative){
     }
     if(input != *output){
         *output = input;
-        qDebug () << "checkHysterise float";
         return true;
     }
     return false;
@@ -754,7 +802,13 @@ void zusi3Tcp::guesTractionType(){
     if(fahrlSpng > 0){
         setMtdIndicator(1, 12);
     }
-    if(fahrlSpng <= 0 && zugkraftProAchs > 0){
+    if(fahrlSpng <= 0 && ((zugkraftProAchs > 0) || (zugkraftProAchsSteuerwagen > 0))){
         setMtdIndicator(2, 12);
+    }
+}
+void zusi3Tcp::setUseManometer(bool use){
+    if(useManometer != use){
+        useManometer = use;
+        reconnect();
     }
 }
