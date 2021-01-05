@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QtMath>
-#include <QDebug>
 
 class zusiPower : public QObject
 {

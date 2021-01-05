@@ -4,14 +4,12 @@ zusiPower::zusiPower(QObject *parent) : QObject(parent){
     powerValuesToDecoder.resize(6);
 }
 void zusiPower::setFahrstufe(float stufe){
-    qDebug() << "stufe: " + QString::number(stufe);
     if(forwardDriveModeDisplay){
         float roundToNearest = 0;
         if(driveModeDivisor != 0)roundToNearest = 0.5;
         qint8 driveMode = static_cast<qint8>(stufe / driveModeDivisor + roundToNearest + driveModeOffset);
         if(driveMode < 0) driveMode = 0;
         emit newDriveMode(static_cast<quint8>(driveMode));
-        qDebug() << "driveMode: " + QString::number(driveMode);
     }
 }
 void zusiPower::setVIst(quint16 V){
