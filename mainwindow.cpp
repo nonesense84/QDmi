@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowFlags(Qt::FramelessWindowHint);
     settings = new QSettings("QDmi", "QDmi");
     this->setGeometry(0,0,settings->value("mainwindow/width").toInt(),settings->value("mainwindow/height").toInt());
-    this->setGeometry(0,0,768,480); // For 4:3 800*600. For 16:9 848*480
+    //this->setGeometry(0,0,768,480); // For 4:3 800*600. For 16:9 848*480. For 16:10 768*480
     #ifdef Q_OS_ANDROID
     QTimer::singleShot(1000,this,SLOT(showFullScreen()));
     QTimer::singleShot(500,this,SLOT(keepScreenOn()));
@@ -55,7 +55,7 @@ void MainWindow::process(){
     ui->systemVersionComp2Name->setTextFieldUsing(1, Qt::AlignRight);
     ui->systemVersionComp2Name->addTextMessage("github.com/nones",era::grey,era::darkBlue,1);
     ui->systemVersionComp1Version->setBorderThickness(0);
-    ui->systemVersionComp1Version->addTextMessage("1.2B11",era::grey,era::darkBlue,1);
+    ui->systemVersionComp1Version->addTextMessage("1.2",era::grey,era::darkBlue,1);
     ui->systemVersionComp2Version->setBorderThickness(0);
     ui->systemVersionComp2Version->addTextMessage("ense84/QDmi",era::grey,era::darkBlue,1);
     qRegisterMetaType< QVector<quint8> >("QVector<quint8>");
@@ -120,6 +120,7 @@ void MainWindow::process(){
     ui->widgetMano1->setPonter1Label("Hauptluftbehälter");
     ui->widgetMano1->setPonter2Label("Hauptluftleitung");
     ui->widgetMano2->setPonter1Label("Bremszylinder");
+    connect(this,SIGNAL(newManometerUse(bool)),myTcp,SLOT(setUseManometer(bool)));
     connect(myTcp,SIGNAL(newSimTime(QString)),ui->fieldG13,SLOT(setText(QString)));
     connect(mySep,SIGNAL(newSimTime(QString)),ui->fieldG13,SLOT(setText(QString)));
     connect(myTcp,SIGNAL(newZugnummer(QString)),ui->fieldG11,SLOT(setText(QString)));
@@ -212,6 +213,8 @@ void MainWindow::process(){
     ui->fieldA3->setTargetDistance(0,false);
     ui->widgetTacho->setVMaxDial(400);
     configureSettingsWindow();
+    emit newManometerUse(showManometer > 0);
+    resizeMe();
 }
 
 void MainWindow::connectPzbIcons(){
@@ -343,11 +346,15 @@ void MainWindow::settingsCloseClicked(){
     if(ui->fieldDG->currentIndex() == 6){
         settings->setValue("pulldown_gauge",ui->pulldown_gauge->currentIndex());
         settings->setValue("pulldown_targetdistance",ui->pulldown_targetdistance->currentIndex());
+        settings->setValue("pulldown_showManometer",ui->pulldown_showManometer->currentIndex());
         ui->widgetTacho->setEraUse(settings->value("pulldown_gauge").toInt() == 0);
         ui->fieldVZile100->setVisib(settings->value("pulldown_gauge").toInt() == 1);
         ui->fieldVZile10->setVisib(settings->value("pulldown_gauge").toInt() == 1);
         ui->fieldVZile1->setVisib(settings->value("pulldown_gauge").toInt() == 1);
         ui->fieldA3->setEraUse(settings->value("pulldown_targetdistance").toInt() == 0);
+        showManometer = static_cast<quint8>(settings->value("pulldown_showManometer").toUInt());
+        emit newManometerUse(showManometer);
+        resizeMe();
     }
     if(ui->fieldDG->currentIndex()>1){
         ui->fieldDG->setCurrentIndex(1);
@@ -385,19 +392,47 @@ void MainWindow::addItemToData(QString item){
 void MainWindow::blinkCursor(){
     addItemToData("_");
 }
-void MainWindow::resizeEvent(QResizeEvent* event)
-{
+void MainWindow::resizeMe(){
+    qreal windowRatio = 4.0 / 3.0;
+    qreal defaultHeight = 480.0;
     qreal multi;
-    int windowHeight = ui->centralWidget->height();
-    int windowWidth = ui->centralWidget->width();
-    if ((static_cast<qreal>(windowWidth) / static_cast<qreal>(windowHeight)) < (16.0/10.0)){ //  (4.0/3.0)
-        multi = static_cast<qreal>(windowWidth) / 768.0;    // 640.0
+    qreal windowHeight = ui->centralWidget->height();
+    qreal windowWidth = ui->centralWidget->width();
+    qreal defaultWidth = 640.0;
+    QSizePolicy manoSizePol = ui->DmiHolder->sizePolicy();
+    switch (showManometer){
+        case 0:
+        manoSizePol.setHorizontalStretch(0);
+        windowRatio = 4.0 / 3.0;
+        defaultWidth = 640.0;
+        ui->manoHolder->setVisible(false);
+        break;
+        case 1:
+        manoSizePol.setHorizontalStretch(53);
+        manoSizePol.setVerticalStretch(54);
+        windowRatio = 16.0 / 9.0;
+        defaultWidth = 853.33;
+        ui->manoHolder->setVisible(true);
+        break;
+        case 2:
+        manoSizePol.setHorizontalStretch(32);
+        manoSizePol.setVerticalStretch(224);
+        windowRatio = 16.0 / 10.0;
+        defaultWidth = 768.0;
+        ui->manoHolder->setVisible(true);
+        break;
+    }
+    ui->manoHolder->setSizePolicy(manoSizePol);
+    ui->manoHolder_Spacer->setSizePolicy(manoSizePol);
+
+    if ((windowWidth / windowHeight) < windowRatio){
+        multi = windowWidth / defaultWidth;
     }
     else{
-        multi = static_cast<qreal>(windowHeight) / 480.0;   // 480.0
+        multi = windowHeight / defaultHeight;
     }
-    ui->centralView->setGeometry(0,0,static_cast<int>(768*multi)    // 640
-                                    ,static_cast<int>(480*multi));  // 480
+    ui->DmiManoHolder->setGeometry(0,0,static_cast<int>(defaultWidth * multi)
+                                    ,static_cast<int>(defaultHeight * multi));
     ui->fieldA1->setBorderThickness(static_cast<int>(multi + 0.75));
     ui->fieldA3->setBorderThickness(static_cast<int>(multi + 0.75));
     ui->fieldA4->setBorderThickness(static_cast<int>(multi + 0.75));
@@ -500,18 +535,25 @@ void MainWindow::resizeEvent(QResizeEvent* event)
     ui->widgetTacho->setGeometry(tachoRect);
     ui->fielBHolders->setGeometry(fieldBHolderRect);
 }
+void MainWindow::resizeEvent(QResizeEvent* event){
+    resizeMe();
+}
 void MainWindow::configureSettingsWindow(){
     QStringList tdList = { "1000m ERA", "4000m DB" };
     QStringList gaugeList = { "Haken ERA", "Dreieck DB" };
+    QStringList showManometerList = { "Nicht anzeigen", "Anzeigen (16:9)", "Anzeigen (16:10)" };
     ui->pulldown_targetdistance->addItems(tdList);
     ui->pulldown_gauge->addItems(gaugeList);
+    ui->pulldown_showManometer->addItems(showManometerList);
     ui->pulldown_targetdistance->setCurrentIndex(settings->value("pulldown_targetdistance").toInt());
     ui->pulldown_gauge->setCurrentIndex(settings->value("pulldown_gauge").toInt());
+    ui->pulldown_showManometer->setCurrentIndex(settings->value("pulldown_showManometer").toInt());
     ui->widgetTacho->setEraUse(settings->value("pulldown_gauge").toInt() == 0);
     ui->fieldVZile100->setVisib(settings->value("pulldown_gauge").toInt() == 1);
     ui->fieldVZile10->setVisib(settings->value("pulldown_gauge").toInt() == 1);
     ui->fieldVZile1->setVisib(settings->value("pulldown_gauge").toInt() == 1);
     ui->fieldA3->setEraUse(settings->value("pulldown_targetdistance").toInt() == 0);
+    showManometer = static_cast<quint8>(settings->value("pulldown_showManometer").toUInt());
     emit newZusiIp(settings->value("zusiIp").toString());
 }
 void MainWindow::mousePressEvent(QMouseEvent *event){

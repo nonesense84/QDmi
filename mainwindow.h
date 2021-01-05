@@ -31,6 +31,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    quint8  showManometer = 1;
 
 private slots:
     void arrowF4Clicked();
@@ -61,6 +62,7 @@ private slots:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void keepScreenOn();
+    void resizeMe();
 
 private:
     QSettings *settings;
@@ -91,6 +93,7 @@ protected:
 
 signals:
     void newDotsPerInch(qreal dpi);
+    void newManometerUse(bool use);
 };
 
 #endif // MAINWINDOW_H
