@@ -34,8 +34,9 @@ public:
     quint8  showManometer = 1;
 
 private slots:
-    void arrowF4Clicked();
-    void arrowF5Clicked();
+    void fieldF1Clicked();
+    void fieldF4Clicked();
+    void fieldF5Clicked();
     void arrowUpClicked();
     void arrowDownClicked();
     void connectTimers();
@@ -61,7 +62,9 @@ private slots:
     void configureSettingsWindow();
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
+    #ifdef Q_OS_ANDROID
     void keepScreenOn();
+    #endif
     void resizeMe();
 
 private:
@@ -90,6 +93,9 @@ private: signals:
 
 protected:
   void resizeEvent ( QResizeEvent * event );
+  #ifdef Q_PROCESSOR_ARM
+  void keyPressEvent(QKeyEvent *event);
+  #endif
 
 signals:
     void newDotsPerInch(qreal dpi);

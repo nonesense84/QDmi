@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowFlags(Qt::FramelessWindowHint);
     settings = new QSettings("QDmi", "QDmi");
     this->setGeometry(0,0,settings->value("mainwindow/width").toInt(),settings->value("mainwindow/height").toInt());
-    //this->setGeometry(0,0,768,480); // For 4:3 800*600. For 16:9 848*480. For 16:10 768*480
+    this->setGeometry(0,0,768,480); // For 4:3 800*600. For 16:9 848*480. For 16:10 768*480
     #ifdef Q_OS_ANDROID
     QTimer::singleShot(1000,this,SLOT(showFullScreen()));
     QTimer::singleShot(500,this,SLOT(keepScreenOn()));
@@ -55,13 +55,14 @@ void MainWindow::process(){
     ui->systemVersionComp2Name->setTextFieldUsing(1, Qt::AlignRight);
     ui->systemVersionComp2Name->addTextMessage("github.com/nones",era::grey,era::darkBlue,1);
     ui->systemVersionComp1Version->setBorderThickness(0);
-    ui->systemVersionComp1Version->addTextMessage("1.2",era::grey,era::darkBlue,1);
+    ui->systemVersionComp1Version->addTextMessage("1.2.1",era::grey,era::darkBlue,1);
     ui->systemVersionComp2Version->setBorderThickness(0);
     ui->systemVersionComp2Version->addTextMessage("ense84/QDmi",era::grey,era::darkBlue,1);
     qRegisterMetaType< QVector<quint8> >("QVector<quint8>");
     qRegisterMetaType< QVector<qint16> >("QVector<qint16>");
-    connect(ui->fieldF4,SIGNAL(clicked(bool)),this,SLOT(arrowF4Clicked()));
-    connect(ui->fieldF5,SIGNAL(clicked(bool)),this,SLOT(arrowF5Clicked()));
+    connect(ui->fieldF1,SIGNAL(clicked(bool)),this,SLOT(fieldF1Clicked()));
+    connect(ui->fieldF4,SIGNAL(clicked(bool)),this,SLOT(fieldF4Clicked()));
+    connect(ui->fieldF5,SIGNAL(clicked(bool)),this,SLOT(fieldF5Clicked()));
     connect(ui->fieldE10,SIGNAL(clicked(bool)),this,SLOT(arrowUpClicked()));
     connect(ui->fieldE11,SIGNAL(clicked(bool)),this,SLOT(arrowDownClicked()));
     connect(ui->settingsBtn1,SIGNAL(clicked(bool)),this,SLOT(settingsBtn1Clicked()));
@@ -127,9 +128,10 @@ void MainWindow::process(){
     ui->settingsBtn1->setIcon(":/icons/lang_ena.svg",":/icons/lang_dis.svg");
     ui->settingsBtn2->setIcon(":/icons/volume_ena.svg", ":/icons/volume_dis.svg");
     ui->settingsBtn3->setIcon(":/icons/bright_ena.svg", ":/icons/bright_dis.svg");
+    ui->settingsBtn5->setIcon(":/icons/QDmi-Icon.svg", ":/icons/QDmi-Icon.svg");
     ui->settingsBtn4->setText("System version",era::grey,era::darkGrey,QFont::Light);
-    ui->settingsBtn5->setText("QDmi",era::grey,era::darkGrey,QFont::Light);
     ui->settingsBtn6->setIcon(":/icons/netw_ena.svg", ":/icons/netw_dis.svg");
+    ui->settingsBtn7->setIcon(":/icons/power_off.svg", ":/icons/power_off.svg");
     ui->settingsBtn1->setWorking(false, false, false);
     ui->settingsBtn2->setWorking(false, false, false);
     ui->settingsBtn3->setWorking(false, false, false);
@@ -157,7 +159,6 @@ void MainWindow::process(){
     ui->fieldF2->setAsButton(true);
     ui->fieldF3->setAsButton(true);
     ui->fieldF4->setAsButton(true);
-    ui->fieldF4->setIcon(":/icons/X.svg");
     ui->fieldF5->setAsButton(true);
     ui->fieldF5->setIcon(":/icons/tool.svg");
     ui->settingsBtn1->setAsButton(true);
@@ -316,12 +317,9 @@ void MainWindow::setPzbLzbNtc(){
         mode = modePzbLzbNtc;
     }
 }
-void MainWindow::arrowF4Clicked(){
-    settings->setValue("mainwindow/height", this->height());
-    settings->setValue("mainwindow/width", this->width());
-    QApplication::quit();
-}
-void MainWindow::arrowF5Clicked(){ui->fieldDG->setCurrentIndex(1);}
+void MainWindow::fieldF1Clicked(){}
+void MainWindow::fieldF4Clicked(){}
+void MainWindow::fieldF5Clicked(){ui->fieldDG->setCurrentIndex(1);}
 void MainWindow::arrowUpClicked(){}
 void MainWindow::arrowDownClicked(){}
 void MainWindow::settingsBtn1Clicked(){}
@@ -336,8 +334,15 @@ void MainWindow::settingsBtn6Clicked(){                                     // N
     ui->FieldE5to9->addTextMessage(" Auf eingegebene IP-Adresse tippen", era::grey, era::darkBlue, 8);
     ui->FieldE8to9->addTextMessage(" Auf eingegebene IP-Adresse tippen", era::grey, era::darkBlue, 8);
 }
-void MainWindow::settingsBtn7Clicked(){this->showFullScreen();}
-void MainWindow::settingsBtn8Clicked(){keepScreenOn();}
+void MainWindow::settingsBtn7Clicked(){
+    settings->setValue("mainwindow/height", this->height());
+    settings->setValue("mainwindow/width", this->width());
+    #ifdef Q_PROCESSOR_ARM
+    system("shutdown -P now");
+    #endif
+    QApplication::quit();
+}
+void MainWindow::settingsBtn8Clicked(){}
 void MainWindow::settingsCloseClicked(){
     if(ui->fieldDG->currentIndex() == 7){
         ui->FieldE5to9->removeTextMessage(8);
@@ -531,9 +536,13 @@ void MainWindow::resizeMe(){
     fieldBHolderRect.setWidth(static_cast<int>( era::modeAreDefault.width() * multi));
     fieldBHolderRect.setHeight(static_cast<int>(era::modeAreDefault.height() *multi));
 
-
     ui->widgetTacho->setGeometry(tachoRect);
     ui->fielBHolders->setGeometry(fieldBHolderRect);
+
+    #ifdef Q_PROCESSOR_ARM
+    this->setCursor(Qt::BlankCursor);
+    cursor().setPos(ui->centralWidget->width(), ui->centralWidget->height());
+    #endif
 }
 void MainWindow::resizeEvent(QResizeEvent* event){
     resizeMe();
@@ -557,13 +566,12 @@ void MainWindow::configureSettingsWindow(){
     emit newZusiIp(settings->value("zusiIp").toString());
 }
 void MainWindow::mousePressEvent(QMouseEvent *event){
-    #ifdef Q_OS_WIN32
+    #if defined(Q_OS_WIN32) || defined(Q_OS_LINUX)
     lKilickPos = event->pos();
     #endif
 }
 void MainWindow::mouseMoveEvent(QMouseEvent *event){
-    //#ifdef Q_OS_LINUX
-    #ifdef Q_OS_WIN32
+    #if defined(Q_OS_WIN32) || defined(Q_OS_LINUX)
     if(event->buttons() & Qt::LeftButton){
         if (ui->fieldZ->underMouse()) {
             QPoint diff = event->pos() - lKilickPos;
@@ -580,9 +588,14 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event){
     }
     #endif
 }
+#ifdef Q_PROCESSOR_ARM
+void MainWindow::keyPressEvent(QKeyEvent *event){
+     if(event->key() == Qt::Key_Escape) QApplication::quit();
+}
+#endif
+#ifdef Q_OS_ANDROID
 void MainWindow::keepScreenOn()
 {
-    #ifdef Q_OS_ANDROID
     QAndroidJniObject activity = QtAndroid::androidActivity();
     if (activity.isValid()) {
         QAndroidJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
@@ -596,5 +609,5 @@ void MainWindow::keepScreenOn()
         {
             env->ExceptionClear();
         }
-    #endif
 }
+#endif
