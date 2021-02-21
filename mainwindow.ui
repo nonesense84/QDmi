@@ -34,9 +34,6 @@
     <height>0</height>
    </size>
   </property>
-  <property name="cursor">
-   <cursorShape>PointingHandCursor</cursorShape>
-  </property>
   <property name="windowTitle">
    <string>QDmi</string>
   </property>
@@ -62,6 +59,9 @@
      <family>FreeSans</family>
     </font>
    </property>
+   <property name="cursor">
+    <cursorShape>PointingHandCursor</cursorShape>
+   </property>
    <widget class="QWidget" name="DmiManoHolder" native="true">
     <property name="geometry">
      <rect>
@@ -70,6 +70,9 @@
       <width>768</width>
       <height>480</height>
      </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="styleSheet">
      <string notr="true">background:rgb(10,10,10)
@@ -159,6 +162,9 @@
                <horstretch>160</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
+             </property>
+             <property name="cursor">
+              <cursorShape>SizeAllCursor</cursorShape>
              </property>
              <property name="styleSheet">
               <string notr="true"/>
