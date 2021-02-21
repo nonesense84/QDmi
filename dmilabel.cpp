@@ -22,9 +22,9 @@ void dmiLabel::mousePressEvent(QMouseEvent *event){
 
 void dmiLabel::mouseReleaseEvent(QMouseEvent *event){
     isPushed = false;
-    if(isEnab && isButton)QSound::play(":/sounds/click.wav");
-    update();
     emit clicked(true);
+    update();
+    if(isEnab && isButton)QSound::play(":/sounds/click.wav");
 }
 
 void dmiLabel::setAsButton(bool asButton){

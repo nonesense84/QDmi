@@ -101,7 +101,6 @@ private:
     void paintSegment(QPainter *iconPainter, QRect centralArea);
     void paintDistance(QPainter *iconPainter, QRect centralArea);
     QRect calcOptimalRect(QRect destArea, QRect iconArea);
-
 };
 
 #endif // DMILABEL_H
