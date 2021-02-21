@@ -339,6 +339,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                         emit newSpeed(VIst);
                         myIndicators->setVIst(VIst);
                         myPower->setVIst(VIst);
+                        if(VIst > 0) trainHasBenMovedSinceLastNewTrainNumber = true;
                     }
                     return;
                 case 0x0002:    // Druck Hauptluftleitung
@@ -368,7 +369,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                                     return;
                                 case 0x0002: return;  // Tf-Nummer qDebug() << "Tf-Nummer: " + QString(useDataComplex);
                                 case 0x0003:   // Zugnummer
-                                    setZugnummer(QString(useDataComplex));
+                                    setZugnummer(QString(useDataComplex), "PZB");
                                     return;
                                 case 0x0004:
                                     switch(nodeIds[5]){
@@ -715,7 +716,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
         }
         case 0x000C:
             switch(nodeIds[2]){
-                case 0x0002: setZugnummer(QString(useDataComplex));return; // Aktuelle Zugnummer
+                case 0x0002: setZugnummer(QString(useDataComplex), "Fahrplan");return; // Aktuelle Zugnummer
               //case 0x0003: return; // Status Ladepause, 0: Ende Ladepause (Start der Simulation)
               //case 0x0005: return; // 1: Zug neu übernommen
             }
@@ -779,15 +780,17 @@ void zusi3Tcp::transmitMtdIndicators(){
         mtdLmsToDecoderOld = mtdLmsToDecoder;
     }
 }
-void zusi3Tcp::setZugnummer(QString nummer){
-    nummer = nummer.right(nummer.indexOf("_"));
-    if((nummer != zugnummer) && (zugnummer != "")){
+void zusi3Tcp::setZugnummer(QString nummer, QString fromSystem){
+    QString zugnummerAnzeige = nummer;
+    emit newZugnummer(zugnummerAnzeige.replace('_', '\n'));
+    if((fromSystem == "Fahrplan" && trainHasBenMovedSinceLastNewTrainNumber && VIst == 0)){
+        trainHasBenMovedSinceLastNewTrainNumber = false;
         disconnectFromZusi();
         myIndicators->clearData();
         QTimer::singleShot(1000, this, SLOT(reconnect()));
     }
-    emit newZugnummer(nummer);
     zugnummer = nummer;
+
 }
 void zusi3Tcp::reconnect(){
     setIpadress(ipAddress);

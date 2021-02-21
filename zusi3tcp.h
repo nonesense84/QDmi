@@ -31,7 +31,7 @@ private slots:
     int32_t readIntegerAtPos(int pos);
     uint16_t readIdAtPos(int pos);
     void setSammelschine();
-    void setZugnummer(QString nummer);
+    void setZugnummer(QString nummer, QString fromSystem);
     void transmitMtdIndicators();
 
 public slots:
@@ -59,6 +59,7 @@ private:
     QString zugnummer;
     bool useManometer = true;
     bool istVMaxErstesFahrzeug = true;
+    bool trainHasBenMovedSinceLastNewTrainNumber = false;
     uint8_t ipHostPart = 1;
     uint16_t drHll=0;
     uint16_t drHlb=0;
