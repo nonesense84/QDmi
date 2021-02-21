@@ -78,5 +78,7 @@
         <file>icons/LmUe_Gnt_on.svg</file>
         <file>icons/LmG_Gnt_off.svg</file>
         <file>icons/LmS_Gnt_off.svg</file>
+        <file>icons/QDmi-Icon.svg</file>
+        <file>icons/power_off.svg</file>
     </qresource>
 </RCC>
