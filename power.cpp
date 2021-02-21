@@ -16,6 +16,7 @@ void power::setDpi(qreal dpi){
     fontDial.setPointSizeF(26.0 * 96.0 / dpi);
     fontNose.setPointSizeF(37.0 * 96.0 / dpi);
     fontDescription.setPointSizeF(17.0 * 96.0 / dpi);
+    update();
 }
 
 void power::attenuationRoutine(){
