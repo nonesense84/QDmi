@@ -9,6 +9,7 @@ void zusi3Tcp::process(){
     myPower = new zusiPower();
     mtdLmsToDecoder.resize(13);
     connect(client,SIGNAL(readyRead()),this,SLOT(clientReadReady()));
+    connect(client,SIGNAL(disconnected()),this,SLOT(reconnect()));
 }
 
 void zusi3Tcp::disconnectFromZusi(){
@@ -57,7 +58,7 @@ void zusi3Tcp::setIpadress(QString address){
     addAtribut(&anmeldung, 0x01, 0x02); // Protokoll-Version
     addAtribut(&anmeldung, 0x02, 0x02); // Client-Typ: [1: Zusi| 2: Fahrpult]
     addTextAtribut(&anmeldung, 0x03, "QDmi");
-    addTextAtribut(&anmeldung, 0x04, "1.2");
+    addTextAtribut(&anmeldung, 0x04, "1.2.2");
     addKnotenEnde(&anmeldung);
     addKnotenEnde(&anmeldung);
     QByteArray anmeldArr;
@@ -183,7 +184,8 @@ void zusi3Tcp::checkClientConnection(){
     case QAbstractSocket::UnconnectedState:
         removeTechnicalMessage(11);
         emit newTechnicalMessage(" Verbindungsaufbau gescheitert", era::grey, era::darkBlue, 10);
-        QTimer::singleShot(5000,this,SLOT(remooveTechMessage10()));
+        QTimer::singleShot(4000,this,SLOT(remooveTechMessage10()));
+        if(autoReconnect)QTimer::singleShot(5000, this, SLOT(reconnect()));
         break;
     case QAbstractSocket::HostLookupState:
         removeTechnicalMessage(10);
@@ -371,7 +373,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                                 case 0x0003:   // Zugnummer
                                     setZugnummer(QString(useDataComplex), "PZB");
                                     return;
-                                case 0x0004:
+                                case 0x0004:   // Werte der Grunddaten
                                     switch(nodeIds[5]){
                                     case 0x0001:   // BRH-Wert (Bremshundertstel).
                                         //qDebug() << "BRH Grund.: " + QString::number(useData2Byte.Word);
@@ -390,7 +392,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                                         return;
                                     }
                                     return;
-                                case 0x0005:
+                                case 0x0005:   // Werte der Ersatzzugdaten
                                     switch(nodeIds[5]) {
                                         case 0x0001:   // BRH-Wert (Bremshundertstel)
                                             //qDebug() << "BRH Ers.: " + QString::number(useData2Byte.Word);
@@ -409,7 +411,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                                             return;
                                     }
                                     return;
-                                case 0x0006:
+                                case 0x0006:   // Aktive Zugdaten
                                     switch(nodeIds[5]) {
                                         case 0x0001:   // BRH-Wert (Bremshundertstel). Werte der Ersatzzugdaten
                                             //qDebug() << "BRH Akt.:   " + QString::number(useData2Byte.Word);
@@ -423,8 +425,10 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                                         case 0x0005:   // Zugehörige Zugart. Werte der Ersatzzugdaten
                                             //qDebug() << "ZA Akt.:    " + QString::number(useData2Byte.byte[0]);
                                             return;
-                                        case 0x0006:   // Modus (Ersatzzugdaten / Normalbetrieb)
-                                            //qDebug() << "Ers./Norm.: " + QString::number(useData2Byte.byte[0]);
+                                        case 0x0006:   // Modus (Grunddaten / Ersatzzugdaten / Normalbetrieb)
+                                            qDebug() << "Grund./Ers./Norm.: " + QString::number(useData2Byte.byte[0]);
+                                            myIndicators->setGrunddatenWirksam(useData2Byte.byte[0] == 4, VIst <= 50);
+                                            myIndicators->setErsatzdatenWirksam(useData2Byte.byte[0] == 5, VIst <= 50);
                                             return;
                                     }
                                     return;
@@ -794,6 +798,9 @@ void zusi3Tcp::setZugnummer(QString nummer, QString fromSystem){
 }
 void zusi3Tcp::reconnect(){
     setIpadress(ipAddress);
+}
+void zusi3Tcp::setAutoReconnect(quint8 reconnect){
+   autoReconnect = reconnect > 0;
 }
 void zusi3Tcp::setSammelschine(){
     setMtdIndicator(0,8);

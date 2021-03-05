@@ -42,6 +42,7 @@ public slots:
     void disconnectFromZusi();
     void process();
     void reconnect();
+    void setAutoReconnect(quint8 reconnect);
     void addKnotenAnfang(QVector<unsigned char> *vector, unsigned char knoten);
     void addKnotenEnde(QVector<unsigned char> *vector);
     void addAtribut(QVector<unsigned char> *vector, unsigned char id, unsigned char atribut);
@@ -55,6 +56,7 @@ public:
     zusiPower *myPower;
 
 private:
+    bool autoReconnect = true;
     QString ipAddress;
     QString zugnummer;
     bool useManometer = true;

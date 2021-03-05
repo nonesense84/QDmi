@@ -29,6 +29,15 @@ void zusiIndicator::setMelderbild(uint8_t value){
 void zusiIndicator::setZustandZugsicherung(uint16_t value){
     //qDebug() << "Zustand Zugb.:      " + QString::number(value);
     zustandZugsicherung = value;
+    if(ktp){
+        if(value == 4 &&  vIst <= vMAuffordZDE){
+            emit newTextMessage(db::messages[46], db::textFontColors[46], db::textBgColors[46], 46); // Zugdaten eingeben
+        }
+        else{
+            emit removeMessage(46); // Zugdaten eingeben
+        }
+    }
+
 }
 void zusiIndicator::setGrundZwangsbrmnsung(uint16_t value){//qDebug() << "ZB wegen ID: " + QString::number(value);
     if(lzbZustand == 3)value = 9;   //Workarround: Zusi does not set "Bremsgrund LZB-Halt überfahren (->9)". But luckily then "LzbZustand" is 3
@@ -113,10 +122,14 @@ void zusiIndicator::setGrundZwangsbrmnsung(uint16_t value){//qDebug() << "ZB weg
 }
 void zusiIndicator::setZugart(uint8_t value){//qDebug() << "Zugart:    " + QString::number(value);
     zugart = value; // U_M_O 2_3_4  1_Undef
-    if(zugart == 1 && ktp) emit newTextMessage(db::messages[46], db::textFontColors[46], db::textBgColors[46], 46);
 }
 void zusiIndicator::setKlartextmeldungen(uint8_t value){//qDebug() << "Klartextmeldungen : " + QString::number(value);
-    klartextmeldungen = value;
+    if(ktp != value > 1 && value > 1){
+        for(quint8 i = 0; db::messages->size(); i++){
+            removeMessage(i);
+        }
+        removeMessage(lastLimitMessage);
+    }
     ktp = value > 1;
 }
 void zusiIndicator::setLmHauptschalter(uint8_t value){
@@ -154,9 +167,21 @@ void zusiIndicator::setLm1000Hz(uint8_t value){
     if(melderbild == 0 && lm1000Hz  > 0) melderbild = 6;
     if(melderbild == 6 && lm1000Hz == 0) melderbild = 0;
 }
-void zusiIndicator::setErsatzdatenWirksam(uint8_t value){
-    if(value == 0)emit removeMessage(59);
-    if(value >  0 && ktp)emit newTextMessage(db::messages[59], db::textFontColors[59], db::textBgColors[59], 59);
+void zusiIndicator::setGrunddatenWirksam(bool valid, bool visible){
+    grunddatenWirksam = valid;
+    if(ktp){
+        if(valid && visible){
+            emit newTextMessage(db::messages[59], db::textFontColors[59], db::textBgColors[59], 59);
+        }
+        else{
+            if(!valid || !visible)emit removeMessage(59);
+        }
+    }
+}
+void zusiIndicator::setErsatzdatenWirksam(bool valid, bool visible){
+    ersatzdatenWirksam = valid;
+    if(!valid || !visible)emit removeMessage(69);
+    if(valid && visible)emit newTextMessage(db::messages[69], db::textFontColors[69], db::textBgColors[69], 69);
 }
 void zusiIndicator::setLm500Hz(uint8_t value){
     lm500Hz = value;
@@ -434,6 +459,16 @@ void zusiIndicator::setVSoll(int16_t value){
     setLzbValue(value, 3);
 }
 void zusiIndicator::setVIst(uint16_t value){
+    if(value > vMAuffordZDE && vIst <= vMAuffordZDE && ktp){
+        setZustandZugsicherung(zustandZugsicherung);            // To remove "Zugdaten eingeben"
+        this->setGrunddatenWirksam(grunddatenWirksam, false);
+        this->setErsatzdatenWirksam(ersatzdatenWirksam, false);
+    }
+    if(value <= vMAuffordZDE && vIst > vMAuffordZDE && ktp){
+        setZustandZugsicherung(zustandZugsicherung);            // To add "Zugdaten eingeben"
+        this->setGrunddatenWirksam(grunddatenWirksam, true);
+        this->setErsatzdatenWirksam(ersatzdatenWirksam, true);
+    }
     vIst = value;
 }
 void zusiIndicator::setVZiel(int16_t value){
@@ -565,21 +600,23 @@ void zusiIndicator::makeLzbLmDatagram(){
             lm70 = 5;
             lm55 = 5;}
         if(lzbZustand == 0) {//Keine LZB-Führung
-            if(zugart == 2 && zustandZugsicherung == 5 && melderbild > 1 && melderbild < 6 && !ktp)lm85 = 5;
-            if(zugart == 2 && zustandZugsicherung == 5 && melderbild > 1 && melderbild < 6 && ktp)lm55 = 5;
-            if(zugart == 3 && zustandZugsicherung == 5 && melderbild > 1 && melderbild < 5 && !ktp)lm85 = 13;
-            if(zugart == 3 && zustandZugsicherung == 5 && melderbild == 5)lm85 = 5;
-            if(zugart == 4 && zustandZugsicherung >= 5)lm85 = 5;
-            if(zugart == 4 && zustandZugsicherung == 5 && melderbild == 0)lm85 = 1;
-            if(zugart == 2 && zustandZugsicherung == 5 && melderbild > 1 && melderbild < 5 && !ktp)lm70 = 13;
-            if(zugart == 2 && zustandZugsicherung == 5 && melderbild == 5)lm70 = 5;
-            if(zugart == 3 && zustandZugsicherung >= 5)lm70 = 5;
-            if(zugart == 3 && zustandZugsicherung == 5 && melderbild == 0)lm70 = 1;
-            if(zugart == 4 && zustandZugsicherung == 5 && melderbild > 1 && melderbild < 5 && !ktp)lm70 = 13;
-            if(zugart == 4 && zustandZugsicherung == 5 && melderbild == 5)lm70 = 5;
-            if(zugart == 2 && zustandZugsicherung == 5 && (melderbild == 1 || melderbild == 6))lm55 = 5;
-            if(zugart == 2 && zustandZugsicherung == 5 && melderbild == 0)lm55 = 1;
-            if(zustandZugsicherung == 4 && melderbild == 0)lm55 = 5;
+            if(zugart == 2 && (zustandZugsicherung == 5 || zustandZugsicherung == 4) && melderbild > 1 && melderbild < 6 && !ktp)lm85 = 5;
+            if(zugart == 2 && (zustandZugsicherung == 5 || zustandZugsicherung == 4) && melderbild > 1 && melderbild < 6 && ktp)lm55 = 5;
+            if(zugart == 3 && (zustandZugsicherung == 5 || zustandZugsicherung == 4) && melderbild > 1 && melderbild < 5 && !ktp)lm85 = 13;
+            if(zugart == 3 && (zustandZugsicherung == 5 || zustandZugsicherung == 4) && melderbild == 5)lm85 = 5;
+            if(zugart == 4 && (zustandZugsicherung >= 4))lm85 = 5;
+            if(zugart == 4 && (zustandZugsicherung == 5 || zustandZugsicherung == 4) && melderbild == 0)lm85 = 1;
+            if(zugart == 2 && (zustandZugsicherung == 5 || zustandZugsicherung == 4) && melderbild > 1 && melderbild < 5 && !ktp)lm70 = 13;
+            if(zugart == 2 && (zustandZugsicherung == 5 || zustandZugsicherung == 4) && melderbild == 5)lm70 = 5;
+            if(zugart == 3 && (zustandZugsicherung >= 4))lm70 = 5;
+            if(zugart == 3 && (zustandZugsicherung == 5 || zustandZugsicherung == 4) && melderbild == 0)lm70 = 1;
+            if(zugart == 4 && (zustandZugsicherung == 5 || zustandZugsicherung == 4) && melderbild > 1 && melderbild < 5 && !ktp)lm70 = 13;
+            if(zugart == 4 && (zustandZugsicherung == 5 || zustandZugsicherung == 4) && melderbild == 5)lm70 = 5;
+            if(zugart == 2 && (zustandZugsicherung == 5 || zustandZugsicherung == 4) && (melderbild == 1 || melderbild == 6))lm55 = 5;
+            if(zugart == 2 && (zustandZugsicherung == 5 || zustandZugsicherung == 4)  && melderbild == 0)lm55 = 1;
+            if(zugart == 2 &&  zustandZugsicherung == 4  && melderbild == 0 && vIst <= vMAuffordZDE)lm55 = 5;
+            if(zugart == 3 &&  zustandZugsicherung == 4  && melderbild == 0 && vIst <= vMAuffordZDE)lm70 = 5;
+            if(zugart == 4 &&  zustandZugsicherung == 4  && melderbild == 0 && vIst <= vMAuffordZDE)lm85 = 5;
         }
         if(ktp)calcPzbTextmessages();
     }
@@ -614,11 +651,11 @@ void zusiIndicator::makeLzbLmDatagram(){
 
 void zusiIndicator::clearData(){
     melderbild = 0; melderbildOld = 0; lm1000Hz = 0; lm85 = 0; lm70 = 0; lm55 = 0;
-    zugart = 0; klartextmeldungen = 0; ktp = 0; lmBefehl = 0; lm500Hz = 0; lmS = 0;
+    zugart = 0; ktp = 0; lmBefehl = 0; lm500Hz = 0; lmS = 0;
     lmSDelayed = 0; lmH = 0; lmE40 = 0; lmB = 0; lmUe = 0; lmG = 0; lmEl = 0; lmEnde = 0;
     lmHauptschalter = 0; lmGetriebe = 0; lmSchleudern = 0; lmGleiten = 0;
     lmUhrzeitDigital = 0; StwgHauptschalter = 0; lmSifa = 0; SifaHupe = 0;
-    SifaStoerschalter = 0; SifaLuftabsperrhahn = 0; ErsatzdatenWirksam = 0; lzbZustand = 0;
+    SifaStoerschalter = 0; SifaLuftabsperrhahn = 0; lzbZustand = 0;
     falschfahrauftrag = 0; vorsichtauftrag = 0; lzbNothalt = 0; lzbRechnerausfall = 0;
     lzbElAuftrag = 0; lmEL = 0; lmV40 = 0; lmPruefStoer = 0; stromabn1Oben = 0;
     stromabn2Oben = 0; stromabn3Oben = 0; stromabn4Oben = 0; stromabn1Hebend = 0;
@@ -632,6 +669,9 @@ void zusiIndicator::clearData(){
     setZielweg(0);
     setAfbSoll(0);
     setAfbAn(0);
+    for(quint8 i = 0; db::messages->size(); i++){
+        removeMessage(i);
+    }
     emit removeMessage(lastLimitMessage);
 }
 

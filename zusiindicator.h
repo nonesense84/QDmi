@@ -7,17 +7,18 @@
 #include <QTimer>
 #include <era.h>
 #include "db.h"
+#define vMAuffordZDE  50    // Maximum speed, till "Zugdaten eingeben" or 55/70/85 is blinking
 class zusiIndicator : public QObject
 {
     Q_OBJECT
 private:
     uint8_t indicators[64];
     uint8_t melderbild = 0, melderbildOld = 0, lm1000Hz = 0, lm85 = 0, lm70 = 0, lm55 = 0,
-    zugart = 0, klartextmeldungen = 0, ktp = 0, lmBefehl = 0, lm500Hz = 0, lmS = 0,
+    zugart = 0, ktp = 1, lmBefehl = 0, lm500Hz = 0, lmS = 0,
     lmSDelayed = 0, lmH = 0, lmE40 = 0, lmB = 0, lmUe = 0, lmG = 0, lmEl = 0, lmEnde = 0,
     lmHauptschalter = 0, lmGetriebe = 0, lmSchleudern = 0, lmGleiten = 0,
     lmUhrzeitDigital = 0, StwgHauptschalter = 0, lmSifa = 0, SifaHupe = 0,
-    SifaStoerschalter = 0, SifaLuftabsperrhahn = 0, ErsatzdatenWirksam = 0, lzbZustand = 0,
+    SifaStoerschalter = 0, SifaLuftabsperrhahn = 0, lzbZustand = 0,
     falschfahrauftrag = 0, vorsichtauftrag = 0, lzbNothalt = 0, lzbRechnerausfall = 0,
     lzbElAuftrag = 0, lmEL = 0, lmV40 = 0, lmPruefStoer = 0, stromabn1Oben = 0,
     stromabn2Oben = 0, stromabn3Oben = 0, stromabn4Oben = 0, stromabn1Hebend = 0,
@@ -28,7 +29,7 @@ private:
     quint8 lastLimitMessage;
     bool restriktiv = false;
     bool afbAn = false;
-    bool ersatzauftrag = false, lzbHaltUeberfahren = false;
+    bool ersatzauftrag = false, lzbHaltUeberfahren = false, grunddatenWirksam = false, ersatzdatenWirksam = false;
     bool lzbVorhanden;
     QVector<quint8> lmsToDecoderOld;
     QTimer *lmElBlinkTestTimer;
@@ -72,7 +73,8 @@ public slots:
     void setLmGleiten(uint8_t value);
     void setLmUhrzeitDigital(uint8_t value);
     void setLm1000Hz(uint8_t value);
-    void setErsatzdatenWirksam(uint8_t value);
+    void setGrunddatenWirksam(bool valid, bool visible);
+    void setErsatzdatenWirksam(bool valid, bool visible);
     void setLm500Hz(uint8_t value);
     void setLmBefehl(uint8_t value);
     void setLzbStoerschalter(uint8_t value);
