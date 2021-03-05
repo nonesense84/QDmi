@@ -100,6 +100,7 @@ protected:
 signals:
     void newDotsPerInch(qreal dpi);
     void newManometerUse(bool use);
+    void tcpConnectionSettings(quint8 settings);
 };
 
 #endif // MAINWINDOW_H

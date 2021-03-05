@@ -2998,6 +2998,65 @@
                    </widget>
                   </item>
                   <item>
+                   <widget class="QLabel" name="label_qdmi_4">
+                    <property name="font">
+                     <font>
+                      <family>FreeSans</family>
+                      <pointsize>14</pointsize>
+                     </font>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">color:rgb(195,195,195)</string>
+                    </property>
+                    <property name="frameShape">
+                     <enum>QFrame::NoFrame</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Sunken</enum>
+                    </property>
+                    <property name="lineWidth">
+                     <number>3</number>
+                    </property>
+                    <property name="text">
+                     <string>Verbindungsaufbau zu Zusi 3</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QComboBox" name="pulldown_tcpConnection">
+                    <property name="font">
+                     <font>
+                      <family>FreeSans</family>
+                      <pointsize>14</pointsize>
+                     </font>
+                    </property>
+                    <property name="focusPolicy">
+                     <enum>Qt::NoFocus</enum>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background:rgb(3,17,34);color:rgb(195,195,195)</string>
+                    </property>
+                    <property name="currentText">
+                     <string comment="1"/>
+                    </property>
+                    <property name="maxVisibleItems">
+                     <number>3</number>
+                    </property>
+                    <property name="maxCount">
+                     <number>3</number>
+                    </property>
+                    <property name="minimumContentsLength">
+                     <number>0</number>
+                    </property>
+                    <property name="frame">
+                     <bool>true</bool>
+                    </property>
+                    <property name="modelColumn">
+                     <number>0</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
                    <spacer name="verticalSpacer">
                     <property name="orientation">
                      <enum>Qt::Vertical</enum>

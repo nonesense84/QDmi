@@ -6,7 +6,12 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowFlags(Qt::FramelessWindowHint);
+
+    #ifdef Q_PROCESSOR_ARM
+    //QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, ".");
+    #endif
     settings = new QSettings("QDmi", "QDmi");
+    //settings->setPath(QSettings::IniFormat, QSettings::SystemScope, ".");
     this->setGeometry(0,0,settings->value("mainwindow/width").toInt(),settings->value("mainwindow/height").toInt());
     this->setGeometry(0,0,768,480); // For 4:3 800*600. For 16:9 848*480. For 16:10 768*480
     #ifdef Q_OS_ANDROID
@@ -55,7 +60,7 @@ void MainWindow::process(){
     ui->systemVersionComp2Name->setTextFieldUsing(1, Qt::AlignRight);
     ui->systemVersionComp2Name->addTextMessage("github.com/nones",era::grey,era::darkBlue,1);
     ui->systemVersionComp1Version->setBorderThickness(0);
-    ui->systemVersionComp1Version->addTextMessage("1.2.1",era::grey,era::darkBlue,1);
+    ui->systemVersionComp1Version->addTextMessage("1.2.2",era::grey,era::darkBlue,1);
     ui->systemVersionComp2Version->setBorderThickness(0);
     ui->systemVersionComp2Version->addTextMessage("ense84/QDmi",era::grey,era::darkBlue,1);
     qRegisterMetaType< QVector<quint8> >("QVector<quint8>");
@@ -122,6 +127,7 @@ void MainWindow::process(){
     ui->widgetMano1->setPonter2Label("Hauptluftleitung");
     ui->widgetMano2->setPonter1Label("Bremszylinder");
     connect(this,SIGNAL(newManometerUse(bool)),myTcp,SLOT(setUseManometer(bool)));
+    connect(this,SIGNAL(tcpConnectionSettings(quint8)),myTcp,SLOT(setAutoReconnect(quint8)));
     connect(myTcp,SIGNAL(newSimTime(QString)),ui->fieldG13,SLOT(setText(QString)));
     connect(mySep,SIGNAL(newSimTime(QString)),ui->fieldG13,SLOT(setText(QString)));
     connect(myTcp,SIGNAL(newZugnummer(QString)),ui->fieldG11,SLOT(setText(QString)));
@@ -352,6 +358,7 @@ void MainWindow::settingsCloseClicked(){
         settings->setValue("pulldown_gauge",ui->pulldown_gauge->currentIndex());
         settings->setValue("pulldown_targetdistance",ui->pulldown_targetdistance->currentIndex());
         settings->setValue("pulldown_showManometer",ui->pulldown_showManometer->currentIndex());
+        settings->setValue("pulldown_tcpConnection",ui->pulldown_tcpConnection->currentIndex());
         ui->widgetTacho->setEraUse(settings->value("pulldown_gauge").toInt() == 0);
         ui->fieldVZile100->setVisib(settings->value("pulldown_gauge").toInt() == 1);
         ui->fieldVZile10->setVisib(settings->value("pulldown_gauge").toInt() == 1);
@@ -359,6 +366,7 @@ void MainWindow::settingsCloseClicked(){
         ui->fieldA3->setEraUse(settings->value("pulldown_targetdistance").toInt() == 0);
         showManometer = static_cast<quint8>(settings->value("pulldown_showManometer").toUInt());
         emit newManometerUse(showManometer);
+        emit tcpConnectionSettings(static_cast<quint8>(settings->value("pulldown_tcpConnection").toUInt()));
         resizeMe();
     }
     if(ui->fieldDG->currentIndex()>1){
@@ -549,14 +557,17 @@ void MainWindow::resizeEvent(QResizeEvent* event){
 }
 void MainWindow::configureSettingsWindow(){
     QStringList tdList = { "1000m ERA", "4000m DB" };
-    QStringList gaugeList = { "Haken ERA", "Dreieck DB" };
+    QStringList gaugeList = { "Haken ERA ERTMS", "Dreieck DB" };
     QStringList showManometerList = { "Nicht anzeigen", "Anzeigen (16:9)", "Anzeigen (16:10)" };
+    QStringList tcpConnectionList = { "Einmal beim Start", "Wiederholend" };
     ui->pulldown_targetdistance->addItems(tdList);
     ui->pulldown_gauge->addItems(gaugeList);
     ui->pulldown_showManometer->addItems(showManometerList);
+    ui->pulldown_tcpConnection->addItems(tcpConnectionList);
     ui->pulldown_targetdistance->setCurrentIndex(settings->value("pulldown_targetdistance").toInt());
     ui->pulldown_gauge->setCurrentIndex(settings->value("pulldown_gauge").toInt());
     ui->pulldown_showManometer->setCurrentIndex(settings->value("pulldown_showManometer").toInt());
+    ui->pulldown_tcpConnection->setCurrentIndex(settings->value("pulldown_tcpConnection").toInt());
     ui->widgetTacho->setEraUse(settings->value("pulldown_gauge").toInt() == 0);
     ui->fieldVZile100->setVisib(settings->value("pulldown_gauge").toInt() == 1);
     ui->fieldVZile10->setVisib(settings->value("pulldown_gauge").toInt() == 1);
@@ -564,6 +575,7 @@ void MainWindow::configureSettingsWindow(){
     ui->fieldA3->setEraUse(settings->value("pulldown_targetdistance").toInt() == 0);
     showManometer = static_cast<quint8>(settings->value("pulldown_showManometer").toUInt());
     emit newZusiIp(settings->value("zusiIp").toString());
+    emit tcpConnectionSettings(static_cast<quint8>(settings->value("pulldown_tcpConnection").toUInt()));
 }
 void MainWindow::mousePressEvent(QMouseEvent *event){
     #if defined(Q_OS_WIN32) || defined(Q_OS_LINUX)
