@@ -20,15 +20,13 @@ void power::setDpi(qreal dpi){
 }
 
 void power::attenuationRoutine(){
-    //if(arcOpenRight == arcAccel) arcAccel = 0;
-    //arcAccel++;
     if(arcAccel < arcAccelDest){
-        arcAccel = arcAccel + (arcAccelDest - arcAccel) * 0.05;
+        arcAccel = arcAccel + (arcAccelDest - arcAccel) * 0.1;
         if((arcAccelDest - arcAccel) < 1)arcAccel = arcAccelDest;
         update();
     }
     if(arcAccel > arcAccelDest){
-        arcAccel = arcAccel - (arcAccel - arcAccelDest) * 0.05;
+        arcAccel = arcAccel - (arcAccel - arcAccelDest) * 0.1;
         if((arcAccel - arcAccelDest) < 1)arcAccel = arcAccelDest;
         update();
     }
