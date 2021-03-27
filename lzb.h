@@ -14,7 +14,8 @@ public:
 public slots:
     void setStates(QVector<quint8> states);
     void setAnalogValues(QVector<quint8> values);
-    void setTextUsing(bool useAutomText);
+    void setTextUsing(quint8 useAutomText);
+    void setZusiAsDataSource(bool value);
     void setVAct(quint16 V);
 
 private slots:
@@ -63,31 +64,32 @@ private:
     #define Zwangsbremsung 3
     #define Stoerbetrieb 4
     bool useTxtMsgByLm = false;
+    bool zusiIsDataSource = false;
     bool blauBlink = false;
     bool intervenation = false;
-    bool tausendBeinfl = false;
-    bool fuenfhuBeinfl = false;
-    bool zweitauBeinfl = false;
+    //bool tausendBeinfl = false;
+    //bool fuenfhuBeinfl = false;
+    //bool zweitauBeinfl = false;
     bool overspeed = false;
-    bool restriktiv = false;
-    bool intervenationEmitted = false;
+    //bool restriktiv = false;
     //bool showLzb;
     quint8 stoerschalter;
     quint8 zugart = 2;
     quint8 zustLmBlau;
     quint8 magnLm;
     quint8 actState;
-    quint8 lastLimitMessage;
+    quint8 lastLimitMessage = 255;
     quint8 indicatorField[7] = {255,255,255,255,255,255,255};
     quint8 indicatorFieldBehav[7] = {255,255,255,255,255,255,255};
+    quint8 emittedMessages[69];
     quint8 actMessages[3];
-    QString messages[63];
     qreal vAct = 0;
     quint16 vPerm;
     quint16 vDest;
 
 private slots:
     void sentSpetLimitMessage(quint8 limit);
+    void addOrRemoveMessage(quint8 message, bool add);
 
 };
 

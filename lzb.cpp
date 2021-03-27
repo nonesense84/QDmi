@@ -2,11 +2,30 @@
 #include "lzb.h"
 
 lzb::lzb(){
-    //messages = db::messages;
 }
 
-void lzb::setTextUsing(bool useAutomText){
-    useTxtMsgByLm = useAutomText;
+void lzb::setTextUsing(quint8 useAutomText){
+    if(useTxtMsgByLm != useAutomText){
+        qDebug()  << db::numMessages;
+        for(quint8 i = 0; i < db::numMessages; i++){
+            removeMessage(i);
+            qDebug()  << i;
+        }
+        removeMessage(lastLimitMessage);
+    }
+    useTxtMsgByLm = useAutomText == 0; // 0: Allways, 1: Automatic, 2: Never
+}
+
+void lzb::setZusiAsDataSource(bool value){
+    if(zusiIsDataSource != value){
+        qDebug()  << db::numMessages;
+        for(quint8 i = 0; i < db::numMessages; i++){
+            removeMessage(i);
+            qDebug()  << i;
+        }
+        removeMessage(lastLimitMessage);
+    }
+    zusiIsDataSource = value;
 }
 
 void lzb::setAnalogValues(QVector<quint8> values){
@@ -29,49 +48,67 @@ void lzb::setVAct(quint16 V){
 void lzb::setStates(QVector<quint8> states){
     emit gotLzbMessage();
     intervenation = ((states[12] > 1 && states[13] > 1) || states[ 6] >  0);
+
     overspeed = states[ 8] >  1;
     emit newOverspeed(overspeed || ((vAct > vPerm) &&  vPerm > 0));
     emit newIntervenation(intervenation);
     emit newVMaxReducing(states[ 8] >  0);
-    if(useTxtMsgByLm){
-        if(states[ 1] > 0  && states[ 2] == 0 && states[03] == 0) zustLmBlau = ZugartO;
-        if(states[ 1] == 0 && states[ 2] >  0 && states[03] == 0) zustLmBlau = ZugartM;
-        if(states[ 1] == 0 && states[ 2] == 0 && states[03] >  0) zustLmBlau = ZugartU;
-        if(states[ 1] == 0 && states[ 2] == 0 && states[03] == 0) zustLmBlau = Keine;
-        if(states[ 1] > 1  && states[ 2] == 0 && states[03] == 0) zustLmBlau = ZugartOBlink;
-        if(states[ 1] == 0 && states[ 2] >  1 && states[03] == 0) zustLmBlau = ZugartMBlink;
-        if(states[ 1] == 0 && states[ 2] == 0 && states[03] >  1) zustLmBlau = ZugartUBlink;
-        restriktiv = states[ 1] > 1 && states[ 2] > 1;
+    if(useTxtMsgByLm && !zusiIsDataSource){
+        if(states[1] > 0  && states[2] == 0 && states[3] == 0) zustLmBlau = ZugartO;
+        if(states[1] == 0 && states[2] >  0 && states[3] == 0) zustLmBlau = ZugartM;
+        if(states[1] == 0 && states[2] == 0 && states[3] >  0) zustLmBlau = ZugartU;
+        if(states[1] == 0 && states[2] == 0 && states[3] == 0) zustLmBlau = Keine;
+        if(states[1] > 1  && states[2] == 0 && states[3] == 0) zustLmBlau = ZugartOBlink;
+        if(states[1] == 0 && states[2] >  1 && states[3] == 0) zustLmBlau = ZugartMBlink;
+        if(states[1] == 0 && states[2] == 0 && states[3] >  1) zustLmBlau = ZugartUBlink;
+        quint8 blinkFrequency = 2;
+        if((states[4] == 6) || (states[4] == 7)){ // If system has LZB, use slow blinking.
+            blinkFrequency = 1;
+        }
+        bool restriktiv = states[ 1] > 1 && states[ 2] > 1;
         if((zustLmBlau == ZugartO) || ((zustLmBlau == ZugartOBlink) && (zustLmBlau != ZugartMBlink))) zugart = ZugartO;
         if((zustLmBlau == ZugartM) || ((zustLmBlau == ZugartMBlink) && (zustLmBlau != ZugartOBlink))) zugart = ZugartM;
         if((zustLmBlau == ZugartU) || zustLmBlau == ZugartUBlink)                                     zugart = ZugartU;
         if (zustLmBlau == Keine)                                                                      zugart = Keine;
         blauBlink = ((zustLmBlau == ZugartOBlink) || (zustLmBlau == ZugartMBlink) || (zustLmBlau == ZugartUBlink));
-        tausendBeinfl = (states[12] == 1 && states[13] == 0);
-        fuenfhuBeinfl = (states[12] == 0 && states[13] == 1);
-        zweitauBeinfl = states[11] == 1;
-        stoerschalter = (states[12] >  1 && states[13] == 0);
-
-        //showLzb = states[18] >  0;
+        bool tausendBeinfl =  (states[12] == 1 && states[13] == 0);
+        bool fuenfhuBeinfl =  (states[12] == 0 && states[13] == 1);
+        bool zweitauBeinfl =   states[11] == 1;
+      //bool stoerschalter =  (states[12] >  1 && states[13] == 0);
+        bool bremsEinsPunkt =  states[8 ] == 1;
+        bool vorsAuftrag    =  states[10] >  0;
+        bool ersAuftrag     =  states[10] >  0;
+        bool freiTastErw    = (states[10] >  1 ||
+                               states[17] >  1 ||
+                              (intervenation && vAct <= 30));
+        bool lzbEnde        = (states[17] >  0);
+        addOrRemoveMessage(0,  intervenation);
+        addOrRemoveMessage(5,  overspeed);
+        addOrRemoveMessage(61, bremsEinsPunkt);
+      //addOrRemoveMessage(66, stoerschalter);
+        addOrRemoveMessage(29, vorsAuftrag);
+        addOrRemoveMessage(29, ersAuftrag);
+        addOrRemoveMessage(28, lzbEnde);
+        addOrRemoveMessage(45, freiTastErw);
 
         switch (zugart){
             case ZugartO:
                 removeIndicator(2);
                 removeIndicator(3);
                 if( restriktiv &&  !fuenfhuBeinfl){//45km/h / 1000 / 85'
-                    addIndicator(1, 2, false);
+                    addIndicator(1, blinkFrequency, false);
                     sentSpetLimitMessage(20);//45
                 }
                 if( restriktiv &&  fuenfhuBeinfl){//25km/h / 500  / 85'
-                    addIndicator(1, 2, false);
+                    addIndicator(1, blinkFrequency, false);
                     sentSpetLimitMessage(24);//25
                 }
                 if(!restriktiv && blauBlink && !(fuenfhuBeinfl || tausendBeinfl)){//85km/h /      / 85'
-                    addIndicator(1, 2, false);
+                    addIndicator(1, blinkFrequency, false);
                     sentSpetLimitMessage(14);//85
                 }
                 if(!restriktiv &&  tausendBeinfl){//85km/h / 1000 / 85'
-                    addIndicator(1, 2, false);
+                    addIndicator(1, blinkFrequency, false);
                     sentSpetLimitMessage(14);//85
                 }
                 if(!restriktiv &&  fuenfhuBeinfl){//45km/h / 500  /25
@@ -88,23 +125,23 @@ void lzb::setStates(QVector<quint8> states){
                 removeIndicator(1);
                 removeIndicator(3);
                 if( restriktiv &&  !tausendBeinfl && !fuenfhuBeinfl){//45km/h / 1000 / 70'
-                    addIndicator(2, 2, false);
+                    addIndicator(2, blinkFrequency, false);
                     sentSpetLimitMessage(20);//45
                 }
                 if( restriktiv &&  tausendBeinfl){//45km/h / 1000 / 70'
-                    addIndicator(2, 2, false);
+                    addIndicator(2, blinkFrequency, false);
                     sentSpetLimitMessage(20);//45
                 }
                 if( restriktiv &&  fuenfhuBeinfl){//25km/h / 500  / 70'
-                    addIndicator(2, 2, false);
+                    addIndicator(2, blinkFrequency, false);
                     sentSpetLimitMessage(24);//25
                 }
                 if(!restriktiv && blauBlink && !(fuenfhuBeinfl || tausendBeinfl)){//70km/h /      / 70'
-                    addIndicator(2, 2, false);
+                    addIndicator(2, blinkFrequency, false);
                     sentSpetLimitMessage(16);//70
                 }
                 if(!restriktiv &&  tausendBeinfl){//70km/h / 1000 / 70'
-                    addIndicator(2, 2, false);
+                    addIndicator(2, blinkFrequency, false);
                     sentSpetLimitMessage(16);//70
                 }
                 if(!restriktiv &&  fuenfhuBeinfl){//45km/h / 500  /70
@@ -121,23 +158,23 @@ void lzb::setStates(QVector<quint8> states){
                 removeIndicator(1);
                 removeIndicator(2);
                 if( restriktiv &&  !tausendBeinfl && !fuenfhuBeinfl){//45km/h / 1000 / 55'
-                    addIndicator(3, 2, false);
+                    addIndicator(3, blinkFrequency, false);
                     sentSpetLimitMessage(20);//45
                 }
                 if( restriktiv &&  tausendBeinfl){//45km/h / 1000 / 55'
-                    addIndicator(3, 2, false);
+                    addIndicator(3, blinkFrequency, false);
                     sentSpetLimitMessage(20);//45
                 }
                 if( restriktiv &&  fuenfhuBeinfl){//25km/h / 500  / 55'
-                    addIndicator(3, 2, false);
+                    addIndicator(3, blinkFrequency, false);
                     sentSpetLimitMessage(24);//25
                 }
                 if(!restriktiv && blauBlink && !(fuenfhuBeinfl || tausendBeinfl)){//55km/h /      / 55'
-                    addIndicator(3, 2, false);
+                    addIndicator(3, blinkFrequency, false);
                     sentSpetLimitMessage(18);//55
                 }
                 if(!restriktiv &&  tausendBeinfl){//55km/h / 1000 / 55'
-                    addIndicator(3, 2, false);
+                    addIndicator(3, blinkFrequency, false);
                     sentSpetLimitMessage(18);//55
                 }
                 if(!restriktiv &&  fuenfhuBeinfl){//25km/h / 500  /55
@@ -155,33 +192,16 @@ void lzb::setStates(QVector<quint8> states){
                 removeIndicator(2);
                 removeIndicator(3);
                 emit removeMessage(lastLimitMessage);
-                lastLimitMessage = 0;
+                lastLimitMessage = 255;
             break;
         }
         if(zweitauBeinfl){
-            //addIndicator(11, 0);
             if(lastLimitMessage <= 21) sentSpetLimitMessage(21);
         }
         else{
-            //removeIndicator(11);
             if(lastLimitMessage == 21){
                 emit removeMessage(lastLimitMessage);
                 lastLimitMessage = 0;
-            }
-        }
-        if(intervenation && !intervenationEmitted){
-            //emit newIconC9(db::indicatorFiles[16][0],db::indicatorFiles[16][1]);
-            //emit newIconBehavC9(true, 0, false);
-            emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
-            intervenationEmitted = true;
-        }
-        else{
-            if(intervenationEmitted){
-                removeIndicator(6);
-                //emit newIconC9("","");
-                //emit newIconBehavC9(false, 0, false);
-                emit removeMessage(0);
-                intervenationEmitted = false;
             }
         }
     }
@@ -193,6 +213,16 @@ void lzb::setStates(QVector<quint8> states){
         else{
             removeIndicator(i);
         }
+    }
+}
+void lzb::addOrRemoveMessage(quint8 message, bool add){
+    if(add && emittedMessages[message] != add){
+        emit newTextMessage(db::messages[message], db::textFontColors[message], db::textBgColors[message], message);
+        emittedMessages[message] = add;
+    }
+    if(add != emittedMessages[message]){
+        emit removeMessage(message);
+        emittedMessages[message] = add;
     }
 }
 void lzb::sentSpetLimitMessage(quint8 limit){
