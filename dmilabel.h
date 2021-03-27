@@ -33,6 +33,7 @@ public slots:
     void setSegmentText(quint16 value, bool textVisible);
     void addTextMessage(QString text, QColor textColor, QColor bgColor, quint8 msgId);
     void removeTextMessage(quint8 msgId);
+    void shiftTextMessageOffset(qint8 shift);
     void setWorking(bool working, quint8 blinking, bool inverse);
     void setDpi(qreal dpi);
     void setTargetDistance(quint16 distance, bool visible);
@@ -47,6 +48,7 @@ protected:
 signals:
     void clicked(bool value);
     void txtBtnClicked(QString value);
+    void messaesOutOfView(bool outOfView);
 
 private:
     bool fileNameIsSet;
@@ -61,7 +63,7 @@ private:
     QString filenameIconInactive;
     QColor labelTextColorEnab = era::grey;
     QColor labelTextColorDisab = era::darkGrey;
-    uint8_t msgTextAlign;
+    quint8 msgTextAlign;
     QString fileForDistanceScale;
     quint16 distanceScale;
     quint16 targetDistance;
@@ -69,8 +71,12 @@ private:
     qreal fontFactor;
     qreal customFontFactor = 0.3;
     quint8 numTextFields = 0;
+    quint8 highestTextMessgePosition = 0;
+    quint8 indexHighestTextFields = 0;
     QString messageTexts[10];
+    quint8 textMessageOffset = 0;
     QString segmentText;
+    quint16 segmentValue = 0;
     QColor messageBackQolors[10] = {era::darkBlue,era::darkBlue,era::darkBlue,era::darkBlue,era::darkBlue,
                                     era::darkBlue,era::darkBlue,era::darkBlue,era::darkBlue,era::darkBlue,};
     QColor messageTextColors[10] = {era::darkBlue,era::darkBlue,era::darkBlue,era::darkBlue,era::darkBlue,

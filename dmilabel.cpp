@@ -22,9 +22,11 @@ void dmiLabel::mousePressEvent(QMouseEvent *event){
 
 void dmiLabel::mouseReleaseEvent(QMouseEvent *event){
     isPushed = false;
-    emit clicked(true);
     update();
-    if(isEnab && isButton)QSound::play(":/sounds/click.wav");
+    if(isEnab && isButton){
+        emit clicked(true);
+        //QSound::play(":/sounds/click.wav");
+    }
 }
 
 void dmiLabel::setAsButton(bool asButton){
@@ -174,10 +176,13 @@ void dmiLabel::setSegmentDigitToUse(quint8 position){
 }
 
 void dmiLabel::setSegmentText(quint16 value, bool textVisible){
-    isSegment = textVisible;
-    segmentText = QString::number(value);
-    segmentText = segmentText.mid(segmentText.length() - segmentPosition,1);
-    updateLabel();
+    if(isSegment != textVisible || segmentValue != value){
+        segmentValue = value;
+        isSegment = textVisible;
+        segmentText = QString::number(value);
+        segmentText = segmentText.mid(segmentText.length() - segmentPosition,1);
+        updateLabel();
+    }
 }
 
 void dmiLabel::addTextMessage(QString text, QColor textColor, QColor bgColor, quint8 msgId){
@@ -194,12 +199,14 @@ void dmiLabel::addTextMessage(QString text, QColor textColor, QColor bgColor, qu
             messageTextColors[i] = textColor;
             messageIds[i] = msgId;
             update();
+            if(i > numTextFields)emit messaesOutOfView(true);
             return;
         }
     }
 }
 
 void dmiLabel::removeTextMessage(quint8 msgId){
+    bool foundMessaesOutOfView = false;
     for(quint8 i=0; i<10; i++){
         if(messageIds[i] == msgId){
             messageTexts[i] = "";
@@ -208,7 +215,24 @@ void dmiLabel::removeTextMessage(quint8 msgId){
             messageIds[i] = 255;
             update();
         }
+        if(messageIds[i] != 255 && i > numTextFields){
+            foundMessaesOutOfView = true;
+            highestTextMessgePosition = i;
+        }
     }
+    emit messaesOutOfView(foundMessaesOutOfView);
+}
+void dmiLabel::shiftTextMessageOffset(qint8 shift){
+    if(textMessageOffset < (highestTextMessgePosition - numTextFields)){
+        textMessageOffset = textMessageOffset + shift;
+    }
+    else{
+        if(textMessageOffset > 0){
+            textMessageOffset = textMessageOffset + shift;
+        }
+    }
+    if(textMessageOffset > highestTextMessgePosition) textMessageOffset = 10 - numTextFields;
+    update();
 }
 
 void dmiLabel::paintEvent(QPaintEvent *)
@@ -304,7 +328,7 @@ void dmiLabel::paintDistance(QPainter *iconPainter, QRect centralArea){
     //iconPainter->setPen(Qt::NoPen);
     quint16 targetDistanceAnalog = targetDistance;
     if(targetDistance > distanceScale){ targetDistanceAnalog = distanceScale;}
-    qreal tem;
+    qreal tem = 0.0;
     if(useEraStyle){
         iconPainter->drawText(digitalDistPosition,QString::number(ceil((targetDistance / 10)) * 10));
         if(targetDistance < 1000)
@@ -355,19 +379,19 @@ void dmiLabel::paintTextMessages(QPainter *iconPainter, QRect centralArea){
             field.setHeight(centralArea.height() - i * lineHeight);
         }
         iconPainter->setPen(Qt::NoPen);
-        iconPainter->setBrush(messageBackQolors[i]);
+        iconPainter->setBrush(messageBackQolors[i + textMessageOffset]);
         iconPainter->drawRect(field);
-        iconPainter->setPen(messageTextColors[i]);
+        iconPainter->setPen(messageTextColors[i + textMessageOffset]);
         iconPainter->setFont(QFont("FreeSans",
                                    static_cast<int>(fontFactor * 0.44 * lineHeight),
                                    QFont::Bold,
                                    false));
-        QRect textRect = iconPainter->boundingRect(field,Qt::AlignLeft,messageTexts[i]);
+        QRect textRect = iconPainter->boundingRect(field,Qt::AlignLeft,messageTexts[i + textMessageOffset]);
         textRect.moveLeft(3*borderThickness);
         if(msgTextAlign == Qt::AlignLeft)textRect.translate(0, field.height()/2 - textRect.height()/2);
         if(msgTextAlign == Qt::AlignRight)textRect.translate(field.width()-textRect.width(), field.height()/2 - textRect.height()/2);
         if(msgTextAlign == Qt::AlignCenter)textRect.translate(field.width()/2-textRect.width()/2, field.height()/2 - textRect.height()/2);
-        iconPainter->drawText(textRect,messageTexts[i]);
+        iconPainter->drawText(textRect,messageTexts[i + textMessageOffset]);
         field.translate(0,lineHeight);
     }
     iconPainter->restore();
