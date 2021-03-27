@@ -8,12 +8,13 @@ class db : public QObject
 {
     Q_OBJECT
 public:
-    static const QString messages[63];
+    static const QString messages[71];
     static const QColor textBgColors[58];
     static const QColor textFontColors[58];
     static const QString indicatorFiles[18][2];
+    static const quint8 numMessages = 71;
 };
-
+    const quint8 numMessages = 71;
     const QString messages[71] = {
         "Zwangsbremsung",
         "LZB-Halt überfahren",
