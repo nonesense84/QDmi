@@ -1,9 +1,12 @@
 #include "sep.h"
-
+#include <QDebug>
 sep::sep(){}
 
 void sep::process(){
-    udpSocketPzb = new QUdpSocket(this);
+    udpSocketSep = new QUdpSocket(this);
+    udpSocketSep->bind(QHostAddress::Any, 10001);
+    connect(udpSocketSep, SIGNAL(readyRead()),this,SLOT(readingPendingSep()));
+    /*    udpSocketPzb = new QUdpSocket(this);
     udpSocketPzb->bind(QHostAddress::Any, 10001);
     connect(udpSocketPzb, SIGNAL(readyRead()),this,SLOT(readingPendingPzb()));
     udpSocketLzb = new QUdpSocket(this);
@@ -14,80 +17,85 @@ void sep::process(){
     connect(udpSocketSpeed, SIGNAL(readyRead()),this,SLOT(readingPendingSpeed()));
     udpSocketMtd = new QUdpSocket(this);
     udpSocketMtd->bind(QHostAddress::Any, 10003);
-    connect(udpSocketMtd, SIGNAL(readyRead()),this,SLOT(readingPendingMtd()));
+    connect(udpSocketMtd, SIGNAL(readyRead()),this,SLOT(readingPendingMtd()));*/
+}
+quint8 sep::upNib(qint8 value){return static_cast<quint8>(value >> 4);}
+quint8 sep::lowNib(qint8 value){return static_cast<quint8>(value & 0x0f);}
+quint16 sep::twoByteToquint16(qint8 lowByte, qint8 highByte){
+    return static_cast<quint16>(static_cast<quint8>(lowByte) +
+                              (static_cast<quint8>(highByte)<<8));
 }
 
-void sep::readingPendingLzb(){
+void sep::readingPendingSep(){
+    #define pzbOffset  3
+    #define lzbOffset  14
+    #define MtdOffset  26
+    #define vmfzgOffset  31
+    #define dbcOffset  34
+    #define timeOffset  36
+    #define pressureOffset  40
+    #define speedOffset  21
+    #define forceOffset  24
     QVector<quint8> lzbValuesToDecoder(7,0);
+    QVector<quint8> pzbLmsToDecoder(22,0);
+    QVector<quint8> lmsToDecoder(13,0);
     QByteArray datagram;
-    datagram.resize(udpSocketLzb->pendingDatagramSize());
-    udpSocketLzb->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
-    if(datagram.size() >= 7){
-        for(int i = 0; i < 7; i = i + 1){
-            lzbValuesToDecoder[i] = datagram[i];
-        }
-        emit newLzbValues(lzbValuesToDecoder);
-    }
-}
-
-void sep::readingPendingPzb(){
-    while (udpSocketPzb->hasPendingDatagrams()) {
-        QVector<quint8> lmsToDecoder(22,0);
-        QByteArray datagram;
-        datagram.resize(udpSocketPzb->pendingDatagramSize());
-        udpSocketPzb->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
-        if(datagram.size() >= 12){
+    while (udpSocketSep->hasPendingDatagrams()) {
+        datagram.resize(udpSocketSep->pendingDatagramSize());
+        udpSocketSep->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
+        //qDebug() << datagram;
+        if(datagram.size() >= 41){
+            if (static_cast<quint8>(datagram[0]) != versionMajor)qDebug() << "TDF may by incompatible!";
+            if (static_cast<quint8>(datagram[1]) != versionMinor)qDebug() << "May by there are new functions!";
+            if (static_cast<quint8>(datagram[2]) != versionPatch)qDebug() << "May by there are hot fixes!";
+            // ==================== Read PZB indicators ====================
             for(int i = 0; i < 11; i = i + 1){
-                lmsToDecoder[i*2 +1] = (datagram[i]       & 0x0f);
-                lmsToDecoder[i*2  ] = (datagram[i] >> 4)  & 0x0f;
+                pzbLmsToDecoder[i*2 +1] = lowNib(datagram[pzbOffset + i]);
+                pzbLmsToDecoder[i*2  ] =   upNib(datagram[pzbOffset + i]);
             }
-            emit newLzbIndicators(lmsToDecoder);
-        }
-    }
-}
-void sep::readingPendingSpeed(){
-    while (udpSocketSpeed->hasPendingDatagrams()) {
-        QVector<quint8> lmsToDecoder(16,0); // FIXME: Den benutze ich doch nicht. Kann weg?
-        QByteArray datagram;
-        datagram.resize(udpSocketSpeed->pendingDatagramSize());
-        udpSocketSpeed->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
-        if(datagram.size() >= 5){
-            quint16 speed = static_cast<quint8>(datagram[0]) +
-                           (static_cast<quint8>(datagram[1])<<8);
+            emit newLzbIndicators(pzbLmsToDecoder);
+            // ==================== Read LZB values ====================
+            for(int i = 0; i < 7; i = i + 1){
+                lzbValuesToDecoder[i] = static_cast<quint8>(datagram[lzbOffset + i]);
+            }
+            emit newLzbValues(lzbValuesToDecoder);
+            // ==================== Read Speed ====================
+            quint16 speed =twoByteToquint16(datagram[speedOffset], datagram[speedOffset + 1]);
             emit newSpeed(speed);
-            //qDebug() << "got new speed";
-            qint16 forceRel = 0;
-            quint8 brakingForceRel = static_cast<quint8>(datagram[3]);
-            quint8 tractiveForceRel = static_cast<quint8>(datagram[4]);
-
-            if(brakingForceRel != 0) forceRel = static_cast<qint16>(brakingForceRel * -1);
-            if(tractiveForceRel != 0) forceRel = static_cast<qint16>(tractiveForceRel);
-            qDebug() << forceRel;
-            emit newPowerAbsolute(forceRel);
+            // ==================== Read Power ====================
+            emit newPowerRelative(static_cast<qint16>(- datagram[forceOffset    ]
+                                                      + datagram[forceOffset + 1]));
+            // ==================== Read MTD indicators ====================
+            lmsToDecoder[0] =    upNib(datagram[MtdOffset + 0]);            // Sifa faulty
+            lmsToDecoder[1] =   lowNib(datagram[MtdOffset + 0]);            // IndDsd
+            lmsToDecoder[2] =  ( upNib(datagram[MtdOffset + 1]) & 0x01) +   // IndDsdAcu +
+                               (lowNib(datagram[MtdOffset + 1]) & 0x01);    // IndDsdFb (Enum übernommen aus Zusi Sifa-Hupe)
+            switch (upNib(datagram[MtdOffset + 2])){                        // IndPanto (Enum übernommen aus Zusi Stromabnehmer)
+                case 1: lmsToDecoder[6] = 0x01;break;
+                case 2: lmsToDecoder[6] = 0x11;break;
+                default:lmsToDecoder[6] = 0x00;
+            }
+            lmsToDecoder[7] = !(lowNib(datagram[MtdOffset + 2]));           // IndMtMsO
+            lmsToDecoder[8] =    upNib(datagram[MtdOffset + 3]);            // IndMtHvtl
+            lmsToDecoder[9] =   lowNib(datagram[MtdOffset + 3]);            // InfDoorSystem - Von Loksim nicht unterstützt -> Default 4 (TAV)
+            lmsToDecoder[10] =   upNib(datagram[MtdOffset + 4]);            // InfDoorStatR
+            lmsToDecoder[11] =  lowNib(datagram[MtdOffset + 4]);            // InfDoorStatL (Temporär IndDorTav)
+            lmsToDecoder[12]=   lowNib(datagram[MtdOffset + 5]);            // tractionType
+            emit newMtdIndicators(lmsToDecoder);
+            emit newFzgVmaxTacho(twoByteToquint16(datagram[vmfzgOffset], datagram[vmfzgOffset + 1])+20);
+            emit newAfbSoll(twoByteToquint16(datagram[dbcOffset], datagram[dbcOffset + 1]), upNib(datagram[MtdOffset + 5]) > 0);   // DbcSpeedSet, IndDbc
+            simTime = static_cast<quint32>((static_cast<quint8>(datagram[timeOffset + 3]) << 24)
+                                         + (static_cast<quint8>(datagram[timeOffset + 2]) << 16)
+                                         + (static_cast<quint8>(datagram[timeOffset + 1]) <<  8)
+                                         +  static_cast<quint8>(datagram[timeOffset + 0])      );
+            if(simTime != simTimeOld){
+                simTimeOld = simTime;
+                QDateTime QSimTime = QDateTime::fromSecsSinceEpoch(simTime, Qt::UTC);
+                emit newSimTime(QSimTime.time().toString());
+            }
+            emit newHll(static_cast<quint8>(datagram[pressureOffset + 0]));
+            emit newBrz(static_cast<quint8>(datagram[pressureOffset + 1]));
+            emit newHlb(static_cast<quint8>(datagram[pressureOffset + 2]));
         }
-    }
-}
-
-void sep::readingPendingMtd(){
-    while (udpSocketMtd->hasPendingDatagrams()) {
-        QVector<quint8> lmsToDecoder(13,0);
-        QByteArray datagram;
-        datagram.resize(udpSocketMtd->pendingDatagramSize());
-        udpSocketMtd->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
-        if(datagram.size() >= 7){
-            lmsToDecoder[1] =   (datagram[0] >> 4) & 0x0f;     //IndDsd
-            lmsToDecoder[2] =   (datagram[0]       & 0x0f) * 2;//IndDsdAcu
-            lmsToDecoder[2] =   (datagram[1] >> 4) & 0x0f;     //IndDsdFb
-            lmsToDecoder[9] =    datagram[1]       & 0x0f;     //IndDorTav //Muss noch auf MTD-Seite angepasst werden
-            lmsToDecoder[6] =   (datagram[2] >> 4) & 0x0f;     //IndPhantoUp
-                                                               //IndPhantoDown
-            lmsToDecoder[7] = !((datagram[3] >> 4) & 0x0f);    //IndMtMsO
-            lmsToDecoder[8] =    datagram[3]       & 0x0f;     //IndMtHvtl
-            lmsToDecoder[12]=   (datagram[4] >> 4) & 0x0f;     //tractionType     // Muss noch getestet werden!!!!!
-            lmsToDecoder[0] =    datagram[4]       & 0x0f;     //Sifa faulty
-
-        }
-        emit newMtdIndicators(lmsToDecoder);
-        emit newFzgVmaxTacho((static_cast<uint8_t>(datagram[5])) |   (static_cast<quint16>(datagram[6]) << 8));
     }
 }
