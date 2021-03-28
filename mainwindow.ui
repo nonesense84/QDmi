@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1028</width>
-    <height>569</height>
+    <width>1024</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -67,8 +67,8 @@
      <rect>
       <x>0</x>
       <y>10</y>
-      <width>768</width>
-      <height>480</height>
+      <width>1024</width>
+      <height>600</height>
      </rect>
     </property>
     <property name="cursor">
@@ -2787,287 +2787,462 @@
                    <verstretch>40</verstretch>
                   </sizepolicy>
                  </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_19">
+                 <layout class="QHBoxLayout" name="horizontalLayout_18">
+                  <property name="spacing">
+                   <number>0</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
                   <item>
-                   <widget class="QLabel" name="label_qdmi_1">
-                    <property name="font">
-                     <font>
-                      <family>FreeSans</family>
-                      <pointsize>14</pointsize>
-                     </font>
+                   <widget class="QWidget" name="qdmiSettingsNameHolder" native="true">
+                    <property name="styleSheet">
+                     <string notr="true"/>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayout_19">
+                     <property name="spacing">
+                      <number>0</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="label_qdmi_1">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>20</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <family>FreeSans</family>
+                         <pointsize>14</pointsize>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">color:rgb(195,195,195)</string>
+                       </property>
+                       <property name="frameShape">
+                        <enum>QFrame::NoFrame</enum>
+                       </property>
+                       <property name="frameShadow">
+                        <enum>QFrame::Plain</enum>
+                       </property>
+                       <property name="lineWidth">
+                        <number>3</number>
+                       </property>
+                       <property name="text">
+                        <string>Zielentfernung:</string>
+                       </property>
+                       <property name="scaledContents">
+                        <bool>false</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="label_qdmi_2">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>20</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <family>FreeSans</family>
+                         <pointsize>14</pointsize>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">color:rgb(195,195,195)</string>
+                       </property>
+                       <property name="frameShape">
+                        <enum>QFrame::NoFrame</enum>
+                       </property>
+                       <property name="frameShadow">
+                        <enum>QFrame::Sunken</enum>
+                       </property>
+                       <property name="lineWidth">
+                        <number>3</number>
+                       </property>
+                       <property name="text">
+                        <string>V-Soll:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="label_qdmi_3">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>20</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <family>FreeSans</family>
+                         <pointsize>14</pointsize>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">color:rgb(195,195,195)</string>
+                       </property>
+                       <property name="frameShape">
+                        <enum>QFrame::NoFrame</enum>
+                       </property>
+                       <property name="frameShadow">
+                        <enum>QFrame::Sunken</enum>
+                       </property>
+                       <property name="lineWidth">
+                        <number>3</number>
+                       </property>
+                       <property name="text">
+                        <string>Textmeldungen:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="label_qdmi_4">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>20</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <family>FreeSans</family>
+                         <pointsize>14</pointsize>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">color:rgb(195,195,195)</string>
+                       </property>
+                       <property name="frameShape">
+                        <enum>QFrame::NoFrame</enum>
+                       </property>
+                       <property name="frameShadow">
+                        <enum>QFrame::Sunken</enum>
+                       </property>
+                       <property name="lineWidth">
+                        <number>3</number>
+                       </property>
+                       <property name="text">
+                        <string>Manometer:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="label_qdmi_5">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>20</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <family>FreeSans</family>
+                         <pointsize>14</pointsize>
+                        </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">color:rgb(195,195,195)</string>
+                       </property>
+                       <property name="frameShape">
+                        <enum>QFrame::NoFrame</enum>
+                       </property>
+                       <property name="frameShadow">
+                        <enum>QFrame::Sunken</enum>
+                       </property>
+                       <property name="lineWidth">
+                        <number>3</number>
+                       </property>
+                       <property name="text">
+                        <string>Mit Zusi 3:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QWidget" name="label_qdmi_spacer" native="true">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>100</verstretch>
+                        </sizepolicy>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QWidget" name="qdmiSettingsPullownHolder" native="true">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>6</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
                     </property>
                     <property name="styleSheet">
-                     <string notr="true">color:rgb(195,195,195)</string>
+                     <string notr="true"/>
                     </property>
-                    <property name="frameShape">
-                     <enum>QFrame::NoFrame</enum>
-                    </property>
-                    <property name="frameShadow">
-                     <enum>QFrame::Sunken</enum>
-                    </property>
-                    <property name="lineWidth">
-                     <number>3</number>
-                    </property>
-                    <property name="text">
-                     <string>Zielentfernung:</string>
-                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayout_21">
+                     <property name="spacing">
+                      <number>0</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QComboBox" name="pulldown_targetdistance">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>20</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <family>FreeSans</family>
+                         <pointsize>14</pointsize>
+                        </font>
+                       </property>
+                       <property name="focusPolicy">
+                        <enum>Qt::NoFocus</enum>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background:rgb(3,17,34);color:rgb(195,195,195)</string>
+                       </property>
+                       <property name="currentText">
+                        <string comment="1"/>
+                       </property>
+                       <property name="maxVisibleItems">
+                        <number>3</number>
+                       </property>
+                       <property name="maxCount">
+                        <number>3</number>
+                       </property>
+                       <property name="insertPolicy">
+                        <enum>QComboBox::InsertAtBottom</enum>
+                       </property>
+                       <property name="sizeAdjustPolicy">
+                        <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
+                       </property>
+                       <property name="minimumContentsLength">
+                        <number>0</number>
+                       </property>
+                       <property name="frame">
+                        <bool>true</bool>
+                       </property>
+                       <property name="modelColumn">
+                        <number>0</number>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="pulldown_gauge">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>20</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <family>FreeSans</family>
+                         <pointsize>14</pointsize>
+                        </font>
+                       </property>
+                       <property name="focusPolicy">
+                        <enum>Qt::NoFocus</enum>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background:rgb(3,17,34);color:rgb(195,195,195)</string>
+                       </property>
+                       <property name="editable">
+                        <bool>false</bool>
+                       </property>
+                       <property name="currentText">
+                        <string comment="1"/>
+                       </property>
+                       <property name="maxVisibleItems">
+                        <number>3</number>
+                       </property>
+                       <property name="maxCount">
+                        <number>3</number>
+                       </property>
+                       <property name="minimumContentsLength">
+                        <number>0</number>
+                       </property>
+                       <property name="frame">
+                        <bool>true</bool>
+                       </property>
+                       <property name="modelColumn">
+                        <number>0</number>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="pulldown_showTextmessages">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>20</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <family>FreeSans</family>
+                         <pointsize>14</pointsize>
+                        </font>
+                       </property>
+                       <property name="focusPolicy">
+                        <enum>Qt::NoFocus</enum>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background:rgb(3,17,34);color:rgb(195,195,195)</string>
+                       </property>
+                       <property name="currentText">
+                        <string comment="1"/>
+                       </property>
+                       <property name="maxVisibleItems">
+                        <number>3</number>
+                       </property>
+                       <property name="maxCount">
+                        <number>3</number>
+                       </property>
+                       <property name="minimumContentsLength">
+                        <number>0</number>
+                       </property>
+                       <property name="frame">
+                        <bool>true</bool>
+                       </property>
+                       <property name="modelColumn">
+                        <number>0</number>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="pulldown_showManometer">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>20</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <family>FreeSans</family>
+                         <pointsize>14</pointsize>
+                        </font>
+                       </property>
+                       <property name="focusPolicy">
+                        <enum>Qt::NoFocus</enum>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background:rgb(3,17,34);color:rgb(195,195,195)</string>
+                       </property>
+                       <property name="currentText">
+                        <string comment="1"/>
+                       </property>
+                       <property name="maxVisibleItems">
+                        <number>3</number>
+                       </property>
+                       <property name="maxCount">
+                        <number>3</number>
+                       </property>
+                       <property name="minimumContentsLength">
+                        <number>0</number>
+                       </property>
+                       <property name="frame">
+                        <bool>true</bool>
+                       </property>
+                       <property name="modelColumn">
+                        <number>0</number>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="pulldown_tcpConnection">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>20</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="font">
+                        <font>
+                         <family>FreeSans</family>
+                         <pointsize>14</pointsize>
+                        </font>
+                       </property>
+                       <property name="focusPolicy">
+                        <enum>Qt::NoFocus</enum>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background:rgb(3,17,34);color:rgb(195,195,195)</string>
+                       </property>
+                       <property name="currentText">
+                        <string comment="1"/>
+                       </property>
+                       <property name="maxVisibleItems">
+                        <number>3</number>
+                       </property>
+                       <property name="maxCount">
+                        <number>3</number>
+                       </property>
+                       <property name="minimumContentsLength">
+                        <number>0</number>
+                       </property>
+                       <property name="frame">
+                        <bool>true</bool>
+                       </property>
+                       <property name="modelColumn">
+                        <number>0</number>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QWidget" name="pulldown_spacer" native="true">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>100</verstretch>
+                        </sizepolicy>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
                    </widget>
-                  </item>
-                  <item>
-                   <widget class="QComboBox" name="pulldown_targetdistance">
-                    <property name="font">
-                     <font>
-                      <family>FreeSans</family>
-                      <pointsize>14</pointsize>
-                     </font>
-                    </property>
-                    <property name="focusPolicy">
-                     <enum>Qt::NoFocus</enum>
-                    </property>
-                    <property name="styleSheet">
-                     <string notr="true">background:rgb(3,17,34);color:rgb(195,195,195)</string>
-                    </property>
-                    <property name="currentText">
-                     <string comment="1"/>
-                    </property>
-                    <property name="maxVisibleItems">
-                     <number>3</number>
-                    </property>
-                    <property name="maxCount">
-                     <number>3</number>
-                    </property>
-                    <property name="minimumContentsLength">
-                     <number>0</number>
-                    </property>
-                    <property name="frame">
-                     <bool>true</bool>
-                    </property>
-                    <property name="modelColumn">
-                     <number>0</number>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="Line" name="line">
-                    <property name="frameShadow">
-                     <enum>QFrame::Sunken</enum>
-                    </property>
-                    <property name="lineWidth">
-                     <number>1</number>
-                    </property>
-                    <property name="midLineWidth">
-                     <number>1</number>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_qdmi_2">
-                    <property name="font">
-                     <font>
-                      <family>FreeSans</family>
-                      <pointsize>14</pointsize>
-                     </font>
-                    </property>
-                    <property name="styleSheet">
-                     <string notr="true">color:rgb(195,195,195)</string>
-                    </property>
-                    <property name="frameShape">
-                     <enum>QFrame::NoFrame</enum>
-                    </property>
-                    <property name="frameShadow">
-                     <enum>QFrame::Sunken</enum>
-                    </property>
-                    <property name="lineWidth">
-                     <number>3</number>
-                    </property>
-                    <property name="text">
-                     <string>V-Soll</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QComboBox" name="pulldown_gauge">
-                    <property name="font">
-                     <font>
-                      <family>FreeSans</family>
-                      <pointsize>14</pointsize>
-                     </font>
-                    </property>
-                    <property name="focusPolicy">
-                     <enum>Qt::NoFocus</enum>
-                    </property>
-                    <property name="styleSheet">
-                     <string notr="true">background:rgb(3,17,34);color:rgb(195,195,195)</string>
-                    </property>
-                    <property name="currentText">
-                     <string comment="1"/>
-                    </property>
-                    <property name="maxVisibleItems">
-                     <number>3</number>
-                    </property>
-                    <property name="maxCount">
-                     <number>3</number>
-                    </property>
-                    <property name="minimumContentsLength">
-                     <number>0</number>
-                    </property>
-                    <property name="frame">
-                     <bool>true</bool>
-                    </property>
-                    <property name="modelColumn">
-                     <number>0</number>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="Line" name="line_3">
-                    <property name="frameShadow">
-                     <enum>QFrame::Sunken</enum>
-                    </property>
-                    <property name="lineWidth">
-                     <number>1</number>
-                    </property>
-                    <property name="midLineWidth">
-                     <number>1</number>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_qdmi_3">
-                    <property name="font">
-                     <font>
-                      <family>FreeSans</family>
-                      <pointsize>14</pointsize>
-                     </font>
-                    </property>
-                    <property name="styleSheet">
-                     <string notr="true">color:rgb(195,195,195)</string>
-                    </property>
-                    <property name="frameShape">
-                     <enum>QFrame::NoFrame</enum>
-                    </property>
-                    <property name="frameShadow">
-                     <enum>QFrame::Sunken</enum>
-                    </property>
-                    <property name="lineWidth">
-                     <number>3</number>
-                    </property>
-                    <property name="text">
-                     <string>Manometer</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QComboBox" name="pulldown_showManometer">
-                    <property name="font">
-                     <font>
-                      <family>FreeSans</family>
-                      <pointsize>14</pointsize>
-                     </font>
-                    </property>
-                    <property name="focusPolicy">
-                     <enum>Qt::NoFocus</enum>
-                    </property>
-                    <property name="styleSheet">
-                     <string notr="true">background:rgb(3,17,34);color:rgb(195,195,195)</string>
-                    </property>
-                    <property name="currentText">
-                     <string comment="1"/>
-                    </property>
-                    <property name="maxVisibleItems">
-                     <number>3</number>
-                    </property>
-                    <property name="maxCount">
-                     <number>3</number>
-                    </property>
-                    <property name="minimumContentsLength">
-                     <number>0</number>
-                    </property>
-                    <property name="frame">
-                     <bool>true</bool>
-                    </property>
-                    <property name="modelColumn">
-                     <number>0</number>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="label_qdmi_4">
-                    <property name="font">
-                     <font>
-                      <family>FreeSans</family>
-                      <pointsize>14</pointsize>
-                     </font>
-                    </property>
-                    <property name="styleSheet">
-                     <string notr="true">color:rgb(195,195,195)</string>
-                    </property>
-                    <property name="frameShape">
-                     <enum>QFrame::NoFrame</enum>
-                    </property>
-                    <property name="frameShadow">
-                     <enum>QFrame::Sunken</enum>
-                    </property>
-                    <property name="lineWidth">
-                     <number>3</number>
-                    </property>
-                    <property name="text">
-                     <string>Verbindungsaufbau zu Zusi 3</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QComboBox" name="pulldown_tcpConnection">
-                    <property name="font">
-                     <font>
-                      <family>FreeSans</family>
-                      <pointsize>14</pointsize>
-                     </font>
-                    </property>
-                    <property name="focusPolicy">
-                     <enum>Qt::NoFocus</enum>
-                    </property>
-                    <property name="styleSheet">
-                     <string notr="true">background:rgb(3,17,34);color:rgb(195,195,195)</string>
-                    </property>
-                    <property name="currentText">
-                     <string comment="1"/>
-                    </property>
-                    <property name="maxVisibleItems">
-                     <number>3</number>
-                    </property>
-                    <property name="maxCount">
-                     <number>3</number>
-                    </property>
-                    <property name="minimumContentsLength">
-                     <number>0</number>
-                    </property>
-                    <property name="frame">
-                     <bool>true</bool>
-                    </property>
-                    <property name="modelColumn">
-                     <number>0</number>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <spacer name="verticalSpacer">
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>20</width>
-                      <height>40</height>
-                     </size>
-                    </property>
-                   </spacer>
                   </item>
                  </layout>
                 </widget>

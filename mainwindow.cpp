@@ -60,7 +60,7 @@ void MainWindow::process(){
     ui->systemVersionComp2Name->setTextFieldUsing(1, Qt::AlignRight);
     ui->systemVersionComp2Name->addTextMessage("github.com/nones",era::grey,era::darkBlue,1);
     ui->systemVersionComp1Version->setBorderThickness(0);
-    ui->systemVersionComp1Version->addTextMessage("1.2.2",era::grey,era::darkBlue,1);
+    ui->systemVersionComp1Version->addTextMessage("1.2.3T1",era::grey,era::darkBlue,1);
     ui->systemVersionComp2Version->setBorderThickness(0);
     ui->systemVersionComp2Version->addTextMessage("ense84/QDmi",era::grey,era::darkBlue,1);
     qRegisterMetaType< QVector<quint8> >("QVector<quint8>");
@@ -95,6 +95,10 @@ void MainWindow::process(){
     connect(ui->zusiIpBtn11,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
     connect(ui->zusiIpOkBtn,SIGNAL(txtBtnClicked(QString)),this,SLOT(applyClicked(QString)));
     connect(ui->systemVersionClose,SIGNAL(clicked(bool)),this,SLOT(settingsCloseClicked()));
+    connect(ui->FieldE5to9,SIGNAL(messaesOutOfView(bool)),this,SLOT(messaesOutOfViewHandling5to9(bool)));
+    connect(ui->FieldE8to9,SIGNAL(messaesOutOfView(bool)),this,SLOT(messaesOutOfViewHandling8to9(bool)));
+    connect(this,SIGNAL(naivationArrowClick(qint8)),ui->FieldE5to9,SLOT(shiftTextMessageOffset(qint8)));
+    connect(this,SIGNAL(naivationArrowClick(qint8)),ui->FieldE8to9,SLOT(shiftTextMessageOffset(qint8)));
     connect(mySep,SIGNAL(newLzbIndicators(QVector<quint8>)),myLzb,SLOT(setStates(QVector<quint8>)));
     connect(myTcp->myIndicators,SIGNAL(newLzbIndicators(QVector<quint8>)),myLzb,SLOT(setStates(QVector<quint8>)));
     connect(myTcp->myIndicators,SIGNAL(newTextMessage(QString, QColor, QColor, quint8)),ui->FieldE5to7,SLOT(addTextMessage(QString, QColor, QColor, quint8)));
@@ -102,6 +106,7 @@ void MainWindow::process(){
     connect(myTcp->myIndicators,SIGNAL(removeMessage(quint8)),ui->FieldE5to7,SLOT(removeTextMessage(quint8)));
     connect(myTcp->myIndicators,SIGNAL(removeTechnicalMessage(quint8)),ui->FieldE8to9,SLOT(removeTextMessage(quint8)));
     connect(myTcp->myIndicators,SIGNAL(newAfbSoll(quint16, bool)),ui->widgetTacho,SLOT(setVSet(quint16, bool)));
+    connect(mySep,SIGNAL(newAfbSoll(quint16, bool)),ui->widgetTacho,SLOT(setVSet(quint16, bool)));
     connect(mySep,SIGNAL(newFzgVmaxTacho(quint16)),ui->widgetTacho,SLOT(setVMaxDial(quint16)));
     connect(myTcp->myIndicators,SIGNAL(newFzgVmaxTacho(quint16)),ui->widgetTacho,SLOT(setVMaxDial(quint16)));
     connect(myTcp,SIGNAL(newTechnicalMessage(QString, QColor, QColor, quint8)),ui->FieldE8to9,SLOT(addTextMessage(QString, QColor, QColor, quint8)));
@@ -119,6 +124,9 @@ void MainWindow::process(){
     connect(myTcp,SIGNAL(newHlb(quint16)),ui->widgetMano1,SLOT(setPressure1(quint16)));
     connect(myTcp,SIGNAL(newHll(quint16)),ui->widgetMano1,SLOT(setPressure2(quint16)));
     connect(myTcp,SIGNAL(newBrz(quint16)),ui->widgetMano2,SLOT(setPressure1(quint16)));
+    connect(mySep,SIGNAL(newHlb(quint16)),ui->widgetMano1,SLOT(setPressure1(quint16)));
+    connect(mySep,SIGNAL(newHll(quint16)),ui->widgetMano1,SLOT(setPressure2(quint16)));
+    connect(mySep,SIGNAL(newBrz(quint16)),ui->widgetMano2,SLOT(setPressure1(quint16)));
     ui->widgetMano2->setPointer2using(false);
     ui->widgetMano1->setPointer1color(era::red);
     ui->widgetMano1->setPointer2color(era::yellow);
@@ -128,6 +136,8 @@ void MainWindow::process(){
     ui->widgetMano2->setPonter1Label("Bremszylinder");
     connect(this,SIGNAL(newManometerUse(bool)),myTcp,SLOT(setUseManometer(bool)));
     connect(this,SIGNAL(tcpConnectionSettings(quint8)),myTcp,SLOT(setAutoReconnect(quint8)));
+    connect(this,SIGNAL(newTextMessagesSettings(quint8)),myLzb,SLOT(setTextUsing(quint8)));
+    connect(this,SIGNAL(newTextMessagesSettings(quint8)),myTcp,SLOT(setTextUsing(quint8)));
     connect(myTcp,SIGNAL(newSimTime(QString)),ui->fieldG13,SLOT(setText(QString)));
     connect(mySep,SIGNAL(newSimTime(QString)),ui->fieldG13,SLOT(setText(QString)));
     connect(myTcp,SIGNAL(newZugnummer(QString)),ui->fieldG11,SLOT(setText(QString)));
@@ -150,7 +160,7 @@ void MainWindow::process(){
     ui->fieldE10->setAsButton(true);
     ui->fieldE11->setAsButton(true);
     ui->fieldE10->setWorking(false, false, false);
-    ui->fieldE11->setWorking(false, false, false);
+    ui->fieldE11->setWorking(true, false, false);
     ui->fieldF6->setVisib(false);
     ui->fieldF7->setVisib(false);
     ui->fieldF8->setVisib(false);
@@ -279,6 +289,7 @@ void MainWindow::connectMtdPower(){
     connect(myMtd,SIGNAL(newPowerRelativeSet(qint16)),ui->widgetPower,SLOT(setPowerRelativeSet(qint16)));
     connect(myMtd,SIGNAL(newPowerAbsolute(qint16)),ui->widgetPower,SLOT(setPowerAbsolute(qint16)));
     connect(myMtd,SIGNAL(newPowerAbsoluteSet(qint16)),ui->widgetPower,SLOT(setPowerAbsoluteSet(qint16)));
+    connect(mySep,SIGNAL(newPowerRelative(qint16)),ui->widgetPower,SLOT(setPowerRelative(qint16)));
     connect(myTcp->myPower,SIGNAL(maxPowerPositiveLine (qint16)),ui->widgetPower,SLOT(setAbsoluteAccelerateMaximum(qint16)));
     connect(myTcp->myPower,SIGNAL(maxPowerNegativeLine (qint16)),ui->widgetPower,SLOT(setAbsoluteBrakingMaximum(qint16)));
     connect(myTcp->myPower,SIGNAL(unitAcceleratingText(QString)),ui->widgetPower,SLOT(setUnitAcceleratingText(QString)));
@@ -304,6 +315,7 @@ void MainWindow::connectTimers(){
 }
 void MainWindow::connectTcpStuff(){
     connect(myTcp,SIGNAL(sendTcpConnectionFeedback(QString)),this,SLOT(gotTcpConnectionFeedback(QString)));
+    connect(myTcp,SIGNAL(sendDataSourceIsZusi(bool)),myLzb,SLOT(setZusiAsDataSource(bool)));
     connect(this,SIGNAL(newZusiIp(QString)),myTcp,SLOT(setIpadress(QString)));
 }
 
@@ -321,13 +333,44 @@ void MainWindow::setPzbLzbNtc(){
         ui->fieldC_holder->setCurrentIndex(1);
         ui->fieldC_holder2->setCurrentIndex(0);
         mode = modePzbLzbNtc;
+        messaesOutOfViewHandling8to9(MessaesOutOffView8to9);
+    }
+}
+void MainWindow::messaesOutOfViewHandling5to9(bool outOfView){
+    MessaesOutOffView5to9 = outOfView;
+    if(mode != modePzbLzbNtc){
+        if(outOfView){
+            ui->fieldE10->setWorking(true, false, false);
+            ui->fieldE11->setWorking(true, false, false);
+        }
+        else{
+            ui->fieldE10->setWorking(false, false, false);
+            ui->fieldE11->setWorking(false, false, false);
+        }
+    }
+}
+void MainWindow::messaesOutOfViewHandling8to9(bool outOfView){
+    MessaesOutOffView8to9 = outOfView;
+    if(mode == modePzbLzbNtc){
+        if(outOfView){
+            ui->fieldE10->setWorking(true, false, false);
+            ui->fieldE11->setWorking(true, false, false);
+        }
+        else{
+            ui->fieldE10->setWorking(false, false, false);
+            ui->fieldE11->setWorking(false, false, false);
+        }
     }
 }
 void MainWindow::fieldF1Clicked(){}
 void MainWindow::fieldF4Clicked(){}
 void MainWindow::fieldF5Clicked(){ui->fieldDG->setCurrentIndex(1);}
-void MainWindow::arrowUpClicked(){}
-void MainWindow::arrowDownClicked(){}
+void MainWindow::arrowUpClicked(){
+    emit naivationArrowClick(-1);
+}
+void MainWindow::arrowDownClicked(){
+    emit naivationArrowClick(1);
+}
 void MainWindow::settingsBtn1Clicked(){}
 void MainWindow::settingsBtn2Clicked(){}
 void MainWindow::settingsBtn3Clicked(){}
@@ -339,6 +382,18 @@ void MainWindow::settingsBtn6Clicked(){                                     // N
     activeDataEntryItem = "IP-Address";
     ui->FieldE5to9->addTextMessage(" Auf eingegebene IP-Adresse tippen", era::grey, era::darkBlue, 8);
     ui->FieldE8to9->addTextMessage(" Auf eingegebene IP-Adresse tippen", era::grey, era::darkBlue, 8);
+    const QHostAddress &localhost = QHostAddress(QHostAddress::LocalHost);
+    ui->FieldE5to9->addTextMessage(" IP-Adressen dieses Gerätes:", era::grey, era::darkBlue, 100);
+    ui->FieldE8to9->addTextMessage(" IP-Adressen dieses Gerätes:", era::grey, era::darkBlue, 100);
+    quint8 i = 0;
+    for (const QHostAddress &address: QNetworkInterface::allAddresses()) {
+        if (address.protocol() == QAbstractSocket::IPv4Protocol && address != localhost){
+            ui->FieldE5to9->addTextMessage(address.toString(), era::grey, era::darkBlue, 101 + i);
+            ui->FieldE8to9->addTextMessage(address.toString(), era::grey, era::darkBlue, 101 + i);
+            i++;
+        }
+    }
+
 }
 void MainWindow::settingsBtn7Clicked(){
     settings->setValue("mainwindow/height", this->height());
@@ -353,20 +408,22 @@ void MainWindow::settingsCloseClicked(){
     if(ui->fieldDG->currentIndex() == 7){
         ui->FieldE5to9->removeTextMessage(8);
         ui->FieldE8to9->removeTextMessage(8);
+        ui->FieldE5to9->removeTextMessage(100);
+        ui->FieldE8to9->removeTextMessage(100);
+        ui->FieldE5to9->removeTextMessage(101);
+        ui->FieldE8to9->removeTextMessage(101);
+        ui->FieldE5to9->removeTextMessage(102);
+        ui->FieldE8to9->removeTextMessage(102);
+        ui->FieldE5to9->removeTextMessage(103);
+        ui->FieldE8to9->removeTextMessage(103);
     }
     if(ui->fieldDG->currentIndex() == 6){
         settings->setValue("pulldown_gauge",ui->pulldown_gauge->currentIndex());
         settings->setValue("pulldown_targetdistance",ui->pulldown_targetdistance->currentIndex());
+        settings->setValue("pulldown_showTextmessages",ui->pulldown_showTextmessages->currentIndex());
         settings->setValue("pulldown_showManometer",ui->pulldown_showManometer->currentIndex());
         settings->setValue("pulldown_tcpConnection",ui->pulldown_tcpConnection->currentIndex());
-        ui->widgetTacho->setEraUse(settings->value("pulldown_gauge").toInt() == 0);
-        ui->fieldVZile100->setVisib(settings->value("pulldown_gauge").toInt() == 1);
-        ui->fieldVZile10->setVisib(settings->value("pulldown_gauge").toInt() == 1);
-        ui->fieldVZile1->setVisib(settings->value("pulldown_gauge").toInt() == 1);
-        ui->fieldA3->setEraUse(settings->value("pulldown_targetdistance").toInt() == 0);
-        showManometer = static_cast<quint8>(settings->value("pulldown_showManometer").toUInt());
-        emit newManometerUse(showManometer);
-        emit tcpConnectionSettings(static_cast<quint8>(settings->value("pulldown_tcpConnection").toUInt()));
+        applySettings();
         resizeMe();
     }
     if(ui->fieldDG->currentIndex()>1){
@@ -375,6 +432,17 @@ void MainWindow::settingsCloseClicked(){
     else{
         ui->fieldDG->setCurrentIndex(0);
     }
+}
+void MainWindow::applySettings(){
+    ui->widgetTacho->setEraUse(settings->value("pulldown_gauge").toInt() == 0);
+    ui->fieldVZile100->setVisib(settings->value("pulldown_gauge").toInt() == 1);
+    ui->fieldVZile10->setVisib(settings->value("pulldown_gauge").toInt() == 1);
+    ui->fieldVZile1->setVisib(settings->value("pulldown_gauge").toInt() == 1);
+    ui->fieldA3->setEraUse(settings->value("pulldown_targetdistance").toInt() == 0);
+    showManometer = static_cast<quint8>(settings->value("pulldown_showManometer").toUInt());
+    emit newTextMessagesSettings(static_cast<quint8>(settings->value("pulldown_showTextmessages").toInt()));
+    emit newManometerUse(showManometer);
+    emit tcpConnectionSettings(static_cast<quint8>(settings->value("pulldown_tcpConnection").toUInt()));
 }
 void MainWindow::applyClicked(QString data){
     data.remove("_");
@@ -413,6 +481,7 @@ void MainWindow::resizeMe(){
     qreal windowWidth = ui->centralWidget->width();
     qreal defaultWidth = 640.0;
     QSizePolicy manoSizePol = ui->DmiHolder->sizePolicy();
+    qreal dpi = QApplication::screens().at(0)->logicalDotsPerInch();
     switch (showManometer){
         case 0:
         manoSizePol.setHorizontalStretch(0);
@@ -444,6 +513,17 @@ void MainWindow::resizeMe(){
     else{
         multi = windowHeight / defaultHeight;
     }
+    QFont settingsFont = QFont("FreeSans", multi * 1100.0 / dpi,QFont::Bold,false);
+    ui->pulldown_gauge->setFont(            settingsFont);
+    ui->pulldown_showManometer->setFont(    settingsFont);
+    ui->pulldown_showTextmessages->setFont( settingsFont);
+    ui->pulldown_targetdistance->setFont(   settingsFont);
+    ui->pulldown_tcpConnection->setFont(    settingsFont);
+    ui->label_qdmi_1->setFont(              settingsFont);
+    ui->label_qdmi_2->setFont(              settingsFont);
+    ui->label_qdmi_3->setFont(              settingsFont);
+    ui->label_qdmi_4->setFont(              settingsFont);
+    ui->label_qdmi_5->setFont(              settingsFont);
     ui->DmiManoHolder->setGeometry(0,0,static_cast<int>(defaultWidth * multi)
                                     ,static_cast<int>(defaultHeight * multi));
     ui->fieldA1->setBorderThickness(static_cast<int>(multi + 0.75));
@@ -556,26 +636,24 @@ void MainWindow::resizeEvent(QResizeEvent* event){
     resizeMe();
 }
 void MainWindow::configureSettingsWindow(){
-    QStringList tdList = { "1000m ERA", "4000m DB" };
-    QStringList gaugeList = { "Haken ERA ERTMS", "Dreieck DB" };
+    QStringList tdList = { "1000m (ERTMS)", "4000m (DB)" };
+    QStringList gaugeList = { "Haken (ERTMS)", "Dreieck (DB)" };
+    QStringList showTextmessagesList = { "Ja", "Autom. (Nur Zusi)", "Nein" };
     QStringList showManometerList = { "Nicht anzeigen", "Anzeigen (16:9)", "Anzeigen (16:10)" };
-    QStringList tcpConnectionList = { "Einmal beim Start", "Wiederholend" };
+    QStringList tcpConnectionList = { "beim Start Verbinden", "immer Verbinden" };
     ui->pulldown_targetdistance->addItems(tdList);
     ui->pulldown_gauge->addItems(gaugeList);
+    ui->pulldown_showTextmessages->addItems(showTextmessagesList);
     ui->pulldown_showManometer->addItems(showManometerList);
     ui->pulldown_tcpConnection->addItems(tcpConnectionList);
     ui->pulldown_targetdistance->setCurrentIndex(settings->value("pulldown_targetdistance").toInt());
     ui->pulldown_gauge->setCurrentIndex(settings->value("pulldown_gauge").toInt());
+    ui->pulldown_showTextmessages->setCurrentIndex(settings->value("pulldown_showTextmessages").toInt());
     ui->pulldown_showManometer->setCurrentIndex(settings->value("pulldown_showManometer").toInt());
     ui->pulldown_tcpConnection->setCurrentIndex(settings->value("pulldown_tcpConnection").toInt());
-    ui->widgetTacho->setEraUse(settings->value("pulldown_gauge").toInt() == 0);
-    ui->fieldVZile100->setVisib(settings->value("pulldown_gauge").toInt() == 1);
-    ui->fieldVZile10->setVisib(settings->value("pulldown_gauge").toInt() == 1);
-    ui->fieldVZile1->setVisib(settings->value("pulldown_gauge").toInt() == 1);
-    ui->fieldA3->setEraUse(settings->value("pulldown_targetdistance").toInt() == 0);
-    showManometer = static_cast<quint8>(settings->value("pulldown_showManometer").toUInt());
+    applySettings();
     emit newZusiIp(settings->value("zusiIp").toString());
-    emit tcpConnectionSettings(static_cast<quint8>(settings->value("pulldown_tcpConnection").toUInt()));
+
 }
 void MainWindow::mousePressEvent(QMouseEvent *event){
     #if defined(Q_OS_WIN32) || defined(Q_OS_LINUX)

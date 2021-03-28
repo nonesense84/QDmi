@@ -49,6 +49,7 @@ public slots:
     void addAtribut(QVector<unsigned char> *vector, unsigned char atribut);
     void addTextAtribut(QVector<unsigned char> *vector, quint16 id, QString text);
     void setUseManometer(bool use);
+    void setTextUsing(quint8 useAutomText);
 
 public:
     zusi3Tcp();
@@ -60,6 +61,7 @@ private:
     QString ipAddress;
     QString zugnummer;
     bool useManometer = true;
+    uint8_t forceTextmessages = 0;
     bool istVMaxErstesFahrzeug = true;
     bool trainHasBenMovedSinceLastNewTrainNumber = false;
     uint8_t ipHostPart = 1;
@@ -131,6 +133,7 @@ public: signals:
     void newTechnicalMessage(QString text, QColor forColor, QColor bgColor, quint8 id);
     void removeTechnicalMessage(quint8 id);
     void sendTcpConnectionFeedback(QString feedback);
+    void sendDataSourceIsZusi(bool);
 };
 
 #endif // ZUSI3TCP_H

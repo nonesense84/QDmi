@@ -9,6 +9,7 @@
 #include <QSettings>
 #include <QMouseEvent>
 #include <QDateTime>
+#include <QNetworkInterface>
 #include "era.h"
 #include "lzb.h"
 #include "sep.h"
@@ -34,6 +35,8 @@ public:
     quint8  showManometer = 1;
 
 private slots:
+    void messaesOutOfViewHandling5to9(bool outOfView);
+    void messaesOutOfViewHandling8to9(bool outOfView);
     void fieldF1Clicked();
     void fieldF4Clicked();
     void fieldF5Clicked();
@@ -59,6 +62,7 @@ private slots:
     void addItemToData(QString item);
     void blinkCursor();
     void applyClicked(QString data);
+    void applySettings();
     void configureSettingsWindow();
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
@@ -83,13 +87,12 @@ private:
     bool useDistEraForLzb;
     bool useHookForLzb;
     bool useTextFromPzb;
+    bool MessaesOutOffView5to9 = false;
+    bool MessaesOutOffView8to9 = false;
     QPoint lKilickPos;
     QString dataString = "";
     QString activeDataEntryItem = "";
     uint8_t  mode = 0;
-
-private: signals:
-    void newZusiIp(QString ip);
 
 protected:
   void resizeEvent ( QResizeEvent * event );
@@ -101,6 +104,9 @@ signals:
     void newDotsPerInch(qreal dpi);
     void newManometerUse(bool use);
     void tcpConnectionSettings(quint8 settings);
+    void newZusiIp(QString ip);
+    void newTextMessagesSettings(quint8  setting);
+    void naivationArrowClick(qint8 direction);
 };
 
 #endif // MAINWINDOW_H

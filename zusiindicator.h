@@ -14,7 +14,7 @@ class zusiIndicator : public QObject
 private:
     uint8_t indicators[64];
     uint8_t melderbild = 0, melderbildOld = 0, lm1000Hz = 0, lm85 = 0, lm70 = 0, lm55 = 0,
-    zugart = 0, ktp = 1, lmBefehl = 0, lm500Hz = 0, lmS = 0,
+    zugart = 0, lmBefehl = 0, lm500Hz = 0, lmS = 0,
     lmSDelayed = 0, lmH = 0, lmE40 = 0, lmB = 0, lmUe = 0, lmG = 0, lmEl = 0, lmEnde = 0,
     lmHauptschalter = 0, lmGetriebe = 0, lmSchleudern = 0, lmGleiten = 0,
     lmUhrzeitDigital = 0, StwgHauptschalter = 0, lmSifa = 0, SifaHupe = 0,
@@ -28,6 +28,7 @@ private:
     float vZiel = 0, vIst = 0;
     quint8 lastLimitMessage;
     bool restriktiv = false;
+    bool ktp = false;
     bool afbAn = false;
     bool ersatzauftrag = false, lzbHaltUeberfahren = false, grunddatenWirksam = false, ersatzdatenWirksam = false;
     bool lzbVorhanden;
@@ -63,7 +64,7 @@ public slots:
     void setMelderbild(uint8_t value);
     void setGrundZwangsbrmnsung(uint16_t value);
     void setZugart(uint8_t value);
-    void setKlartextmeldungen(uint8_t value);
+    void setKlartextmeldungen(uint8_t valueFromZusi, uint8_t valueFromUser);
     void setZustandZugsicherung(uint16_t value);
     void clearData();
     //====

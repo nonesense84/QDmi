@@ -123,14 +123,17 @@ void zusiIndicator::setGrundZwangsbrmnsung(uint16_t value){//qDebug() << "ZB weg
 void zusiIndicator::setZugart(uint8_t value){//qDebug() << "Zugart:    " + QString::number(value);
     zugart = value; // U_M_O 2_3_4  1_Undef
 }
-void zusiIndicator::setKlartextmeldungen(uint8_t value){//qDebug() << "Klartextmeldungen : " + QString::number(value);
-    if(ktp != value > 1 && value > 1){
-        for(quint8 i = 0; db::messages->size(); i++){
+void zusiIndicator::setKlartextmeldungen(uint8_t valueFromZusi, uint8_t valueFromUser){//qDebug() << "Klartextmeldungen : " + QString::number(value);
+    // valueFromUser: 0: Allways, 1: Automatic, 2: Never
+    // valueFromZusi: 0: Keine KTM möglich, 1: KTM möglich aber nicht aktiv 2: KTM aktiv 3: nur KTM möglich
+    bool newKtp = (valueFromZusi > 1 && valueFromUser == 1) || (valueFromUser == 0);
+    if((ktp != newKtp) && !newKtp){
+        for(quint8 i = 0; i < db::numMessages; i++){
             removeMessage(i);
         }
         removeMessage(lastLimitMessage);
     }
-    ktp = value > 1;
+    ktp = newKtp;
 }
 void zusiIndicator::setLmHauptschalter(uint8_t value){
     //qDebug() << "HS   " + QString::number(value);

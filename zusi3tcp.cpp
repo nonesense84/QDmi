@@ -184,6 +184,7 @@ void zusi3Tcp::checkClientConnection(){
     case QAbstractSocket::UnconnectedState:
         removeTechnicalMessage(11);
         emit newTechnicalMessage(" Verbindungsaufbau gescheitert", era::grey, era::darkBlue, 10);
+        emit sendDataSourceIsZusi(false);
         QTimer::singleShot(4000,this,SLOT(remooveTechMessage10()));
         if(autoReconnect)QTimer::singleShot(5000, this, SLOT(reconnect()));
         break;
@@ -201,6 +202,7 @@ void zusi3Tcp::checkClientConnection(){
         removeTechnicalMessage(10);
         removeTechnicalMessage(11);
         emit newTechnicalMessage(" Mit Zusi3 Verbunden", era::grey, era::darkBlue, 13);
+        emit sendDataSourceIsZusi(true);
         QTimer::singleShot(2500,this,SLOT(remooveTechMessage13()));
         break;
     case QAbstractSocket::BoundState:
@@ -426,7 +428,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                                             //qDebug() << "ZA Akt.:    " + QString::number(useData2Byte.byte[0]);
                                             return;
                                         case 0x0006:   // Modus (Grunddaten / Ersatzzugdaten / Normalbetrieb)
-                                            qDebug() << "Grund./Ers./Norm.: " + QString::number(useData2Byte.byte[0]);
+                                            //qDebug() << "Grund./Ers./Norm.: " + QString::number(useData2Byte.byte[0]);
                                             myIndicators->setGrunddatenWirksam(useData2Byte.byte[0] == 4, VIst <= 50);
                                             myIndicators->setErsatzdatenWirksam(useData2Byte.byte[0] == 5, VIst <= 50);
                                             return;
@@ -437,7 +439,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                                 case 0x0009: return;  // LZB StörschalterqDebug() << "LZB SS   : " + QString::number(useData2Byte.byte[0]);
                                 case 0x000A: return;  // Indusi-LuftabsperrhahnqDebug() << "Indusi-LH: " + QString::number(useData2Byte.byte[0]);
                                 case 0x000B:   // Klartextmeldungen
-                                    myIndicators->setKlartextmeldungen(useData2Byte.byte[0]);
+                                    myIndicators->setKlartextmeldungen(useData2Byte.byte[0], forceTextmessages);
                                     return;
                             }
                             return;
@@ -819,6 +821,13 @@ void zusi3Tcp::guesTractionType(){
 void zusi3Tcp::setUseManometer(bool use){
     if(useManometer != use){
         useManometer = use;
+        reconnect();
+    }
+}
+
+void zusi3Tcp::setTextUsing(quint8 useAutomText){
+    if(forceTextmessages != useAutomText){  // 0: Allways, 1: Automatic, 2: Never
+        forceTextmessages = useAutomText;
         reconnect();
     }
 }
