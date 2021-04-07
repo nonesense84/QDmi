@@ -53,9 +53,9 @@ signals:
 
 private:
     #define Keine 0
-    #define ZugartO 1
+    #define ZugartO 3
     #define ZugartM 2
-    #define ZugartU 3
+    #define ZugartU 1
     #define ZugartOBlink 4
     #define ZugartMBlink 5
     #define ZugartUBlink 6

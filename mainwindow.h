@@ -58,6 +58,8 @@ private slots:
     void settingsBtn6Clicked();
     void settingsBtn7Clicked();
     void settingsBtn8Clicked();
+    void geoPositionClicked();
+    void setGeoPosition(qint32 geoPosition);
     void settingsCloseClicked();
     void addItemToData(QString item);
     void blinkCursor();

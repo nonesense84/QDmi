@@ -623,7 +623,7 @@ void zusiIndicator::makeLzbLmDatagram(){
         }
         if(ktp)calcPzbTextmessages();
     }
-    QVector<quint8> lmsToDecoder(22,0);
+    QVector<quint8> lmsToDecoder(24,0);
     lmsToDecoder[0] = lmB;
     lmsToDecoder[1] = lm85;
     lmsToDecoder[2] = lm70;

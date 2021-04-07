@@ -126,6 +126,7 @@ void zusi3Tcp::setIpadress(QString address){
   //addAtribut(&abfrage, 0x1c);  // LM Gleiten
     addAtribut(&abfrage, 0x36);  // AFB an
     addAtribut(&abfrage, 0x55);  // Stromabnehmer
+    addAtribut(&abfrage, 0x61);  // Kilometrierung
     addAtribut(&abfrage, 0x64);  // SIFA
     addAtribut(&abfrage, 0x65);  // Zugsicherung
     addAtribut(&abfrage, 0x66);  // Türen
@@ -359,6 +360,11 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                 case 0x0004:    // Druck Hauptluftbehälter
                     if (checkHysterise(&drHlb, useData4Byte.Single * 10)){
                         emit newHlb(drHlb);
+                    }
+                    return;
+                case 0x0061:    // Kilometrierung
+                    if (checkHysterise(&kilometer, useData4Byte.Single * 1000)){
+                        emit newKilometrierung(kilometer);
                     }
                     return;
                 case 0x0065:    // 11.3.3.3.4 Status Zugbeeinﬂussung
@@ -751,6 +757,16 @@ void zusi3Tcp::zusiDecoderSecondaryInfos(){
 
 float zusi3Tcp::mPerSecToKmh(float input){
     return ceil((input * 3.6 - 0.5));
+}
+
+
+bool zusi3Tcp::checkHysterise(int32_t *output, float input){
+    qint32 tmp = static_cast<qint32>(input);
+    if(tmp != *output){
+        *output = tmp;
+        return true;
+    }
+    return false;
 }
 
 bool zusi3Tcp::checkHysterise(uint16_t *output, float input){

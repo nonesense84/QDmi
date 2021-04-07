@@ -23,9 +23,9 @@ void dmiLabel::mousePressEvent(QMouseEvent *event){
 void dmiLabel::mouseReleaseEvent(QMouseEvent *event){
     isPushed = false;
     update();
-    if(isEnab && isButton){
+    if(isEnab){
         emit clicked(true);
-        //QSound::play(":/sounds/click.wav");
+        //if(isButton)QSound::play(":/sounds/click.wav");
     }
 }
 
@@ -36,7 +36,8 @@ void dmiLabel::setAsButton(bool asButton){
 void dmiLabel::setAsButton(bool asButton, bool forDataEntry){
     isButton = asButton;
     isDataEntryButton = forDataEntry;
-    alignLeft = true;
+    customAlignment = Qt::AlignLeft;
+    //alignLeft = true;
 }
 
 void dmiLabel::setTargetDistance(quint16 distance, bool visible){
@@ -141,6 +142,13 @@ void dmiLabel::setCustomFontFactor(qreal factor){
     customFontFactor = factor;
 }
 
+void dmiLabel::setCustomFontFactor(qreal factor, Qt::Alignment alignment){
+    customFontFactor = factor;
+    customAlignment = static_cast<int>(alignment);
+    //alignLeft = alignment == Qt::AlignLeft;
+    //alignRight = alignment == Qt::AlignRight;
+}
+
 void dmiLabel::setText(QString text){
     if(labelText != text){
         labelText = text;
@@ -158,17 +166,33 @@ void dmiLabel::setText(QString text, QColor textColorEnabled, QColor textColorDi
     }
 }
 
+void dmiLabel::setText(QString text, QColor textColor, QColor backgroundColor){
+    if((labelText != text)||(labelTextColorEnab != textColor)||(bgColor != backgroundColor)){
+        labelText = text;
+        labelTextColorEnab = textColor;
+        bgColor = backgroundColor;
+        update();
+    }
+}
+
+void dmiLabel::setUnclosedFrame(bool openL, bool openR, bool openU, bool openD){
+    borderLClosed = !openL;
+    borderRClosed = !openR;
+    borderTClosed = !openU;
+    borderBClosed = !openD;
+}
+
 void dmiLabel::setTextFieldUsing(quint8 numFields){
     isTextField = true;
     useSvgIcon = false;
     numTextFields = numFields;
-    msgTextAlign = Qt::AlignLeft;
+    customAlignment = Qt::AlignLeft;
 }
 void dmiLabel::setTextFieldUsing(quint8 numFields, quint8 alignment){
     isTextField = true;
     useSvgIcon = false;
     numTextFields = numFields;
-    msgTextAlign = alignment;
+    customAlignment = alignment;
 }
 
 void dmiLabel::setSegmentDigitToUse(quint8 position){
@@ -199,6 +223,8 @@ void dmiLabel::addTextMessage(QString text, QColor textColor, QColor bgColor, qu
             messageTextColors[i] = textColor;
             messageIds[i] = msgId;
             update();
+            highestTextMessgePosition = i;
+          //qDebug() << "highestTextMessgePosition: " + QString::number(highestTextMessgePosition);
             if(i > numTextFields)emit messaesOutOfView(true);
             return;
         }
@@ -206,6 +232,7 @@ void dmiLabel::addTextMessage(QString text, QColor textColor, QColor bgColor, qu
 }
 
 void dmiLabel::removeTextMessage(quint8 msgId){
+    bool needUpdate = false;
     bool foundMessaesOutOfView = false;
     for(quint8 i=0; i<10; i++){
         if(messageIds[i] == msgId){
@@ -213,26 +240,24 @@ void dmiLabel::removeTextMessage(quint8 msgId){
             messageBackQolors[i] = era::darkBlue;
             messageTextColors[i] = era::darkBlue;
             messageIds[i] = 255;
-            update();
+            needUpdate  = true;
         }
         if(messageIds[i] != 255 && i > numTextFields){
             foundMessaesOutOfView = true;
             highestTextMessgePosition = i;
+            if(textMessageOffset >= highestTextMessgePosition) textMessageOffset = highestTextMessgePosition - numTextFields + 1;
+          //qDebug() << "highestTextMessgePosition: " + QString::number(highestTextMessgePosition);
         }
     }
+    if(needUpdate)update();
     emit messaesOutOfView(foundMessaesOutOfView);
 }
 void dmiLabel::shiftTextMessageOffset(qint8 shift){
-    if(textMessageOffset < (highestTextMessgePosition - numTextFields)){
-        textMessageOffset = textMessageOffset + shift;
-    }
-    else{
-        if(textMessageOffset > 0){
-            textMessageOffset = textMessageOffset + shift;
-        }
-    }
-    if(textMessageOffset > highestTextMessgePosition) textMessageOffset = 10 - numTextFields;
+    textMessageOffset = textMessageOffset + shift;
+    if(textMessageOffset < 0) textMessageOffset = 0;
+    if(textMessageOffset >= highestTextMessgePosition) textMessageOffset = highestTextMessgePosition - numTextFields + 1;
     update();
+  //qDebug() << "textMessageOffset: " + QString::number(textMessageOffset);
 }
 
 void dmiLabel::paintEvent(QPaintEvent *)
@@ -240,7 +265,10 @@ void dmiLabel::paintEvent(QPaintEvent *)
     if(isVisible){
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing);
-        QRect centralAreaLbl(  borderThickness,     borderThickness, width() - 2 * borderThickness, height() - 2 * borderThickness);
+        QRect centralAreaLbl(  borderThickness * borderLClosed,
+                               borderThickness * borderTClosed,
+                               width() -  borderThickness * (borderRClosed + borderLClosed),
+                               height() - borderThickness * (borderBClosed + borderTClosed));
         paintFrame(&painter, centralAreaLbl    , era::black,  era::shadow, 0);
         if(isButton){
             QRect centralAreaBtn(2*borderThickness, 2 * borderThickness, width() - 4 * borderThickness, height() - 4 * borderThickness);
@@ -286,17 +314,16 @@ void dmiLabel::paintText(QPainter *iconPainter, QRect centralArea){
                                static_cast<int>(fontFactor * customFontFactor * lineHeight),
                                textStyle,
                                false));
-    if(alignLeft){
-        QRect textRect = iconPainter->boundingRect(field,Qt::AlignLeft,labelText);
-        textRect.moveLeft(10*borderThickness);
+
+    QRectF textRect = iconPainter->boundingRect(field,customAlignment,labelText);
+    if(customAlignment == Qt::AlignLeft){
+        textRect.moveLeft(5*borderThickness);
         textRect.translate(0, field.height()/2 - textRect.height()/2);
-        iconPainter->drawText(textRect,labelText);
     }
-    else{
-        QRectF textRect = iconPainter->boundingRect(field,Qt::AlignCenter,labelText);
-        //textRect.translate(0, field.height()/2 - textRect.height()/2);
-        iconPainter->drawText(textRect,labelText);
+    if(customAlignment == Qt::AlignRight){
+        textRect.translate(0, field.height()/2 - textRect.height()/2);
     }
+    iconPainter->drawText(textRect,labelText);
 }
 
 void dmiLabel::paintDistance(QPainter *iconPainter, QRect centralArea){
@@ -388,9 +415,9 @@ void dmiLabel::paintTextMessages(QPainter *iconPainter, QRect centralArea){
                                    false));
         QRect textRect = iconPainter->boundingRect(field,Qt::AlignLeft,messageTexts[i + textMessageOffset]);
         textRect.moveLeft(3*borderThickness);
-        if(msgTextAlign == Qt::AlignLeft)textRect.translate(0, field.height()/2 - textRect.height()/2);
-        if(msgTextAlign == Qt::AlignRight)textRect.translate(field.width()-textRect.width(), field.height()/2 - textRect.height()/2);
-        if(msgTextAlign == Qt::AlignCenter)textRect.translate(field.width()/2-textRect.width()/2, field.height()/2 - textRect.height()/2);
+        if(customAlignment == Qt::AlignLeft)textRect.translate(0, field.height()/2 - textRect.height()/2);
+        if(customAlignment == Qt::AlignRight)textRect.translate(field.width()-textRect.width(), field.height()/2 - textRect.height()/2);
+        if(customAlignment == Qt::AlignCenter)textRect.translate(field.width()/2-textRect.width()/2, field.height()/2 - textRect.height()/2);
         iconPainter->drawText(textRect,messageTexts[i + textMessageOffset]);
         field.translate(0,lineHeight);
     }
@@ -460,7 +487,7 @@ void dmiLabel::paintFrame(QPainter *framePainter,QRect centralArea, QColor color
     if(isDataEntryButton)
         framePainter->setBrush(era::mediumGrey);
     else
-        framePainter->setBrush(era::darkBlue);
+        framePainter->setBrush(bgColor);
 
     framePainter->drawRect(centralArea);
 }

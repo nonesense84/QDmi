@@ -12,6 +12,7 @@ void lzb::setTextUsing(quint8 useAutomText){
             qDebug()  << i;
         }
         removeMessage(lastLimitMessage);
+        lastLimitMessage = 255;
     }
     useTxtMsgByLm = useAutomText == 0; // 0: Allways, 1: Automatic, 2: Never
 }
@@ -24,6 +25,7 @@ void lzb::setZusiAsDataSource(bool value){
             qDebug()  << i;
         }
         removeMessage(lastLimitMessage);
+        lastLimitMessage = 255;
     }
     zusiIsDataSource = value;
 }
@@ -54,23 +56,23 @@ void lzb::setStates(QVector<quint8> states){
     emit newIntervenation(intervenation);
     emit newVMaxReducing(states[ 8] >  0);
     if(useTxtMsgByLm && !zusiIsDataSource){
-        if(states[1] > 0  && states[2] == 0 && states[3] == 0) zustLmBlau = ZugartO;
-        if(states[1] == 0 && states[2] >  0 && states[3] == 0) zustLmBlau = ZugartM;
-        if(states[1] == 0 && states[2] == 0 && states[3] >  0) zustLmBlau = ZugartU;
-        if(states[1] == 0 && states[2] == 0 && states[3] == 0) zustLmBlau = Keine;
-        if(states[1] > 1  && states[2] == 0 && states[3] == 0) zustLmBlau = ZugartOBlink;
-        if(states[1] == 0 && states[2] >  1 && states[3] == 0) zustLmBlau = ZugartMBlink;
-        if(states[1] == 0 && states[2] == 0 && states[3] >  1) zustLmBlau = ZugartUBlink;
         quint8 blinkFrequency = 2;
-        if((states[4] == 6) || (states[4] == 7)){ // If system has LZB, use slow blinking.
-            blinkFrequency = 1;
-        }
+      //if(states[1] == 0 && states[2] >  0 && states[3] == 0) zustLmBlau = ZugartM;
+      //if(states[1] == 0 && states[2] == 0 && states[3] >  0) zustLmBlau = ZugartU;
+      //if(states[1] == 0 && states[2] == 0 && states[3] == 0) zustLmBlau = Keine;
+      //if(states[1] > 1  && states[2] == 0 && states[3] == 0) zustLmBlau = ZugartOBlink;
+      //if(states[1] == 0 && states[2] >  1 && states[3] == 0) zustLmBlau = ZugartMBlink;
+      //if(states[1] == 0 && states[2] == 0 && states[3] >  1) zustLmBlau = ZugartUBlink;
+        zugart = states[23];
+        if(states[1] == 0 && states[2] == 0 && states[3] == 0) zugart = Keine; // When direction switch is not set to forward. -> No blue indicator.
+      //if((states[4] == 6) || (states[4] == 7)){blinkFrequency = 1;} // If system has LZB, use slow blinking.
         bool restriktiv = states[ 1] > 1 && states[ 2] > 1;
-        if((zustLmBlau == ZugartO) || ((zustLmBlau == ZugartOBlink) && (zustLmBlau != ZugartMBlink))) zugart = ZugartO;
-        if((zustLmBlau == ZugartM) || ((zustLmBlau == ZugartMBlink) && (zustLmBlau != ZugartOBlink))) zugart = ZugartM;
-        if((zustLmBlau == ZugartU) || zustLmBlau == ZugartUBlink)                                     zugart = ZugartU;
-        if (zustLmBlau == Keine)                                                                      zugart = Keine;
-        blauBlink = ((zustLmBlau == ZugartOBlink) || (zustLmBlau == ZugartMBlink) || (zustLmBlau == ZugartUBlink));
+      //if((zustLmBlau == ZugartO) || ((zustLmBlau == ZugartOBlink) && (zustLmBlau != ZugartMBlink))) zugart = ZugartO;
+      //if((zustLmBlau == ZugartM) || ((zustLmBlau == ZugartMBlink) && (zustLmBlau != ZugartOBlink))) zugart = ZugartM;
+      //if((zustLmBlau == ZugartU) || zustLmBlau == ZugartUBlink)                                     zugart = ZugartU;
+      //if (zustLmBlau == Keine)                                                                      zugart = Keine;
+      //blauBlink = ((zustLmBlau == ZugartOBlink) || (zustLmBlau == ZugartMBlink) || (zustLmBlau == ZugartUBlink));
+        blauBlink = states[1] > 1 || states[2] > 1 || states[3] >  1;
         bool tausendBeinfl =  (states[12] == 1 && states[13] == 0);
         bool fuenfhuBeinfl =  (states[12] == 0 && states[13] == 1);
         bool zweitauBeinfl =   states[11] == 1;
@@ -90,9 +92,15 @@ void lzb::setStates(QVector<quint8> states){
         addOrRemoveMessage(29, ersAuftrag);
         addOrRemoveMessage(28, lzbEnde);
         addOrRemoveMessage(45, freiTastErw);
-
+      /*qDebug() << "=============================================";
+        qDebug() << "zugart:        " + QString::number(zugart);
+        qDebug() << "restriktiv:    " + QString::number(restriktiv);
+        qDebug() << "fuenfhuBeinfl: " + QString::number(fuenfhuBeinfl);
+        qDebug() << "1000Hz: " + QString::number(states[12]);
+        qDebug() << "500Hz:  " + QString::number(states[13]);*/
         switch (zugart){
             case ZugartO:
+                blinkFrequency = (states[1] & 0x06) >> 1;
                 removeIndicator(2);
                 removeIndicator(3);
                 if( restriktiv &&  !fuenfhuBeinfl){//45km/h / 1000 / 85'
@@ -122,6 +130,7 @@ void lzb::setStates(QVector<quint8> states){
                 }
             break;
             case ZugartM:
+                blinkFrequency = (states[2] & 0x06) >> 1;
                 removeIndicator(1);
                 removeIndicator(3);
                 if( restriktiv &&  !tausendBeinfl && !fuenfhuBeinfl){//45km/h / 1000 / 70'
@@ -155,6 +164,8 @@ void lzb::setStates(QVector<quint8> states){
                 }
             break;
             case ZugartU:
+                if(!restriktiv)blinkFrequency = (states[3] & 0x06) >> 1;
+                if( restriktiv)blinkFrequency = (states[2] & 0x06) >> 1;
                 removeIndicator(1);
                 removeIndicator(2);
                 if( restriktiv &&  !tausendBeinfl && !fuenfhuBeinfl){//45km/h / 1000 / 55'
@@ -206,7 +217,7 @@ void lzb::setStates(QVector<quint8> states){
         }
     }
     for(quint8 i = 0; i <= 21; i++){
-        if(useTxtMsgByLm && i == 1) i = 5;// Set all indicators but O/M/U/PZB/LZB
+        if(useTxtMsgByLm && !zusiIsDataSource && i == 1) i = 5;// Set all indicators but O/M/U/PZB/LZB
         if(states[i]  > 0){
             addIndicator(i, ((states[i] & 0x06 ) >> 1),(states[i] & 0x08) > 0);
         }
@@ -238,7 +249,9 @@ void lzb::addIndicator(quint8 indId, quint8 blinking, bool invers){
     quint8 i = 0;
     bool indAllrUsed = false;
     // Search for a position, this indicator is allready used. ...
+    // If it is, check, if the behaviour is the same.
     // If it is, there is noting left to do.
+    // If no, leave the loop and put indicator with new behaviour at same position (i).
     for(i=0; i<=6; i++){
         if(indicatorField[i] == indId){
             indAllrUsed = true;

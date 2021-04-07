@@ -49,6 +49,8 @@ void MainWindow::process(){
     ui->FieldE8to9->setTextFieldUsing(2);
     ui->settingsTitel->setBorderThickness(0);
     ui->settingsTitel->addTextMessage(" Einstellungen",era::grey,era::black,0);
+    ui->qdmiSettingsTitel->setBorderThickness(0);
+    ui->qdmiSettingsTitel->addTextMessage(" QDmi Einstellungen",era::grey,era::black,0);
     ui->zusiIpTitel->setBorderThickness(0);
     ui->zusiIpTitel->addTextMessage(" Zusi 3 IP-Adresse",era::grey,era::black,1);
     ui->systemVersionTitel->setBorderThickness(0);
@@ -60,7 +62,7 @@ void MainWindow::process(){
     ui->systemVersionComp2Name->setTextFieldUsing(1, Qt::AlignRight);
     ui->systemVersionComp2Name->addTextMessage("github.com/nones",era::grey,era::darkBlue,1);
     ui->systemVersionComp1Version->setBorderThickness(0);
-    ui->systemVersionComp1Version->addTextMessage("1.2.3T1",era::grey,era::darkBlue,1);
+    ui->systemVersionComp1Version->addTextMessage("1.2.3T2",era::grey,era::darkBlue,1);
     ui->systemVersionComp2Version->setBorderThickness(0);
     ui->systemVersionComp2Version->addTextMessage("ense84/QDmi",era::grey,era::darkBlue,1);
     qRegisterMetaType< QVector<quint8> >("QVector<quint8>");
@@ -78,6 +80,14 @@ void MainWindow::process(){
     connect(ui->settingsBtn6,SIGNAL(clicked(bool)),this,SLOT(settingsBtn6Clicked()));
     connect(ui->settingsBtn7,SIGNAL(clicked(bool)),this,SLOT(settingsBtn7Clicked()));
     connect(ui->settingsBtn8,SIGNAL(clicked(bool)),this,SLOT(settingsBtn8Clicked()));
+    connect(ui->fieldG12_geopos_H,SIGNAL(clicked(bool)),this,SLOT(geoPositionClicked()));
+    connect(ui->fieldG12_geopos_T,SIGNAL(clicked(bool)),this,SLOT(geoPositionClicked()));
+    connect(ui->fieldG12_btn,SIGNAL(clicked(bool)),this,SLOT(geoPositionClicked()));
+    ui->fieldG12_btn->setWorking(false, false, false);
+    ui->fieldG12_geopos_T->setUnclosedFrame(false, true, false, false);
+    ui->fieldG12_geopos_H->setUnclosedFrame(true, false, false, false);
+    ui->fieldG12_geopos_H->setCustomFontFactor(0.22, Qt::AlignLeft);
+    ui->fieldG12_geopos_T->setCustomFontFactor(0.3,  Qt::AlignRight);
     connect(ui->settingsClose,SIGNAL(clicked(bool)),this,SLOT(settingsCloseClicked()));
     connect(ui->settingsClose_6,SIGNAL(clicked(bool)),this,SLOT(settingsCloseClicked()));
     connect(ui->zusiIpClose,SIGNAL(clicked(bool)),this,SLOT(settingsCloseClicked()));
@@ -127,6 +137,8 @@ void MainWindow::process(){
     connect(mySep,SIGNAL(newHlb(quint16)),ui->widgetMano1,SLOT(setPressure1(quint16)));
     connect(mySep,SIGNAL(newHll(quint16)),ui->widgetMano1,SLOT(setPressure2(quint16)));
     connect(mySep,SIGNAL(newBrz(quint16)),ui->widgetMano2,SLOT(setPressure1(quint16)));
+    connect(myTcp,SIGNAL(newKilometrierung(qint32)),this,SLOT(setGeoPosition(qint32)));
+    connect(mySep,SIGNAL(newGeoPos(qint32)),this,SLOT(setGeoPosition(qint32)));
     ui->widgetMano2->setPointer2using(false);
     ui->widgetMano1->setPointer1color(era::red);
     ui->widgetMano1->setPointer2color(era::yellow);
@@ -148,6 +160,7 @@ void MainWindow::process(){
     ui->settingsBtn4->setText("System version",era::grey,era::darkGrey,QFont::Light);
     ui->settingsBtn6->setIcon(":/icons/netw_ena.svg", ":/icons/netw_dis.svg");
     ui->settingsBtn7->setIcon(":/icons/power_off.svg", ":/icons/power_off.svg");
+    ui->fieldG12_btn->setIcon(":/icons/DR_03_ena.svg", ":/icons/DR_03_dis.svg");
     ui->settingsBtn1->setWorking(false, false, false);
     ui->settingsBtn2->setWorking(false, false, false);
     ui->settingsBtn3->setWorking(false, false, false);
@@ -388,8 +401,8 @@ void MainWindow::settingsBtn6Clicked(){                                     // N
     quint8 i = 0;
     for (const QHostAddress &address: QNetworkInterface::allAddresses()) {
         if (address.protocol() == QAbstractSocket::IPv4Protocol && address != localhost){
-            ui->FieldE5to9->addTextMessage(address.toString(), era::grey, era::darkBlue, 101 + i);
-            ui->FieldE8to9->addTextMessage(address.toString(), era::grey, era::darkBlue, 101 + i);
+            ui->FieldE5to9->addTextMessage(" " + address.toString(), era::grey, era::darkBlue, 101 + i);
+            ui->FieldE8to9->addTextMessage(" " + address.toString(), era::grey, era::darkBlue, 101 + i);
             i++;
         }
     }
@@ -404,6 +417,20 @@ void MainWindow::settingsBtn7Clicked(){
     QApplication::quit();
 }
 void MainWindow::settingsBtn8Clicked(){}
+void MainWindow::geoPositionClicked(){
+    bool qurrentIndex = static_cast<bool>(ui->fieldG12_holder->currentIndex());
+    ui->fieldG12_holder->setCurrentIndex(!qurrentIndex);
+}
+void MainWindow::setGeoPosition(qint32 geoPosition){
+    qDebug() << "Position: " + QString::number(geoPosition);
+    ui->fieldG12_btn->setWorking(true, false, false);
+    ui->fieldG12_geopos_T->setWorking(true,false,false);
+    ui->fieldG12_geopos_H->setWorking(true,false,false);
+    QString postionTextKilometer = QString::number(geoPosition / 1000);
+    QString postionTextMeter = QString::number(geoPosition % 1000).rightJustified(3, '0');
+    ui->fieldG12_geopos_T->setText(postionTextKilometer,era::black,era::grey);
+    ui->fieldG12_geopos_H->setText(postionTextMeter,era::black,era::grey);
+}
 void MainWindow::settingsCloseClicked(){
     if(ui->fieldDG->currentIndex() == 7){
         ui->FieldE5to9->removeTextMessage(8);
@@ -586,7 +613,9 @@ void MainWindow::resizeMe(){
     ui->fieldG9->setBorderThickness(static_cast<int>(multi + 0.75));
     ui->fieldG10->setBorderThickness(static_cast<int>(multi + 0.75));
     ui->fieldG11->setBorderThickness(static_cast<int>(multi + 0.75));
-    ui->fieldG12->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->fieldG12_btn->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->fieldG12_geopos_T->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->fieldG12_geopos_H->setBorderThickness(static_cast<int>(multi + 0.75));
     ui->fieldG13->setBorderThickness(static_cast<int>(multi + 0.75));
     ui->settingsBtn1->setBorderThickness(static_cast<int>(multi + 0.75));
     ui->settingsBtn2->setBorderThickness(static_cast<int>(multi + 0.75));
@@ -639,7 +668,7 @@ void MainWindow::configureSettingsWindow(){
     QStringList tdList = { "1000m (ERTMS)", "4000m (DB)" };
     QStringList gaugeList = { "Haken (ERTMS)", "Dreieck (DB)" };
     QStringList showTextmessagesList = { "Ja", "Autom. (Nur Zusi)", "Nein" };
-    QStringList showManometerList = { "Nicht anzeigen", "Anzeigen (16:9)", "Anzeigen (16:10)" };
+    QStringList showManometerList = { "nicht anzeigen", "anzeigen (16:9)", "anzeigen (16:10)" };
     QStringList tcpConnectionList = { "beim Start Verbinden", "immer Verbinden" };
     ui->pulldown_targetdistance->addItems(tdList);
     ui->pulldown_gauge->addItems(gaugeList);

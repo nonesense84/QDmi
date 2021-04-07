@@ -18,6 +18,7 @@ private slots:
     void setMtdIndicator(uint8_t value, uint8_t pos);
 
     float mPerSecToKmh(float input);
+    bool checkHysterise(int32_t *output, float input);
     bool checkHysterise(uint16_t *output, float input);
     bool checkHysterise(float *output, float input, bool isRelative = false);
     void clientReadReady();
@@ -65,6 +66,7 @@ private:
     bool istVMaxErstesFahrzeug = true;
     bool trainHasBenMovedSinceLastNewTrainNumber = false;
     uint8_t ipHostPart = 1;
+    int32_t kilometer = 0;
     uint16_t drHll=0;
     uint16_t drHlb=0;
     uint16_t drBrz=0;
@@ -122,6 +124,7 @@ private:
     } useData2Byte;
     #define MAX_NUTZDATA 4
 public: signals:
+    void newKilometrierung(qint32 kilometrierung);
     void newLzbIndicators(QVector<quint8> lmsToDecoder);
     void newSpeed(quint16 speed);
     void newHll(quint16 Hll);

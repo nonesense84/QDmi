@@ -25,8 +25,10 @@ public slots:
     void setIcon(QString filename);
     void setIcon(QString filenameActive, QString filenameInactive);
     void setCustomFontFactor(qreal factor);
+    void setCustomFontFactor(qreal factor, Qt::Alignment alignment);
     void setText(QString text);
     void setText(QString text, QColor textColor, QColor textColorDisabled, quint8 boldOrThin);
+    void setText(QString text, QColor textColor, QColor backgroundColor);
     void setTextFieldUsing(quint8 numFields);
     void setTextFieldUsing(quint8 numFields, quint8 alignment);
     void setSegmentDigitToUse(quint8 position);
@@ -39,6 +41,7 @@ public slots:
     void setTargetDistance(quint16 distance, bool visible);
     void setIsDistanceScale();
     void setEraUse(bool useEra);
+    void setUnclosedFrame(bool openL, bool openR, bool openU, bool openD);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -57,13 +60,18 @@ private:
     bool isTargetDistance = false;
     bool targetDistanceVisible = false;
     bool useEraStyle = true;
+    bool borderLClosed = true;
+    bool borderRClosed = true;
+    bool borderTClosed = true;
+    bool borderBClosed = true;
     quint8 textStyle=QFont::Bold;   // Bold: 75, Normal 50
     QString labelText;
     QString filenameIconActive;
     QString filenameIconInactive;
     QColor labelTextColorEnab = era::grey;
     QColor labelTextColorDisab = era::darkGrey;
-    quint8 msgTextAlign;
+    QColor bgColor = era::darkBlue;
+    //quint8 msgTextAlign;
     QString fileForDistanceScale;
     quint16 distanceScale;
     quint16 targetDistance;
@@ -74,7 +82,7 @@ private:
     quint8 highestTextMessgePosition = 0;
     quint8 indexHighestTextFields = 0;
     QString messageTexts[10];
-    quint8 textMessageOffset = 0;
+    qint8 textMessageOffset = 0;
     QString segmentText;
     quint16 segmentValue = 0;
     QColor messageBackQolors[10] = {era::darkBlue,era::darkBlue,era::darkBlue,era::darkBlue,era::darkBlue,
@@ -98,7 +106,9 @@ private:
     bool blinkerFast = false;
     bool isButton = false;
     bool isDataEntryButton = false;
-    bool alignLeft = false;
+    //bool alignLeft = false;
+    //bool alignRight = false;
+    int customAlignment = Qt::AlignCenter;
     bool useSvgIcon = false;
     void paintText(QPainter *iconPainter, QRect centralArea);
     void paintTextMessages(QPainter *iconPainter, QRect centralArea);

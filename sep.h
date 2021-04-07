@@ -28,6 +28,7 @@ signals:
     void newFzgVmaxTacho(quint16 speed);
     void newAfbSoll(quint16 vSoll, bool visible);
     void newSimTime(QString simtime);
+    void newGeoPos(qint32 geoPos);
 
 private:
     QUdpSocket *udpSocketSep;
