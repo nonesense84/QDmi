@@ -95,8 +95,6 @@ private:
     int borderThickness = 1;
     bool isVisible = true;
     bool isEnab = true;
-    QPixmap iconActive;
-    QPixmap iconInactive;
     QSvgRenderer svgActive;
     QSvgRenderer svgInactive;
     quint8 blinkFrequency = 0;
@@ -109,7 +107,6 @@ private:
     //bool alignLeft = false;
     //bool alignRight = false;
     int customAlignment = Qt::AlignCenter;
-    bool useSvgIcon = false;
     void paintText(QPainter *iconPainter, QRect centralArea);
     void paintTextMessages(QPainter *iconPainter, QRect centralArea);
     void paintFrame(QPainter *framePainter, QRect centralArea, QColor colorLefUp, QColor colorRightDown, int offset);

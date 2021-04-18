@@ -99,15 +99,8 @@ void dmiLabel::setWorking(bool enabled, quint8 blinkingFreq, bool inverse){
 void dmiLabel::setIcon(QString filename){
     if(filenameIconActive != filename){
         if(mimeFile.suffixForFileName(filename) == "svg"){
-            useSvgIcon = true;
             svgActive.load(filename);
             fileNameIsSet = filename != "";
-        }
-        if(mimeFile.suffixForFileName(filename) == "png"){
-            useSvgIcon = false;
-            iconActive = QPixmap(filename);
-            iconInactive = QPixmap();
-            updateLabel();
         }
         filenameIconActive = filename;
         updateLabel();
@@ -116,22 +109,9 @@ void dmiLabel::setIcon(QString filename){
 
 void dmiLabel::setIcon(QString filenameActive, QString filenameInactive){
     if((filenameIconActive != filenameActive)||(filenameIconInactive != filenameInactive)){
-        useSvgIcon = false;
-        if((mimeFile.suffixForFileName(filenameActive) == "svg")&&mimeFile.suffixForFileName(filenameInactive) == "svg"){
-            useSvgIcon = true;
-            svgActive.load(filenameActive);
-            svgInactive.load(filenameInactive);
-            fileNameIsSet = filenameActive != "";
-        }
-        else{
-            if((mimeFile.suffixForFileName(filenameActive) == "png")&&mimeFile.suffixForFileName(filenameInactive) == "png"){
-                iconActive = QPixmap(filenameActive);
-                iconInactive = QPixmap(filenameInactive);
-            }
-            else{
-                //qDebug() << "Filenames for icons are inconsistent!";
-            }
-        }
+        svgActive.load(filenameActive);
+        svgInactive.load(filenameInactive);
+        fileNameIsSet = filenameActive != "";
         filenameIconActive = filenameActive;
         filenameIconInactive = filenameInactive;
         updateLabel();
@@ -184,13 +164,11 @@ void dmiLabel::setUnclosedFrame(bool openL, bool openR, bool openU, bool openD){
 
 void dmiLabel::setTextFieldUsing(quint8 numFields){
     isTextField = true;
-    useSvgIcon = false;
     numTextFields = numFields;
     customAlignment = Qt::AlignLeft;
 }
 void dmiLabel::setTextFieldUsing(quint8 numFields, quint8 alignment){
     isTextField = true;
-    useSvgIcon = false;
     numTextFields = numFields;
     customAlignment = alignment;
 }
@@ -431,16 +409,11 @@ void dmiLabel::paintIcon(QPainter *iconPainter, QRect centralArea){
        ((blinkFrequency == 2) &&  blinkerFast && !isInvert) ||
        ((blinkFrequency == 2) && !blinkerFast &&  isInvert) ||
        !isEnab){
-        if(useSvgIcon)
-            svgInactive.render(iconPainter, centralArea);
-        else
-            iconPainter->drawPixmap(centralArea, iconInactive);
+       svgInactive.render(iconPainter, centralArea);
+
     }
     else{
-        if(useSvgIcon)
-            svgActive.render(iconPainter,centralArea);
-        else
-            iconPainter->drawPixmap(centralArea, iconActive);
+        svgActive.render(iconPainter,centralArea);
     }
 }
 
