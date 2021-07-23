@@ -18,19 +18,23 @@ public:
 public slots:
     void updateBlinking();
     void updateLabel();
-    void setAsButton(bool asButton);
-    void setAsButton(bool asButton, bool forDataEntry);
+    //void setAsButton(bool forDataEntry=false, bool enabled=true, QString text="");
+    void setAsButton(QString text);
+    void setAsButton(bool enabled, QString text, QString emitText);
+    void setAsButton(bool enabled=true, QString text="");
+    void setAsDataEntryLabel(QString text, bool isInputfield=false, bool isEnabled=false, bool isValid=false, bool isApplicable=true, bool fullGrid=false);
     void setVisib(bool visible);
     void setBorderThickness(int height);
     void setIcon(QString filename);
     void setIcon(QString filenameActive, QString filenameInactive);
     void setCustomFontFactor(qreal factor);
-    void setCustomFontFactor(qreal factor, Qt::Alignment alignment);
+    void setCustomFontFactor(qreal factor, Qt::Alignment customAlignment);
     void setText(QString text);
+    void setText(quint16 text);
     void setText(QString text, QColor textColor, QColor textColorDisabled, quint8 boldOrThin);
     void setText(QString text, QColor textColor, QColor backgroundColor);
     void setTextFieldUsing(quint8 numFields);
-    void setTextFieldUsing(quint8 numFields, quint8 alignment);
+    void setTextFieldUsing(quint8 numFields, quint8 customAlignment);
     void setSegmentDigitToUse(quint8 position);
     void setSegmentText(quint16 value, bool textVisible);
     void addTextMessage(QString text, QColor textColor, QColor bgColor, quint8 msgId);
@@ -51,6 +55,7 @@ protected:
 signals:
     void clicked(bool value);
     void txtBtnClicked(QString value);
+    void dataEntryBtnClicked(QString value, bool enabled);
     void messaesOutOfView(bool outOfView);
 
 private:
@@ -65,11 +70,14 @@ private:
     bool borderTClosed = true;
     bool borderBClosed = true;
     quint8 textStyle=QFont::Bold;   // Bold: 75, Normal 50
-    QString labelText;
+    QString labelText = "";
+    QString emitText = "";
     QString filenameIconActive;
     QString filenameIconInactive;
     QColor labelTextColorEnab = era::grey;
     QColor labelTextColorDisab = era::darkGrey;
+    QColor borderColorTopAndLeft = era::shadow;
+    QColor borderColorButtomAndRight = era::black;
     QColor bgColor = era::darkBlue;
     //quint8 msgTextAlign;
     QString fileForDistanceScale;
@@ -106,7 +114,8 @@ private:
     bool isDataEntryButton = false;
     //bool alignLeft = false;
     //bool alignRight = false;
-    int customAlignment = Qt::AlignCenter;
+    bool hasCustomAlignment = false;
+    int alignment = Qt::AlignCenter;
     void paintText(QPainter *iconPainter, QRect centralArea);
     void paintTextMessages(QPainter *iconPainter, QRect centralArea);
     void paintFrame(QPainter *framePainter, QRect centralArea, QColor colorLefUp, QColor colorRightDown, int offset);

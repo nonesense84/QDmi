@@ -49,7 +49,6 @@ signals:
     void newIntervenation(bool intervenation);
     void newVMaxReducing(bool vMaxReducing);
     void newTarDist(quint16 zielEntf, bool visible);
-    void gotLzbMessage();
 
 private:
     #define Keine 0

@@ -8,13 +8,15 @@
 #include <era.h>
 #include "db.h"
 #define vMAuffordZDE  50    // Maximum speed, till "Zugdaten eingeben" or 55/70/85 is blinking
+#define levelUndefined  10
+#define levelPzbLzbNtc  11
 class zusiIndicator : public QObject
 {
     Q_OBJECT
 private:
     uint8_t indicators[64];
     uint8_t melderbild = 0, melderbildOld = 0, lm1000Hz = 0, lm85 = 0, lm70 = 0, lm55 = 0,
-    zugart = 0, lmBefehl = 0, lm500Hz = 0, lmS = 0,
+    zugart = 0, lmBefehl = 0, lm500Hz = 0, lmS = 0, lmPzb = 0,
     lmSDelayed = 0, lmH = 0, lmE40 = 0, lmB = 0, lmUe = 0, lmG = 0, lmEl = 0, lmEnde = 0,
     lmHauptschalter = 0, lmGetriebe = 0, lmSchleudern = 0, lmGleiten = 0,
     lmUhrzeitDigital = 0, StwgHauptschalter = 0, lmSifa = 0, SifaHupe = 0,
@@ -23,7 +25,8 @@ private:
     lzbElAuftrag = 0, lmEL = 0, lmV40 = 0, lmPruefStoer = 0, stromabn1Oben = 0,
     stromabn2Oben = 0, stromabn3Oben = 0, stromabn4Oben = 0, stromabn1Hebend = 0,
     stromabn2Hebend = 0,stromabn3Hebend = 0,stromabn4Hebend = 0, ZwangsbremsungAktiv = 0,
-    lmV40Roh = 0, lmGnt = 0, lmGnt_Ue = 0, lmGnt_G = 0, lmGnt_S = 0, endeverfahren = 0;
+    lmV40Roh = 0, lmGnt = 0, lmGnt_Ue = 0, lmGnt_G = 0, lmGnt_S = 0, endeverfahren = 0, systemstatusPzb = 0,
+    indusiStoerschalter = 0;
     uint16_t zustandZugsicherung = 0,  Uebertragungsausfall = 0, FahrtUeberLlzbHaltPerBefehl = 0, afbSoll = 0, grundZwangsbrmnsung = 0;
     float vZiel = 0, vIst = 0;
     quint8 lastLimitMessage;
@@ -59,6 +62,8 @@ signals:
     void newMtdIndicators(QVector<quint8> lmsToDecoder);
     void newAfbSoll(quint16 vSoll, bool visible);
     void newFzgVmaxTacho(quint16 speed);
+    void lzbAvailable(bool available);
+    void newLevelInforamtion(quint8 level);
 
 public slots:
     void setMelderbild(uint8_t value);
@@ -68,6 +73,7 @@ public slots:
     void setZustandZugsicherung(uint16_t value);
     void clearData();
     //====
+    void setSystemstatusPzb(uint8_t value);
     void setLmHauptschalter(uint8_t value);
     void setStatusStromabnehmer(uint8_t value);
     void setLmSchleudern(uint8_t value);
@@ -78,7 +84,9 @@ public slots:
     void setErsatzdatenWirksam(bool valid, bool visible);
     void setLm500Hz(uint8_t value);
     void setLmBefehl(uint8_t value);
+    void setIndusiStoerschalter(uint8_t value);
     void setLzbStoerschalter(uint8_t value);
+    void setPlzbLuftabsperrhahn(uint8_t value);
     void setLzbZustand(uint8_t value);
     void setEndeverfahren(uint8_t value);
     void setFalschfahrauftrag(uint8_t value);
@@ -110,6 +118,7 @@ public slots:
     void setFzgVMax(uint16_t value);
     void setZugbeeinflussungssystem(QString value);
     void makeLzbLmDatagram();
+    void setDefaults();
     //====
 };
 

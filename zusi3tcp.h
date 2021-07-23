@@ -22,7 +22,7 @@ private slots:
     bool checkHysterise(uint16_t *output, float input);
     bool checkHysterise(float *output, float input, bool isRelative = false);
     void clientReadReady();
-    void checkClientConnection();
+    void checkClientConnection(QAbstractSocket::SocketState state);
     void remooveTechMessage9();
     void remooveTechMessage10();
     void remooveTechMessage13();
@@ -41,16 +41,24 @@ public slots:
     void zusiDecoderSecondaryInfos();
     void setIpadress(QString address);
     void disconnectFromZusi();
+    void connectToZusi();
+    //void handleConnectionError(QAbstractSocket::SocketError socketError);
+    void subscribeZusiData();
     void process();
     void reconnect();
     void setAutoReconnect(quint8 reconnect);
-    void addKnotenAnfang(QVector<unsigned char> *vector, unsigned char knoten);
+    void addKnotenAnfang(QVector<unsigned char> *vector, quint16 knoten);
     void addKnotenEnde(QVector<unsigned char> *vector);
-    void addAtribut(QVector<unsigned char> *vector, unsigned char id, unsigned char atribut);
     void addAtribut(QVector<unsigned char> *vector, unsigned char atribut);
+    void addAtribut(QVector<unsigned char> *vector, unsigned char id, quint16 atribut);
+    void addAtribut(QVector<unsigned char> *vector, unsigned char id, QString atribut);
     void addTextAtribut(QVector<unsigned char> *vector, quint16 id, QString text);
     void setUseManometer(bool use);
     void setTextUsing(quint8 useAutomText);
+    void setDriverId(QString driverID);
+    void setTrainRunningNumber(QString trn);
+    void setTrainData(quint16 BRA, quint16 BRH, quint16 ZL, quint16 VMZ, bool validated);
+
 
 public:
     zusi3Tcp();
@@ -58,8 +66,11 @@ public:
     zusiPower *myPower;
 
 private:
+    //bool DATA_OP_Tast_Zugbeeinf = false;
     bool autoReconnect = true;
+    bool reconnectOnes = false;
     QString ipAddress;
+    QHostAddress zusiPc;
     QString zugnummer;
     bool useManometer = true;
     uint8_t forceTextmessages = 0;
@@ -73,6 +84,7 @@ private:
     uint16_t VIst=0;
     uint16_t VSoll=0;
     uint16_t VMFzg=0;
+    bool fstAktiv;
     float fahrlSpng;
     uint8_t stromabnehmerLok;
     uint8_t stromabnehmerSteuerwagen;
@@ -132,11 +144,18 @@ public: signals:
     void newHlb(quint16 Hlb);
     void newSimTime(QString simtime);
     void newZugnummer(QString simtime);
+    void changedTrain();
     void newMtdIndicators(QVector<quint8> lmsToDecoder);
     void newTechnicalMessage(QString text, QColor forColor, QColor bgColor, quint8 id);
     void removeTechnicalMessage(quint8 id);
     void sendTcpConnectionFeedback(QString feedback);
     void sendDataSourceIsZusi(bool);
+    void newBra(quint16 BRA);
+    void newBrh(quint16 BRH);
+    void newZl(quint16 ZL);
+    void newVmz(quint16 VMZ);
+    void newTastaturkommando(quint16 tastaturkommando);
+    void newCabActive(bool cabActive, bool standstill);
 };
 
 #endif // ZUSI3TCP_H

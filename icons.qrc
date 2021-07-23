@@ -82,5 +82,16 @@
         <file>icons/power_off.svg</file>
         <file>icons/DR_03_dis.svg</file>
         <file>icons/DR_03_ena.svg</file>
+        <file>icons/key_2abc.svg</file>
+        <file>icons/key_3def.svg</file>
+        <file>icons/key_4ghi.svg</file>
+        <file>icons/key_5jkl.svg</file>
+        <file>icons/key_6mno.svg</file>
+        <file>icons/key_7pqrs.svg</file>
+        <file>icons/key_8tuv.svg</file>
+        <file>icons/key_9wxyz.svg</file>
+        <file>icons/tool_small.svg</file>
+        <file>icons/LmPzb_off.svg</file>
+        <file>icons/LmPzb_on.svg</file>
     </qresource>
 </RCC>

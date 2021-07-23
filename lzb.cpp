@@ -6,10 +6,10 @@ lzb::lzb(){
 
 void lzb::setTextUsing(quint8 useAutomText){
     if(useTxtMsgByLm != useAutomText){
-        qDebug()  << db::numMessages;
+        //qDebug()  << db::numMessages;
         for(quint8 i = 0; i < db::numMessages; i++){
             removeMessage(i);
-            qDebug()  << i;
+            //qDebug()  << i;
         }
         removeMessage(lastLimitMessage);
         lastLimitMessage = 255;
@@ -19,10 +19,10 @@ void lzb::setTextUsing(quint8 useAutomText){
 
 void lzb::setZusiAsDataSource(bool value){
     if(zusiIsDataSource != value){
-        qDebug()  << db::numMessages;
+        //qDebug()  << db::numMessages;
         for(quint8 i = 0; i < db::numMessages; i++){
             removeMessage(i);
-            qDebug()  << i;
+            //qDebug()  << i;
         }
         removeMessage(lastLimitMessage);
         lastLimitMessage = 255;
@@ -31,7 +31,6 @@ void lzb::setZusiAsDataSource(bool value){
 }
 
 void lzb::setAnalogValues(QVector<quint8> values){
-    emit gotLzbMessage();
     if(values.length()>=7){
         vPerm = static_cast<quint16>((values[4] << 8) + values[3]);
         //vDest = static_cast<quint16>((values[4] << 8) + values[3]);
@@ -48,7 +47,6 @@ void lzb::setVAct(quint16 V){
 }
 
 void lzb::setStates(QVector<quint8> states){
-    emit gotLzbMessage();
     intervenation = ((states[12] > 1 && states[13] > 1) || states[ 6] >  0);
 
     overspeed = states[ 8] >  1;
@@ -264,13 +262,14 @@ void lzb::addIndicator(quint8 indId, quint8 blinking, bool invers){
         }
     }
     // If the inidcator is not used jet, search for the first free field.
-    if((indId > 0) && (indId != 15) && (indId != 16) && (indId != 19) && !indAllrUsed){
+    if((indId > 0) && (indId != 4) && (indId != 15) && (indId != 16) && (indId != 19) && !indAllrUsed){
         for(i=1; i<=6; i++){
             if(indicatorField[i] == 255)break;
         }
     }
     if(indId == 15 || indId == 19)i = 6;    // "Ue" or "Ue GNT" must be at pos 6
     if(indId == 0                )i = 0;    // "B" must be at field 1
+    if(indId == 4                )i = 5;    // "PZB"  must be at field 5
     if(indId == 16){                        // Era Brake
         emit newIconC9(db::indicatorFiles[16][0],db::indicatorFiles[16][1]);
         emit newIconBehavC9(true, blinking, invers);

@@ -15,10 +15,32 @@
 #include "sep.h"
 #include "mtd.h"
 #include "zusi3tcp.h"
+#include "zusitraindata.h"
+#include "alphanumericinput.h"
+
 #ifdef Q_OS_ANDROID
 #include <QtAndroid>
 #include <QAndroidJniEnvironment>
 #endif
+
+#define P_ABE_DefaultWindow  0
+#define P_ABE_DataEntry  1
+#define P_DG_DefaultWindow  0
+#define P_DG_Settings  1
+#define P_DG_System_Version  5
+#define P_DG_QDmi  6
+#define P_DG_Data_entry  7
+#define P_DG_Main_menu  8
+#define P_entry_TrainData  1
+#define P_entry_DriverId  3
+#define P_entry_ZusiIp  0
+#define P_entry_TrainNumber  4
+#define P_Keyboard_Numeric  0
+#define P_Keyboard_Alphanumeric  1
+#define P_Keyboard_YesNo  2
+#define P_EntryButton_YesNo  2
+#define P_entry_complete  0
+#define P_entry_not_complete  1
 
 namespace Ui {
 class MainWindow;
@@ -28,18 +50,23 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-#define modePzbLzbNtc  1
+#define levelUndefined  10
+#define levelPzbLzbNtc  11
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     quint8  showManometer = 1;
 
 private slots:
+    void setKeyboardType(quint8 type);
+    void setKeyboardType(quint8 type, bool showDott);
+    void TdeCompeteClicked();
     void messaesOutOfViewHandling5to9(bool outOfView);
     void messaesOutOfViewHandling8to9(bool outOfView);
-    void fieldF1Clicked();
+    void openMainMenu();
+    void fieldF3Clicked();
     void fieldF4Clicked();
-    void fieldF5Clicked();
+    void openSettings();
     void arrowUpClicked();
     void arrowDownClicked();
     void connectTimers();
@@ -49,21 +76,26 @@ private slots:
     void connectMtdPower();
     void connectTcpStuff();
     void gotTcpConnectionFeedback(QString feedback);
-    void setPzbLzbNtc();
+    void setLevel(quint8 level);
+    void openTrainDataEntry();
+    void cabActivation(bool cabActivated, bool standstill);
+    void openDriverIdEntry();
+    void openTrainRunnimgNumberEntry();
     void settingsBtn1Clicked();
     void settingsBtn2Clicked();
     void settingsBtn3Clicked();
-    void settingsBtn4Clicked();
-    void settingsBtn5Clicked();
-    void settingsBtn6Clicked();
-    void settingsBtn7Clicked();
+    void openSystemVersionInfo();
+    void openQDmiSettings();
+    void openNetworkSettings();
+    void closeQDmi();
     void settingsBtn8Clicked();
     void geoPositionClicked();
     void setGeoPosition(qint32 geoPosition);
     void settingsCloseClicked();
     void addItemToData(QString item);
     void blinkCursor();
-    void applyClicked(QString data);
+    void setEntryStrWithMaxLength(quint8 length, QString startString);
+    void applyClicked(QString data, bool enabled);
     void applySettings();
     void configureSettingsWindow();
     void mousePressEvent(QMouseEvent *event);
@@ -82,6 +114,8 @@ private:
     sep *mySep;
     mtd *myMtd;
     zusi3Tcp *myTcp;
+    zusiTraindata *myZusiTrainData;
+    alphaNumericInput *myDriverId;
     QThread* lzbThread = new QThread;
     QThread* sepThread = new QThread;
     QThread* mtdThread = new QThread;
@@ -93,8 +127,10 @@ private:
     bool MessaesOutOffView8to9 = false;
     QPoint lKilickPos;
     QString dataString = "";
+    quint8 maxEntryStrLength;
+    quint8 actKeyboardType = 0;
     QString activeDataEntryItem = "";
-    uint8_t  mode = 0;
+    uint8_t  actLevel = 0;
 
 protected:
   void resizeEvent ( QResizeEvent * event );
@@ -107,6 +143,8 @@ signals:
     void newManometerUse(bool use);
     void tcpConnectionSettings(quint8 settings);
     void newZusiIp(QString ip);
+    void newDriverId(QString number);
+    void newTrainRunningNumber(QString number);
     void newTextMessagesSettings(quint8  setting);
     void naivationArrowClick(qint8 direction);
 };

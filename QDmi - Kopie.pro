@@ -12,8 +12,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = QDmi
 TEMPLATE = app
-ANDROID_VERSION_CODE = 15
-ANDROID_VERSION_NAME = "1.2.3T2"
+ANDROID_VERSION_CODE = 13
+ANDROID_VERSION_NAME = "1.2"
 ANDROID_TARGET_SDK_VERSION = 29
 APP_NAME = QDmi
 
@@ -29,12 +29,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 CONFIG += c++11
-#CONFIG += static
+CONFIG += static
 
 SOURCES += \
-    alphanumericinput.cpp \
-    main.cpp \
-    mainwindow.cpp \
+        main.cpp \
+        mainwindow.cpp \
     gauge.cpp \
     dmilabel.cpp \
     lzb.cpp \
@@ -44,11 +43,9 @@ SOURCES += \
     zusi3tcp.cpp \
     zusiindicator.cpp \
     power.cpp \
-    zusipower.cpp \
-    zusitraindata.cpp
+    zusipower.cpp
 
 HEADERS += \
-    alphanumericinput.h \
         mainwindow.h \
     gauge.h \
     era.h \
@@ -61,8 +58,7 @@ HEADERS += \
     zusiindicator.h \
     db.h \
     power.h \
-    zusipower.h \
-    zusitraindata.h
+    zusipower.h
 
 FORMS += \
         mainwindow.ui
@@ -81,7 +77,7 @@ RESOURCES += \
     icons.qrc \
     sunds.qrc
 
-ANDROID_ABIS = armeabi-v7a
+ANDROID_ABIS = armeabi-v7a arm64-v8a
 
 DISTFILES += \
     android/AndroidManifest.xml \

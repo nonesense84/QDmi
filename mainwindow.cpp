@@ -6,7 +6,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowFlags(Qt::FramelessWindowHint);
-
     #ifdef Q_PROCESSOR_ARM
     //QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, ".");
     #endif
@@ -22,6 +21,8 @@ MainWindow::MainWindow(QWidget *parent) :
     mySep = new sep();
     myMtd = new mtd();
     myTcp = new zusi3Tcp();
+    myZusiTrainData = new zusiTraindata();
+    myDriverId = new alphaNumericInput();
     // https://wiki.qt.io/QThreads_general_usage
     // https://mayaposch.wordpress.com/2011/11/01/how-to-really-truly-use-qthreads-the-full-explanation/
     myLzb->moveToThread(lzbThread);
@@ -35,6 +36,9 @@ MainWindow::MainWindow(QWidget *parent) :
     sepThread->start();
     mtdThread->start();
     tcpThread->start();
+//    myTcp->process();
+//    mySep->process();
+//    this->process();
 }
 
 void MainWindow::process(){
@@ -49,10 +53,54 @@ void MainWindow::process(){
     ui->FieldE8to9->setTextFieldUsing(2);
     ui->settingsTitel->setBorderThickness(0);
     ui->settingsTitel->addTextMessage(" Einstellungen",era::grey,era::black,0);
+    ui->mainTitel->setBorderThickness(0);
+    ui->mainTitel->addTextMessage(" Hauptmenü",era::grey,era::black,0);
     ui->qdmiSettingsTitel->setBorderThickness(0);
     ui->qdmiSettingsTitel->addTextMessage(" QDmi Einstellungen",era::grey,era::black,0);
     ui->zusiIpTitel->setBorderThickness(0);
     ui->zusiIpTitel->addTextMessage(" Zusi 3 IP-Adresse",era::grey,era::black,1);
+    ui->driverIdTitel->setBorderThickness(0);
+    ui->driverIdTitel->addTextMessage(" Triebfahrzeugführernummer",era::grey,era::black,1);
+    ui->trainRunningNumberTitel->setBorderThickness(0);
+    ui->trainRunningNumberTitel->addTextMessage(" Zugnummer",era::grey,era::black,1);
+
+    ui->trainDataTitel1->setBorderThickness(0);
+    ui->trainDataTitel2->setBorderThickness(0);
+    ui->dataEntryCompleteQuestion->setBorderThickness(0);
+    ui->dataValidLabel1->setBorderThickness(0);
+    ui->dataValidLabel2->setBorderThickness(0);
+    ui->dataValidLabel3->setBorderThickness(0);
+    ui->dataValidLabel4->setBorderThickness(0);
+    ui->trainDataTitel1->setTextFieldUsing(1, Qt::AlignRight);
+    ui->trainDataTitel2->setTextFieldUsing(1, Qt::AlignRight);
+    ui->dataEntryCompleteQuestion->setTextFieldUsing(1, Qt::AlignCenter);
+    ui->trainDataTitel1->addTextMessage("Zugdateneingabe ",era::grey,era::black,1);
+    ui->trainDataTitel2->addTextMessage("Zugdaten bestätigen ",era::grey,era::black,1);
+    ui->dataEntryCompleteQuestion->addTextMessage("Zugdateneingabe vollständig?",era::grey, era::darkBlue,1);
+
+    ui->dataValidLabel1->setBorderThickness(0);
+    ui->dataValidLabel2->setBorderThickness(0);
+    ui->dataValidLabel3->setBorderThickness(0);
+    ui->dataValidLabel4->setBorderThickness(0);
+    ui->dataValidLabel1->setCustomFontFactor(0.4,Qt::AlignRight);
+    ui->dataValidLabel2->setCustomFontFactor(0.4,Qt::AlignRight);
+    ui->dataValidLabel3->setCustomFontFactor(0.4,Qt::AlignRight);
+    ui->dataValidLabel4->setCustomFontFactor(0.4,Qt::AlignRight);
+    ui->dataValidLabel1->setText("Bremsart ");
+    ui->dataValidLabel2->setText("Bremshundertstel ");
+    ui->dataValidLabel3->setText("Zuglänge ");
+    ui->dataValidLabel4->setText("Höchstgeschwindigkeit ");
+
+    ui->dataValidValue1->setBorderThickness(0);
+    ui->dataValidValue2->setBorderThickness(0);
+    ui->dataValidValue3->setBorderThickness(0);
+    ui->dataValidValue4->setBorderThickness(0);
+    ui->dataValidValue1->setCustomFontFactor(0.4,Qt::AlignLeft);
+    ui->dataValidValue2->setCustomFontFactor(0.4,Qt::AlignLeft);
+    ui->dataValidValue3->setCustomFontFactor(0.4,Qt::AlignLeft);
+    ui->dataValidValue4->setCustomFontFactor(0.4,Qt::AlignLeft);
+
+    ui->dataEntryCompleteButton->setCustomFontFactor(0.3, Qt::AlignCenter);
     ui->systemVersionTitel->setBorderThickness(0);
     ui->systemVersionTitel->addTextMessage(" System Version",era::grey,era::black,1);
     ui->systemVersionComp1Name->setBorderThickness(0);
@@ -62,24 +110,30 @@ void MainWindow::process(){
     ui->systemVersionComp2Name->setTextFieldUsing(1, Qt::AlignRight);
     ui->systemVersionComp2Name->addTextMessage("github.com/nones",era::grey,era::darkBlue,1);
     ui->systemVersionComp1Version->setBorderThickness(0);
-    ui->systemVersionComp1Version->addTextMessage("1.2.3T2",era::grey,era::darkBlue,1);
+    ui->systemVersionComp1Version->addTextMessage("1.3T2",era::grey,era::darkBlue,1);
     ui->systemVersionComp2Version->setBorderThickness(0);
     ui->systemVersionComp2Version->addTextMessage("ense84/QDmi",era::grey,era::darkBlue,1);
     qRegisterMetaType< QVector<quint8> >("QVector<quint8>");
     qRegisterMetaType< QVector<qint16> >("QVector<qint16>");
-    connect(ui->fieldF1,SIGNAL(clicked(bool)),this,SLOT(fieldF1Clicked()));
+    connect(ui->fieldF1,SIGNAL(clicked(bool)),this,SLOT(openMainMenu()));
+    connect(ui->fieldF3,SIGNAL(clicked(bool)),this,SLOT(fieldF3Clicked()));
     connect(ui->fieldF4,SIGNAL(clicked(bool)),this,SLOT(fieldF4Clicked()));
-    connect(ui->fieldF5,SIGNAL(clicked(bool)),this,SLOT(fieldF5Clicked()));
+    connect(ui->fieldF5,SIGNAL(clicked(bool)),this,SLOT(openSettings()));
     connect(ui->fieldE10,SIGNAL(clicked(bool)),this,SLOT(arrowUpClicked()));
     connect(ui->fieldE11,SIGNAL(clicked(bool)),this,SLOT(arrowDownClicked()));
     connect(ui->settingsBtn1,SIGNAL(clicked(bool)),this,SLOT(settingsBtn1Clicked()));
     connect(ui->settingsBtn2,SIGNAL(clicked(bool)),this,SLOT(settingsBtn2Clicked()));
     connect(ui->settingsBtn3,SIGNAL(clicked(bool)),this,SLOT(settingsBtn3Clicked()));
-    connect(ui->settingsBtn4,SIGNAL(clicked(bool)),this,SLOT(settingsBtn4Clicked()));
-    connect(ui->settingsBtn5,SIGNAL(clicked(bool)),this,SLOT(settingsBtn5Clicked()));
-    connect(ui->settingsBtn6,SIGNAL(clicked(bool)),this,SLOT(settingsBtn6Clicked()));
-    connect(ui->settingsBtn7,SIGNAL(clicked(bool)),this,SLOT(settingsBtn7Clicked()));
+    connect(ui->settingsBtn4,SIGNAL(clicked(bool)),this,SLOT(openSystemVersionInfo()));
+    connect(ui->settingsBtn5,SIGNAL(clicked(bool)),this,SLOT(openQDmiSettings()));
+    connect(ui->settingsBtn6,SIGNAL(clicked(bool)),this,SLOT(openNetworkSettings()));
+    connect(ui->settingsBtn7,SIGNAL(clicked(bool)),this,SLOT(closeQDmi()));
     connect(ui->settingsBtn8,SIGNAL(clicked(bool)),this,SLOT(settingsBtn8Clicked()));
+
+    connect(ui->mainBtn1,SIGNAL(clicked(bool)),this,SLOT(openTrainDataEntry()));
+    connect(ui->mainBtn2,SIGNAL(clicked(bool)),this,SLOT(openDriverIdEntry()));
+    connect(ui->mainBtn3,SIGNAL(clicked(bool)),this,SLOT(openTrainRunnimgNumberEntry()));
+
     connect(ui->fieldG12_geopos_H,SIGNAL(clicked(bool)),this,SLOT(geoPositionClicked()));
     connect(ui->fieldG12_geopos_T,SIGNAL(clicked(bool)),this,SLOT(geoPositionClicked()));
     connect(ui->fieldG12_btn,SIGNAL(clicked(bool)),this,SLOT(geoPositionClicked()));
@@ -90,20 +144,53 @@ void MainWindow::process(){
     ui->fieldG12_geopos_T->setCustomFontFactor(0.3,  Qt::AlignRight);
     connect(ui->settingsClose,SIGNAL(clicked(bool)),this,SLOT(settingsCloseClicked()));
     connect(ui->settingsClose_6,SIGNAL(clicked(bool)),this,SLOT(settingsCloseClicked()));
-    connect(ui->zusiIpClose,SIGNAL(clicked(bool)),this,SLOT(settingsCloseClicked()));
-    connect(ui->zusiIpBtn0,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
-    connect(ui->zusiIpBtn1,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
-    connect(ui->zusiIpBtn2,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
-    connect(ui->zusiIpBtn3,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
-    connect(ui->zusiIpBtn4,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
-    connect(ui->zusiIpBtn5,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
-    connect(ui->zusiIpBtn6,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
-    connect(ui->zusiIpBtn7,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
-    connect(ui->zusiIpBtn8,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
-    connect(ui->zusiIpBtn9,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
-    connect(ui->zusiIpBtn10,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
-    connect(ui->zusiIpBtn11,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
-    connect(ui->zusiIpOkBtn,SIGNAL(txtBtnClicked(QString)),this,SLOT(applyClicked(QString)));
+    connect(ui->mainClose,SIGNAL(clicked(bool)),this,SLOT(settingsCloseClicked()));
+
+    connect(ui->dataEntryCompleteButton,SIGNAL(clicked(bool)),this,SLOT(TdeCompeteClicked()));
+    connect(ui->dataValidButton,SIGNAL(txtBtnClicked(QString)),myZusiTrainData,SLOT(dataValidButtonPressed(QString)));
+    connect(ui->dataValidBtnNo,SIGNAL(txtBtnClicked(QString)),ui->dataValidButton,SLOT(setAsButton(QString)));
+    connect(ui->dataValidBtnYes,SIGNAL(txtBtnClicked(QString)),ui->dataValidButton,SLOT(setAsButton(QString)));
+
+    connect(ui->dataEntryClose,SIGNAL(clicked(bool)),myZusiTrainData,SLOT(finalizeDataEntry()));
+    connect(ui->numBtn0,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->numBtn1,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->numBtn2,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->numBtn3,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->numBtn4,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->numBtn5,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->numBtn6,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->numBtn7,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->numBtn8,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->numBtn9,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->numBtn10,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->numBtn11,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->alphaBtn0,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->alphaBtn1,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->alphaBtn2,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->alphaBtn3,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->alphaBtn4,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->alphaBtn5,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->alphaBtn6,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->alphaBtn7,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->alphaBtn8,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->alphaBtn9,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->alphaBtn10,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->alphaBtn11,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->braBtn1,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->braBtn2,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->braBtn3,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->braBtn4,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->braBtn6,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->braBtn7,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->braBtn8,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->braBtn9,SIGNAL(txtBtnClicked(QString)),this,SLOT(addItemToData(QString)));
+    connect(ui->dataEntryClose, SIGNAL(clicked(bool)),this,SLOT(settingsCloseClicked()));
+    connect(ui->dataEntrySettings,SIGNAL(clicked(bool)),this,SLOT(openSettings()));
+    connect(ui->dataEntryTrn, SIGNAL(clicked(bool)),this,SLOT(openTrainRunnimgNumberEntry()));
+
+    connect(ui->zusiIpOkBtn,SIGNAL(dataEntryBtnClicked(QString, bool)),this,SLOT(applyClicked(QString, bool)));
+    connect(ui->driverIdOkBtn,SIGNAL(dataEntryBtnClicked(QString, bool)),this,SLOT(applyClicked(QString, bool)));
+    connect(ui->trainRunningNumberOkBtn,SIGNAL(dataEntryBtnClicked(QString, bool)),this,SLOT(applyClicked(QString, bool)));
     connect(ui->systemVersionClose,SIGNAL(clicked(bool)),this,SLOT(settingsCloseClicked()));
     connect(ui->FieldE5to9,SIGNAL(messaesOutOfView(bool)),this,SLOT(messaesOutOfViewHandling5to9(bool)));
     connect(ui->FieldE8to9,SIGNAL(messaesOutOfView(bool)),this,SLOT(messaesOutOfViewHandling8to9(bool)));
@@ -139,6 +226,41 @@ void MainWindow::process(){
     connect(mySep,SIGNAL(newBrz(quint16)),ui->widgetMano2,SLOT(setPressure1(quint16)));
     connect(myTcp,SIGNAL(newKilometrierung(qint32)),this,SLOT(setGeoPosition(qint32)));
     connect(mySep,SIGNAL(newGeoPos(qint32)),this,SLOT(setGeoPosition(qint32)));
+    connect(myTcp,SIGNAL(newBra(quint16)),myZusiTrainData,SLOT(setActiveBra(quint16)));
+    connect(myTcp,SIGNAL(newBrh(quint16)),myZusiTrainData,SLOT(setActiveBrh(quint16)));
+    connect(myTcp,SIGNAL(newZl (quint16)),myZusiTrainData,SLOT(setActiveZl (quint16)));
+    connect(myTcp,SIGNAL(newVmz(quint16)),myZusiTrainData,SLOT(setActiveVmz(quint16)));
+    connect(myTcp,SIGNAL(changedTrain()),myZusiTrainData,SLOT(finalizeDataEntry()));
+    connect(myTcp,SIGNAL(newBra(quint16)),ui->dataValidValue1,SLOT(setText(quint16)));
+    connect(myTcp,SIGNAL(newBrh(quint16)),ui->dataValidValue2,SLOT(setText(quint16)));
+    connect(myTcp,SIGNAL(newZl (quint16)),ui->dataValidValue3,SLOT(setText(quint16)));
+    connect(myTcp,SIGNAL(newVmz(quint16)),ui->dataValidValue4,SLOT(setText(quint16)));
+    connect(myTcp,SIGNAL(newCabActive(bool, bool)),this,SLOT(cabActivation(bool, bool)));
+  //connect(myTcp,SIGNAL(newTastaturkommando(quint16)),myZusiTrainData,SLOT(setKeycommand(quint16))); // Not necessary, aslong I dont use 'Wachsam' for validation
+    connect(myTcp->myIndicators,SIGNAL(lzbAvailable(bool)),myZusiTrainData,SLOT(setLzbAvailable(bool)));
+    connect(myTcp->myIndicators,SIGNAL(lzbAvailable(bool)),ui->dataValidLabel3,SLOT(setVisib(bool)));
+    connect(myTcp->myIndicators,SIGNAL(lzbAvailable(bool)),ui->dataValidLabel4,SLOT(setVisib(bool)));
+    connect(myTcp->myIndicators,SIGNAL(lzbAvailable(bool)),ui->dataValidValue3,SLOT(setVisib(bool)));
+    connect(myTcp->myIndicators,SIGNAL(lzbAvailable(bool)),ui->dataValidValue4,SLOT(setVisib(bool)));
+
+    connect(myZusiTrainData,SIGNAL(newTraindata(quint16, quint16, quint16, quint16, bool)),myTcp,SLOT(setTrainData(quint16, quint16, quint16, quint16, bool)));
+    connect(myZusiTrainData,SIGNAL(newBehavBraBtn(QString, bool, bool, bool, bool)),ui->dataEntryInput1,SLOT(setAsDataEntryLabel(QString, bool, bool, bool, bool)));
+    connect(myZusiTrainData,SIGNAL(newBehavBrhBtn(QString, bool, bool, bool, bool)),ui->dataEntryInput2,SLOT(setAsDataEntryLabel(QString, bool, bool, bool, bool)));
+    connect(myZusiTrainData,SIGNAL(newBehavZlBtn (QString, bool, bool, bool, bool)),ui->dataEntryInput3,SLOT(setAsDataEntryLabel(QString, bool, bool, bool, bool)));
+    connect(myZusiTrainData,SIGNAL(newBehavVmzBtn(QString, bool, bool, bool, bool)),ui->dataEntryInput4,SLOT(setAsDataEntryLabel(QString, bool, bool, bool, bool)));
+    connect(myZusiTrainData,SIGNAL(newBehavZlLbl (QString, bool, bool, bool, bool)),ui->dataEntryLabel3,SLOT(setAsDataEntryLabel(QString, bool, bool, bool, bool)));
+    connect(myZusiTrainData,SIGNAL(newBehavVmzLbl(QString, bool, bool, bool, bool)),ui->dataEntryLabel4,SLOT(setAsDataEntryLabel(QString, bool, bool, bool, bool)));
+    connect(myZusiTrainData,SIGNAL(newBehavCmpltBtn(QString, bool, bool, bool, bool, bool)),ui->dataEntryCompleteButton,SLOT(setAsDataEntryLabel(QString, bool, bool, bool, bool, bool)));
+    connect(myZusiTrainData,SIGNAL(closeDataEntryWindow()), this,SLOT(settingsCloseClicked()));
+    connect(myZusiTrainData,SIGNAL(repeateDataEntry()), this,SLOT(openTrainDataEntry()));
+    connect(myZusiTrainData,SIGNAL(requestDataEntrStrInitials(quint8, QString)), this,SLOT(setEntryStrWithMaxLength(quint8, QString)));
+    connect(ui->dataEntryCompleteButton,SIGNAL(clicked(bool)),myZusiTrainData,SLOT(TdeCompeteClicked()));
+    connect(myZusiTrainData,SIGNAL(requestKeyboardLayout(quint8)), this,SLOT(setKeyboardType(quint8)));
+    connect(ui->dataEntryInput1,SIGNAL(dataEntryBtnClicked(QString, bool)),myZusiTrainData,SLOT(setBra(QString, bool)));
+    connect(ui->dataEntryInput2,SIGNAL(dataEntryBtnClicked(QString, bool)),myZusiTrainData,SLOT(setBrh(QString, bool)));
+    connect(ui->dataEntryInput3,SIGNAL(dataEntryBtnClicked(QString, bool)),myZusiTrainData,SLOT(setZl (QString, bool)));
+    connect(ui->dataEntryInput4,SIGNAL(dataEntryBtnClicked(QString, bool)),myZusiTrainData,SLOT(setVmz(QString, bool)));
+
     ui->widgetMano2->setPointer2using(false);
     ui->widgetMano1->setPointer1color(era::red);
     ui->widgetMano1->setPointer2color(era::yellow);
@@ -153,25 +275,35 @@ void MainWindow::process(){
     connect(myTcp,SIGNAL(newSimTime(QString)),ui->fieldG13,SLOT(setText(QString)));
     connect(mySep,SIGNAL(newSimTime(QString)),ui->fieldG13,SLOT(setText(QString)));
     connect(myTcp,SIGNAL(newZugnummer(QString)),ui->fieldG11,SLOT(setText(QString)));
+    connect(this,SIGNAL(newDriverId(QString)),myTcp,SLOT(setDriverId(QString)));
+    connect(this,SIGNAL(newTrainRunningNumber(QString)),myTcp,SLOT(setTrainRunningNumber(QString)));
     ui->settingsBtn1->setIcon(":/icons/lang_ena.svg",":/icons/lang_dis.svg");
     ui->settingsBtn2->setIcon(":/icons/volume_ena.svg", ":/icons/volume_dis.svg");
     ui->settingsBtn3->setIcon(":/icons/bright_ena.svg", ":/icons/bright_dis.svg");
     ui->settingsBtn5->setIcon(":/icons/QDmi-Icon.svg", ":/icons/QDmi-Icon.svg");
-    ui->settingsBtn4->setText("System version",era::grey,era::darkGrey,QFont::Light);
     ui->settingsBtn6->setIcon(":/icons/netw_ena.svg", ":/icons/netw_dis.svg");
     ui->settingsBtn7->setIcon(":/icons/power_off.svg", ":/icons/power_off.svg");
     ui->fieldG12_btn->setIcon(":/icons/DR_03_ena.svg", ":/icons/DR_03_dis.svg");
-    ui->settingsBtn1->setWorking(false, false, false);
-    ui->settingsBtn2->setWorking(false, false, false);
-    ui->settingsBtn3->setWorking(false, false, false);
-    ui->settingsBtn4->setWorking(true, false, false);
 
+    ui->dataEntryLabel1->setAsDataEntryLabel("Bremsart ");
+    ui->dataEntryLabel2->setAsDataEntryLabel("Bremshundertstel ");
+    ui->dataEntryLabel3->setAsDataEntryLabel("Zuglänge ");
+    ui->dataEntryLabel4->setAsDataEntryLabel("Höchstgeschwindigkeit ");
+    ui->dataEntryInput1->setAsDataEntryLabel("0",true);
+    ui->dataEntryInput2->setAsDataEntryLabel("0",true);
+    ui->dataEntryInput3->setAsDataEntryLabel("0",true);
+    ui->dataEntryInput4->setAsDataEntryLabel("0",true);
+    ui->dataEntryCompleteButton->setAsDataEntryLabel("Ja",true,false,false,true,true);
+    ui->dataValidButton->setAsDataEntryLabel("Nein",true,true,false,true,true);
+    ui->dataValidBtnNo->setAsButton(true, "Nein");
+    ui->dataValidBtnYes->setAsButton(true, "Ja");
     ui->settingsClose->setIcon(":/icons/X.svg");
     ui->settingsClose_6->setIcon(":/icons/X.svg");
+    ui->mainClose->setIcon(":/icons/X.svg");
     ui->fieldE10->setIcon(":/icons/arrowUp_ena.svg",  ":/icons/arrowUp_dis.svg");
     ui->fieldE11->setIcon(":/icons/arrowDown_ena.svg",":/icons/arrowDown_dis.svg");
-    ui->fieldE10->setAsButton(true);
-    ui->fieldE11->setAsButton(true);
+    ui->fieldE10->setAsButton();
+    ui->fieldE11->setAsButton();
     ui->fieldE10->setWorking(false, false, false);
     ui->fieldE11->setWorking(true, false, false);
     ui->fieldF6->setVisib(false);
@@ -184,51 +316,91 @@ void MainWindow::process(){
     ui->fieldC5->setVisib(false);
     ui->fieldC6->setVisib(false);
     ui->fieldC7->setVisib(false);
-    ui->fieldF1->setAsButton(true);
-    ui->fieldF2->setAsButton(true);
-    ui->fieldF3->setAsButton(true);
-    ui->fieldF4->setAsButton(true);
-    ui->fieldF5->setAsButton(true);
+    ui->fieldF1->setAsButton(true, "Menü");
+    ui->fieldF2->setAsButton();
+    ui->fieldF3->setAsButton();
+    ui->fieldF4->setAsButton();
+    ui->fieldF5->setAsButton();
     ui->fieldF5->setIcon(":/icons/tool.svg");
-    ui->settingsBtn1->setAsButton(true);
-    ui->settingsBtn2->setAsButton(true);
-    ui->settingsBtn3->setAsButton(true);
-    ui->settingsBtn4->setAsButton(true);
-    ui->settingsBtn5->setAsButton(true);
-    ui->settingsBtn6->setAsButton(true);
-    ui->settingsBtn7->setAsButton(true);
-    ui->settingsBtn8->setAsButton(true);
-    ui->settingsClose->setAsButton(true);
-    ui->settingsClose_6->setAsButton(true);
-    ui->zusiIpBtn0->setAsButton(true);
-    ui->zusiIpBtn1->setAsButton(true);
-    ui->zusiIpBtn2->setAsButton(true);
-    ui->zusiIpBtn3->setAsButton(true);
-    ui->zusiIpBtn4->setAsButton(true);
-    ui->zusiIpBtn5->setAsButton(true);
-    ui->zusiIpBtn6->setAsButton(true);
-    ui->zusiIpBtn7->setAsButton(true);
-    ui->zusiIpBtn8->setAsButton(true);
-    ui->zusiIpBtn9->setAsButton(true);
-    ui->zusiIpBtn10->setAsButton(true);
-    ui->zusiIpBtn11->setAsButton(true);
-    ui->zusiIpOkBtn->setAsButton(true, true);
-    ui->zusiIpClose->setAsButton(true);
-    ui->zusiIpBtn0->setText("0",era::grey,era::darkGrey,QFont::Light);
-    ui->zusiIpBtn1->setText("1",era::grey,era::darkGrey,QFont::Light);
-    ui->zusiIpBtn2->setText("2",era::grey,era::darkGrey,QFont::Light);
-    ui->zusiIpBtn3->setText("3",era::grey,era::darkGrey,QFont::Light);
-    ui->zusiIpBtn4->setText("4",era::grey,era::darkGrey,QFont::Light);
-    ui->zusiIpBtn5->setText("5",era::grey,era::darkGrey,QFont::Light);
-    ui->zusiIpBtn6->setText("6",era::grey,era::darkGrey,QFont::Light);
-    ui->zusiIpBtn7->setText("7",era::grey,era::darkGrey,QFont::Light);
-    ui->zusiIpBtn8->setText("8",era::grey,era::darkGrey,QFont::Light);
-    ui->zusiIpBtn9->setText("9",era::grey,era::darkGrey,QFont::Light);
-    ui->zusiIpBtn10->setText("Del",era::grey,era::darkGrey,QFont::Light);
-    ui->zusiIpBtn11->setText(".",era::grey,era::darkGrey,QFont::Light);
-    ui->zusiIpClose->setIcon(":/icons/X.svg");
-    ui->zusiIpBtn0->setText("0",era::grey,era::darkGrey,QFont::Light);
-    ui->systemVersionClose->setAsButton(true);
+    ui->dataEntrySettings->setAsButton();
+    ui->dataEntrySettings->setIcon(":/icons/tool_small.svg");
+    ui->dataEntryTrn->setAsButton(true,"Zug");
+    ui->settingsBtn1->setAsButton(false);
+    ui->settingsBtn2->setAsButton(false);
+    ui->settingsBtn3->setAsButton(false);
+    ui->settingsBtn4->setAsButton(true,"System version");
+    ui->settingsBtn5->setAsButton();
+    ui->settingsBtn6->setAsButton();
+    ui->settingsBtn7->setAsButton();
+    ui->settingsBtn8->setAsButton(false);
+    ui->settingsClose->setAsButton();
+    ui->settingsClose_6->setAsButton();
+
+    ui->mainBtn1->setAsButton(true, "Zugdateneingabe");
+    ui->mainBtn2->setAsButton(true, "TF-Nummer");
+    ui->mainBtn3->setAsButton(true, "Zugnummer");
+    ui->mainBtn1->setCustomFontFactor(0.28);
+    ui->mainBtn2->setCustomFontFactor(0.28);
+    ui->mainBtn3->setCustomFontFactor(0.28);
+    ui->mainClose->setAsButton();
+
+
+    // Numeric keyboard buttons
+    ui->numBtn0->setAsButton(true, "0");
+    ui->numBtn1->setAsButton(true, "1");
+    ui->numBtn2->setAsButton(true, "2");
+    ui->numBtn3->setAsButton(true, "3");
+    ui->numBtn4->setAsButton(true, "4");
+    ui->numBtn5->setAsButton(true, "5");
+    ui->numBtn6->setAsButton(true, "6");
+    ui->numBtn7->setAsButton(true, "7");
+    ui->numBtn8->setAsButton(true, "8");
+    ui->numBtn9->setAsButton(true, "9");
+    ui->numBtn10->setAsButton(true, "Entf", "Del");
+    ui->numBtn11->setAsButton(true, ".");
+
+    ui->alphaBtn0->setAsButton(true, "0");
+    ui->alphaBtn1->setAsButton(true, "1");
+    ui->alphaBtn2->setIcon(":/icons/key_2abc.svg",  ":/icons/key_2abc.svg");
+    ui->alphaBtn2->setAsButton(true, "", "2");
+    ui->alphaBtn3->setIcon(":/icons/key_3def.svg",  ":/icons/key_3def.svg");
+    ui->alphaBtn3->setAsButton(true, "", "3");
+    ui->alphaBtn4->setIcon(":/icons/key_4ghi.svg",  ":/icons/key_4ghi.svg");
+    ui->alphaBtn4->setAsButton(true, "", "4");
+    ui->alphaBtn5->setIcon(":/icons/key_5jkl.svg",  ":/icons/key_5jkl.svg");
+    ui->alphaBtn5->setAsButton(true, "", "5");
+    ui->alphaBtn6->setIcon(":/icons/key_6mno.svg",  ":/icons/key_6mno.svg");
+    ui->alphaBtn6->setAsButton(true, "", "6");
+    ui->alphaBtn7->setIcon(":/icons/key_7pqrs.svg", ":/icons/key_7pqrs.svg");
+    ui->alphaBtn7->setAsButton(true, "", "7");
+    ui->alphaBtn8->setIcon(":/icons/key_8tuv.svg",  ":/icons/key_8tuv.svg");
+    ui->alphaBtn8->setAsButton(true, "", "8");
+    ui->alphaBtn9->setIcon(":/icons/key_9wxyz.svg", ":/icons/key_9wxyz.svg");
+    ui->alphaBtn9->setAsButton(true, "", "9");
+    ui->alphaBtn10->setAsButton(true, "Entf", "Del");
+    ui->alphaBtn11->setAsButton(true, ".");
+
+    // Brake regime buttons
+    ui->braBtn1->setAsButton(true, "G", "1");
+    ui->braBtn2->setAsButton(true, "G KlBr", "2");
+    ui->braBtn3->setAsButton(true, "G SchBr", "3");
+    ui->braBtn4->setAsButton(true, "P", "4");
+    ui->braBtn6->setAsButton(true, "P/R + KlBr", "6");
+    ui->braBtn7->setAsButton(true, "P/R + SchBr SW", "7");
+    ui->braBtn8->setAsButton(true, "P/R ", "8");
+    ui->braBtn9->setAsButton(true, "P/R + SchBr", "9");
+
+    ui->zusiIpOkBtn->setAsButton();
+    ui->zusiIpOkBtn->setAsDataEntryLabel("Nach Eingabe hier tippen",true,true);
+    ui->driverIdOkBtn->setAsButton();
+    ui->driverIdOkBtn->setAsDataEntryLabel("",true,true);
+    ui->trainRunningNumberOkBtn->setAsButton();
+    ui->trainRunningNumberOkBtn->setAsDataEntryLabel("",true,true);
+    ui->dataEntryClose->setAsButton();
+    ui->dataEntryClose->setIcon(":/icons/X.svg");
+    ui->numBtn0->setText("0",era::grey,era::darkGrey,QFont::Light);
+
+    ui->systemVersionClose->setAsButton();
     ui->systemVersionClose->setIcon(":/icons/X.svg");
     ui->fieldG11->setText("",era::grey,era::darkGrey,QFont::Light);
     ui->fieldG11->setCustomFontFactor(0.24);
@@ -280,7 +452,6 @@ void MainWindow::connectPzbIcons(){
     connect(myLzb,SIGNAL(newOverspeed(bool)),ui->widgetTacho,SLOT(setOverspeed(bool)));
     connect(myLzb,SIGNAL(newIntervenation(bool)),ui->widgetTacho,SLOT(setIntervenation(bool)));
     connect(myLzb,SIGNAL(newTarDist(quint16, bool)),ui->fieldA3,SLOT(setTargetDistance(quint16, bool)));
-    connect(myLzb,SIGNAL(gotLzbMessage()),this,SLOT(setPzbLzbNtc()));
 }
 void MainWindow::connectMtdIcons(){
     connect(myMtd,SIGNAL(newIconBehavE3(bool,quint8,bool)),ui->fieldE3,SLOT(setWorking(bool,quint8,bool)));
@@ -330,6 +501,8 @@ void MainWindow::connectTcpStuff(){
     connect(myTcp,SIGNAL(sendTcpConnectionFeedback(QString)),this,SLOT(gotTcpConnectionFeedback(QString)));
     connect(myTcp,SIGNAL(sendDataSourceIsZusi(bool)),myLzb,SLOT(setZusiAsDataSource(bool)));
     connect(this,SIGNAL(newZusiIp(QString)),myTcp,SLOT(setIpadress(QString)));
+    connect(mySep,SIGNAL(newLevelInforamtion(quint8)),this,SLOT(setLevel(quint8)));
+    connect(myTcp->myIndicators,SIGNAL(newLevelInforamtion(quint8)),this,SLOT(setLevel(quint8)));
 }
 
 void MainWindow::gotTcpConnectionFeedback(QString feedback){
@@ -338,20 +511,30 @@ void MainWindow::gotTcpConnectionFeedback(QString feedback){
 
 }
 MainWindow::~MainWindow(){delete ui;}
-void MainWindow::setPzbLzbNtc(){
-    if(mode != modePzbLzbNtc){
+void MainWindow::setLevel(quint8 level){
+    if(level == actLevel) return;
+    if(level == levelPzbLzbNtc){
         ui->fieldB7->setIcon(":/icons/MO_19.svg");
         ui->fieldC8->setIcon(":/icons/LE_02a.svg");
         ui->fieldE_holder2->setCurrentIndex(1);
         ui->fieldC_holder->setCurrentIndex(1);
         ui->fieldC_holder2->setCurrentIndex(0);
-        mode = modePzbLzbNtc;
+        actLevel = levelPzbLzbNtc;
+        messaesOutOfViewHandling8to9(MessaesOutOffView8to9);
+    }
+    if(level == levelUndefined){
+        ui->fieldB7->setIcon(":/icons/blanc.svg");
+        ui->fieldC8->setIcon(":/icons/blanc.svg");
+        ui->fieldE_holder2->setCurrentIndex(0);
+        ui->fieldC_holder->setCurrentIndex(0);
+        ui->fieldC_holder2->setCurrentIndex(1);
+        actLevel = levelUndefined;
         messaesOutOfViewHandling8to9(MessaesOutOffView8to9);
     }
 }
 void MainWindow::messaesOutOfViewHandling5to9(bool outOfView){
     MessaesOutOffView5to9 = outOfView;
-    if(mode != modePzbLzbNtc){
+    if(actLevel != levelPzbLzbNtc){
         if(outOfView){
             ui->fieldE10->setWorking(true, false, false);
             ui->fieldE11->setWorking(true, false, false);
@@ -364,7 +547,7 @@ void MainWindow::messaesOutOfViewHandling5to9(bool outOfView){
 }
 void MainWindow::messaesOutOfViewHandling8to9(bool outOfView){
     MessaesOutOffView8to9 = outOfView;
-    if(mode == modePzbLzbNtc){
+    if(actLevel == levelPzbLzbNtc){
         if(outOfView){
             ui->fieldE10->setWorking(true, false, false);
             ui->fieldE11->setWorking(true, false, false);
@@ -375,9 +558,62 @@ void MainWindow::messaesOutOfViewHandling8to9(bool outOfView){
         }
     }
 }
-void MainWindow::fieldF1Clicked(){}
+void MainWindow::openMainMenu(){
+    ui->fieldDG->setCurrentIndex(P_DG_Main_menu);                // Page with main menu
+}
+void MainWindow::fieldF3Clicked(){}
+void MainWindow::setKeyboardType(quint8 type){
+    setKeyboardType(type, false);
+}
+void MainWindow::setKeyboardType(quint8 type, bool showDott){
+    actKeyboardType = type;
+    ui->keyboards->setCurrentIndex(type);
+    ui->numBtn11->setAsButton(showDott, ".");
+}
+void MainWindow::TdeCompeteClicked(){
+    ui->keyboards->setCurrentIndex(P_Keyboard_YesNo);                   // Data entry page on the right keyboard "Yes" and "No" for validation
+    ui->entryFields->setCurrentIndex(P_EntryButton_YesNo);              // Data entry page on the right konfirm button for validation -> [Yes | No]
+    ui->dataValidationHolder2->setCurrentIndex(P_entry_not_complete);   // Data entry page validation on the left buttom "Entry complerte? Yes" not visible
+    ui->dataValidationHolder3->setCurrentIndex(P_entry_not_complete);   // Data entry page validation on the left top. Titel changess from data entry to data validation
+}
 void MainWindow::fieldF4Clicked(){}
-void MainWindow::fieldF5Clicked(){ui->fieldDG->setCurrentIndex(1);}
+void MainWindow::openSettings(){
+    ui->fieldDG->setCurrentIndex(P_DG_Settings);
+    ui->TrnSettingsHolder->setCurrentIndex(0);                      // In case previous window was driver ID, triggered by cab activation
+}
+void MainWindow::openTrainDataEntry(){
+    ui->fieldDG->setCurrentIndex(P_DG_Data_entry);                  // Data entry page for all kind of data
+    ui->entryFields->setCurrentIndex(P_entry_TrainData);            // Data entry page for LZB
+    ui->dataValidationHolder2->setCurrentIndex(P_entry_complete);   // Data entry page validation on the left buttom "Entry complerte? Yes" visible
+    ui->dataValidationHolder3->setCurrentIndex(P_entry_complete);   // Data entry page validation on the left top. Titel changess from data validation to data entry
+    setKeyboardType(P_Keyboard_Numeric, false);                     // Numeric keyboard without dot
+    ui->fieldABE->setCurrentIndex(P_ABE_DataEntry);                 // Data entry page on the left
+    ui->dataValidButton->setAsButton(true, "Nein");
+    activeDataEntryItem = "trainData";
+    dataString = "";
+}
+void MainWindow::cabActivation(bool cabActivated, bool standstill){
+    if(cabActivated && standstill)ui->TrnSettingsHolder->setCurrentIndex(1);
+    if(cabActivated && standstill)openDriverIdEntry();
+}
+void MainWindow::openDriverIdEntry(){
+    ui->fieldDG->setCurrentIndex(P_DG_Data_entry);                  // Data entry page for all kind of data
+    ui->entryFields->setCurrentIndex(P_entry_DriverId);             // Data entry page for driver ID
+    setKeyboardType(P_Keyboard_Alphanumeric);                       // Numeric keyboard without dot
+    activeDataEntryItem = "driverId";
+    myDriverId->clearText();
+    myDriverId->hideText(true);
+    ui->driverIdOkBtn->setText(myDriverId->getText(),era::black,era::black,QFont::Light);
+}
+
+void MainWindow::openTrainRunnimgNumberEntry(){
+    ui->fieldDG->setCurrentIndex(P_DG_Data_entry);                  // Data entry page for all kind of data
+    ui->entryFields->setCurrentIndex(P_entry_TrainNumber);          // Data entry page for train running number
+    setKeyboardType(P_Keyboard_Numeric, false);                     // Numeric keyboard without dot
+    activeDataEntryItem = "trainRunningNumber";
+    dataString = "";
+    ui->TrnSettingsHolder->setCurrentIndex(0);                      // In case previous window was driver ID, triggered by cab activation
+}
 void MainWindow::arrowUpClicked(){
     emit naivationArrowClick(-1);
 }
@@ -387,12 +623,15 @@ void MainWindow::arrowDownClicked(){
 void MainWindow::settingsBtn1Clicked(){}
 void MainWindow::settingsBtn2Clicked(){}
 void MainWindow::settingsBtn3Clicked(){}
-void MainWindow::settingsBtn4Clicked(){ui->fieldDG->setCurrentIndex(5);}    // System Version
-void MainWindow::settingsBtn5Clicked(){ui->fieldDG->setCurrentIndex(6);}    // QDmi
-void MainWindow::settingsBtn6Clicked(){                                     // Network
-    ui->fieldDG->setCurrentIndex(7);
+void MainWindow::openSystemVersionInfo(){ui->fieldDG->setCurrentIndex(P_DG_System_Version);}    // System Version
+void MainWindow::openQDmiSettings(){ui->fieldDG->setCurrentIndex(P_DG_QDmi);}                   // QDmi
+void MainWindow::openNetworkSettings(){                                     // Network
+    ui->fieldDG->setCurrentIndex(P_DG_Data_entry);                          // Data entry page for all kind of data
+    setKeyboardType(P_Keyboard_Numeric, true);                              // Data entry page on the right numeric keyboard
+    ui->entryFields->setCurrentIndex(P_entry_ZusiIp);                       // Data entry page on the right for IP adress
     dataString = settings->value("zusiIp").toString();
     activeDataEntryItem = "IP-Address";
+    setEntryStrWithMaxLength(15, settings->value("zusiIp").toString());     // Limit entry string 15 characters and set start value from settings
     ui->FieldE5to9->addTextMessage(" Auf eingegebene IP-Adresse tippen", era::grey, era::darkBlue, 8);
     ui->FieldE8to9->addTextMessage(" Auf eingegebene IP-Adresse tippen", era::grey, era::darkBlue, 8);
     const QHostAddress &localhost = QHostAddress(QHostAddress::LocalHost);
@@ -408,7 +647,7 @@ void MainWindow::settingsBtn6Clicked(){                                     // N
     }
 
 }
-void MainWindow::settingsBtn7Clicked(){
+void MainWindow::closeQDmi(){
     settings->setValue("mainwindow/height", this->height());
     settings->setValue("mainwindow/width", this->width());
     #ifdef Q_PROCESSOR_ARM
@@ -421,8 +660,8 @@ void MainWindow::geoPositionClicked(){
     bool qurrentIndex = static_cast<bool>(ui->fieldG12_holder->currentIndex());
     ui->fieldG12_holder->setCurrentIndex(!qurrentIndex);
 }
+
 void MainWindow::setGeoPosition(qint32 geoPosition){
-    qDebug() << "Position: " + QString::number(geoPosition);
     ui->fieldG12_btn->setWorking(true, false, false);
     ui->fieldG12_geopos_T->setWorking(true,false,false);
     ui->fieldG12_geopos_H->setWorking(true,false,false);
@@ -432,19 +671,32 @@ void MainWindow::setGeoPosition(qint32 geoPosition){
     ui->fieldG12_geopos_H->setText(postionTextMeter,era::black,era::grey);
 }
 void MainWindow::settingsCloseClicked(){
-    if(ui->fieldDG->currentIndex() == 7){
-        ui->FieldE5to9->removeTextMessage(8);
-        ui->FieldE8to9->removeTextMessage(8);
-        ui->FieldE5to9->removeTextMessage(100);
-        ui->FieldE8to9->removeTextMessage(100);
-        ui->FieldE5to9->removeTextMessage(101);
-        ui->FieldE8to9->removeTextMessage(101);
-        ui->FieldE5to9->removeTextMessage(102);
-        ui->FieldE8to9->removeTextMessage(102);
-        ui->FieldE5to9->removeTextMessage(103);
-        ui->FieldE8to9->removeTextMessage(103);
+    activeDataEntryItem = "";
+    if(ui->fieldDG->currentIndex() == P_DG_Data_entry){// && (ui->entryFields->currentIndex() == 1 || ui->entryFields->currentIndex() == 2)){   // Data entry
+       ui->fieldABE->setCurrentIndex(P_ABE_DefaultWindow);                 // Data entry page on the right
+       ui->TrnSettingsHolder->setCurrentIndex(0);
+       if(ui->entryFields->currentIndex() == P_entry_ZusiIp){
+           ui->FieldE5to9->removeTextMessage(8);
+           ui->FieldE8to9->removeTextMessage(8);
+           ui->FieldE5to9->removeTextMessage(100);
+           ui->FieldE8to9->removeTextMessage(100);
+           ui->FieldE5to9->removeTextMessage(101);
+           ui->FieldE8to9->removeTextMessage(101);
+           ui->FieldE5to9->removeTextMessage(102);
+           ui->FieldE8to9->removeTextMessage(102);
+           ui->FieldE5to9->removeTextMessage(103);
+           ui->FieldE8to9->removeTextMessage(103);
+           ui->fieldDG->setCurrentIndex(P_DG_Settings);
+           return;
+       }
+       ui->fieldDG->setCurrentIndex(P_DG_Main_menu);
+       return;
     }
-    if(ui->fieldDG->currentIndex() == 6){
+    if(ui->fieldDG->currentIndex() == P_DG_Main_menu){   // Main menu
+       ui->fieldDG->setCurrentIndex(P_DG_DefaultWindow);
+       return;
+    }
+    if(ui->fieldDG->currentIndex() == P_DG_QDmi){
         settings->setValue("pulldown_gauge",ui->pulldown_gauge->currentIndex());
         settings->setValue("pulldown_targetdistance",ui->pulldown_targetdistance->currentIndex());
         settings->setValue("pulldown_showTextmessages",ui->pulldown_showTextmessages->currentIndex());
@@ -454,10 +706,10 @@ void MainWindow::settingsCloseClicked(){
         resizeMe();
     }
     if(ui->fieldDG->currentIndex()>1){
-        ui->fieldDG->setCurrentIndex(1);
+        ui->fieldDG->setCurrentIndex(P_DG_Settings);
     }
     else{
-        ui->fieldDG->setCurrentIndex(0);
+        ui->fieldDG->setCurrentIndex(P_DG_DefaultWindow);
     }
 }
 void MainWindow::applySettings(){
@@ -471,10 +723,22 @@ void MainWindow::applySettings(){
     emit newManometerUse(showManometer);
     emit tcpConnectionSettings(static_cast<quint8>(settings->value("pulldown_tcpConnection").toUInt()));
 }
-void MainWindow::applyClicked(QString data){
-    data.remove("_");
-    if(activeDataEntryItem == "IP-Address"){
-        emit newZusiIp(data);
+void MainWindow::applyClicked(QString data, bool enabled){
+    if(enabled){
+        data.remove("_");
+        if(activeDataEntryItem == "IP-Address"){
+            emit newZusiIp(data);
+        }
+        if(activeDataEntryItem == "driverId"){
+            qDebug() << "driverId " + data;
+            emit newDriverId(data);
+            openMainMenu();
+        }
+        if(activeDataEntryItem == "trainRunningNumber"){
+            qDebug() << "trainRunningNumber " + data;
+            emit newTrainRunningNumber(data);
+            openMainMenu();
+        }
     }
 }
 void MainWindow::addItemToData(QString item){
@@ -485,21 +749,43 @@ void MainWindow::addItemToData(QString item){
         hasUnderline = false;
     dataString.remove("_");
     if(item == "Del"){
-        dataString = dataString.left(dataString.length() - 1);
+        dataString.chop(1);
     }
     else{
-        if(item != "_")
+        if((item != "_") && (dataString.length() < maxEntryStrLength)){
             dataString = dataString + item;
+        }
+        if((item != "_") && (maxEntryStrLength == 1))
+            dataString = item;
         if(hasUnderline)
             dataString = dataString + "_";
     }
     if(activeDataEntryItem == "IP-Address")
         ui->zusiIpOkBtn->setText(dataString,era::black,era::black,QFont::Light);
-    //qDebug() << dataString;
+    if(activeDataEntryItem == "trainData")
+
+        qDebug() << dataString;
+
+        if(dataString == "0_" || dataString == "0")dataString = dataString.remove("0");
+        myZusiTrainData->setTextFromKeyboard(dataString);
+    if(activeDataEntryItem == "driverId"){
+        if(item == "_") myDriverId->togleCursor();
+        if(item == "Del") myDriverId->deleteLastChar();
+        myDriverId->adItem(item);
+        ui->driverIdOkBtn->setText(myDriverId->getText(),era::black,era::black,QFont::Light);
+    }
+    if(activeDataEntryItem == "trainRunningNumber")
+        ui->trainRunningNumberOkBtn->setText(dataString,era::black,era::black,QFont::Light);
+
 }
 void MainWindow::blinkCursor(){
     addItemToData("_");
 }
+void MainWindow::setEntryStrWithMaxLength(quint8 length, QString startString){
+    dataString = startString;
+    maxEntryStrLength = length;
+}
+
 void MainWindow::resizeMe(){
     qreal windowRatio = 4.0 / 3.0;
     qreal defaultHeight = 480.0;
@@ -627,21 +913,57 @@ void MainWindow::resizeMe(){
     ui->settingsBtn8->setBorderThickness(static_cast<int>(multi + 0.75));
     ui->settingsClose->setBorderThickness(static_cast<int>(multi + 0.75));
     ui->settingsClose_6->setBorderThickness(static_cast<int>(multi + 0.75));
-    ui->zusiIpBtn0->setBorderThickness(static_cast<int>(multi + 0.75));
-    ui->zusiIpBtn1->setBorderThickness(static_cast<int>(multi + 0.75));
-    ui->zusiIpBtn2->setBorderThickness(static_cast<int>(multi + 0.75));
-    ui->zusiIpBtn3->setBorderThickness(static_cast<int>(multi + 0.75));
-    ui->zusiIpBtn4->setBorderThickness(static_cast<int>(multi + 0.75));
-    ui->zusiIpBtn5->setBorderThickness(static_cast<int>(multi + 0.75));
-    ui->zusiIpBtn6->setBorderThickness(static_cast<int>(multi + 0.75));
-    ui->zusiIpBtn7->setBorderThickness(static_cast<int>(multi + 0.75));
-    ui->zusiIpBtn8->setBorderThickness(static_cast<int>(multi + 0.75));
-    ui->zusiIpBtn9->setBorderThickness(static_cast<int>(multi + 0.75));
-    ui->zusiIpBtn10->setBorderThickness(static_cast<int>(multi + 0.75));
-    ui->zusiIpBtn11->setBorderThickness(static_cast<int>(multi + 0.75));
-    ui->zusiIpClose->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->dataEntrySettings->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->dataEntryTrn->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->mainBtn1->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->mainBtn2->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->mainBtn3->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->mainClose->setBorderThickness(static_cast<int>(multi + 0.75));
+    // Data entry buttons
+    ui->numBtn0->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->numBtn1->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->numBtn2->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->numBtn3->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->numBtn4->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->numBtn5->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->numBtn6->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->numBtn7->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->numBtn8->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->numBtn9->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->numBtn10->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->numBtn11->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->alphaBtn0->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->alphaBtn1->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->alphaBtn2->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->alphaBtn3->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->alphaBtn4->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->alphaBtn5->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->alphaBtn6->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->alphaBtn7->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->alphaBtn8->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->alphaBtn9->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->alphaBtn10->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->alphaBtn11->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->dataEntryClose->setBorderThickness(static_cast<int>(multi + 0.75));
     ui->zusiIpOkBtn->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->driverIdOkBtn->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->trainRunningNumberOkBtn->setBorderThickness(static_cast<int>(multi + 0.75));
+
     ui->systemVersionClose->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->dataEntryLabel1->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->dataEntryLabel2->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->dataEntryLabel3->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->dataEntryLabel4->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->dataEntryInput1->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->dataEntryInput2->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->dataEntryInput3->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->dataEntryInput4->setBorderThickness(static_cast<int>(multi + 0.75));
+
+    ui->dataEntryCompleteButton->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->dataValidButton->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->dataValidBtnYes->setBorderThickness(static_cast<int>(multi + 0.75));
+    ui->dataValidBtnNo->setBorderThickness(static_cast<int>(multi + 0.75));
+
     QRect tachoRect;
     QRect fieldBHolderRect;
     tachoRect.setY(static_cast<int>(     era::tachoDefault.top() * multi));
@@ -690,7 +1012,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
     #endif
 }
 void MainWindow::mouseMoveEvent(QMouseEvent *event){
-    #if defined(Q_OS_WIN32) || defined(Q_OS_LINUX)
+    #if not defined(Q_OS_ANDROID)
     if(event->buttons() & Qt::LeftButton){
         if (ui->fieldZ->underMouse()) {
             QPoint diff = event->pos() - lKilickPos;

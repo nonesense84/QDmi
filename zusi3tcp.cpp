@@ -9,16 +9,23 @@ void zusi3Tcp::process(){
     myPower = new zusiPower();
     mtdLmsToDecoder.resize(13);
     connect(client,SIGNAL(readyRead()),this,SLOT(clientReadReady()));
-    connect(client,SIGNAL(disconnected()),this,SLOT(reconnect()));
+    connect(client,SIGNAL(disconnected()),this,SLOT(connectToZusi()));
+    connect(client,SIGNAL(connected()),this,SLOT(subscribeZusiData()));
+    connect(client,SIGNAL(stateChanged(QAbstractSocket::SocketState )),this,SLOT(checkClientConnection(QAbstractSocket::SocketState)));
+  //connect(client,SIGNAL(errorOccurred(QAbstractSocket::SocketError)),this,SLOT(handleConnectionError(QAbstractSocket::SocketError)));
 }
-
+void zusi3Tcp::reconnect(){
+    reconnectOnes = true;
+    disconnectFromZusi();
+}
 void zusi3Tcp::disconnectFromZusi(){
    client->disconnectFromHost();
 }
-
+void zusi3Tcp::setAutoReconnect(quint8 reconnect){
+   autoReconnect = reconnect > 0;
+   reconnectOnes = false;
+}
 void zusi3Tcp::setIpadress(QString address){
-    incommingData.clear();
-    disconnectFromZusi();
     if(address.isEmpty()) emit sendTcpConnectionFeedback("-1");
     QStringList slist = address.split(".");
     int s = slist.size();
@@ -26,6 +33,7 @@ void zusi3Tcp::setIpadress(QString address){
         emit newTechnicalMessage(" IP hat zu viele Elemente", era::grey, era::darkBlue, 9);
         QTimer::singleShot(2500,this,SLOT(remooveTechMessage9()));
          emit sendTcpConnectionFeedback("-1");
+        return;
     }
     bool emptyGroup = false;
     for(int i=0;i<s;i++){
@@ -39,17 +47,29 @@ void zusi3Tcp::setIpadress(QString address){
             emit newTechnicalMessage(" Ungültige Werte in IP", era::grey, era::darkBlue, 9);
             QTimer::singleShot(2500,this,SLOT(remooveTechMessage9()));
             emit sendTcpConnectionFeedback("-1");
+            return;
         }
     }
     if(s<4 || emptyGroup){
         emit newTechnicalMessage(" IP hat zu wenig Elemente", era::grey, era::darkBlue, 9);
         QTimer::singleShot(2500,this,SLOT(remooveTechMessage9()));
         emit sendTcpConnectionFeedback("-1");
+        return;
     }
-    QHostAddress zusiPc = QHostAddress(address);
+    zusiPc = QHostAddress(address);
     ipAddress = address;
-    client->abort();
+    if(client->state() != QAbstractSocket::UnconnectedState){
+        reconnect();
+    }
+    else{
+        connectToZusi();
+    }
+}
+void zusi3Tcp::connectToZusi(){
+    incommingData.clear();
     client->connectToHost(zusiPc,1436);
+}
+void zusi3Tcp::subscribeZusiData(){
     QVector<unsigned char> anmeldung;
     QVector<unsigned char> abfrage;
 
@@ -58,7 +78,7 @@ void zusi3Tcp::setIpadress(QString address){
     addAtribut(&anmeldung, 0x01, 0x02); // Protokoll-Version
     addAtribut(&anmeldung, 0x02, 0x02); // Client-Typ: [1: Zusi| 2: Fahrpult]
     addTextAtribut(&anmeldung, 0x03, "QDmi");
-    addTextAtribut(&anmeldung, 0x04, "1.2.2");
+    addTextAtribut(&anmeldung, 0x04, "1.3.0");
     addKnotenEnde(&anmeldung);
     addKnotenEnde(&anmeldung);
     QByteArray anmeldArr;
@@ -67,35 +87,6 @@ void zusi3Tcp::setIpadress(QString address){
     }
     client->write(anmeldArr);
 
-
- /* constexpr static const unsigned char trainData[] =
-             { 0x00, 0x00, 0x00, 0x00, 0x02, 0x00,              // <Kn> Client-Anwendung 02
-               0x00, 0x00, 0x00, 0x00, 0x0A, 0x01,              // <Kn> Befehl INPUT
-               0x00, 0x00, 0x00, 0x00, 0x02, 0x00,              // <Kn> Zugbeeinflussung einstellen
-               0x00, 0x00, 0x00, 0x00, 0x02, 0x00,              // <Kn> System aus der Indusi-Familie
-               0x00, 0x00, 0x00, 0x00, 0x04, 0x00,              // <Kn> Werte der Grunddaten
-               0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x8C, 0x00,  // BRH-Wert (Bremshundertstel)
-               0x04, 0x00, 0x00, 0x00, 0x02, 0x00, 0x09, 0x00,  // BRA-Wert (Bremsart)
-               0x04, 0x00, 0x00, 0x00, 0x05, 0x00, 0x02, 0x00,  // Zugehörige Zugart
-               0xFF, 0xFF, 0xFF, 0xFF,
-               0x00, 0x00, 0x00, 0x00, 0x05, 0x00,              // <Kn> Werte der Ersatzzugdaten
-               0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x8C, 0x00,  // BRH-Wert (Bremshundertstel)
-               0x04, 0x00, 0x00, 0x00, 0x02, 0x00, 0x09, 0x00,  // BRA-Wert (Bremsart)
-               0x04, 0x00, 0x00, 0x00, 0x05, 0x00, 0x02, 0x00,  // Zugehörige Zugart
-               0x04, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,  // Modus (Normalbetrieb, nicht Ersatzzugdaten)
-               0xFF, 0xFF, 0xFF, 0xFF,
-               0x00, 0x00, 0x00, 0x00, 0x06, 0x00,              // <Kn> Aktive Zugdaten
-               0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x8C, 0x00,  // BRH-Wert (Bremshundertstel)
-               0x04, 0x00, 0x00, 0x00, 0x02, 0x00, 0x09, 0x00,  // BRA-Wert (Bremsart)
-               0x04, 0x00, 0x00, 0x00, 0x05, 0x00, 0x02, 0x00,  // Zugehörige Zugart
-               0x04, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,  // Modus (Normalbetrieb, nicht Ersatzzugdaten)
-               0xFF, 0xFF, 0xFF, 0xFF,
-               0xFF, 0xFF, 0xFF, 0xFF,
-               0xFF, 0xFF, 0xFF, 0xFF,
-               0xFF, 0xFF, 0xFF, 0xFF,
-               0xFF, 0xFF, 0xFF, 0xFF
-             };
-    */
     addKnotenAnfang(&abfrage, 0x02);// <Kn>    // Client-Anwendung 02
     addKnotenAnfang(&abfrage, 0x03);// <Kn>    // Befehl NEEDED_DATA
     addKnotenAnfang(&abfrage, 0x0A);// <Kn>    // Untergruppe Führerstandsanzeigen
@@ -132,10 +123,14 @@ void zusi3Tcp::setIpadress(QString address){
     addAtribut(&abfrage, 0x66);  // Türen
     addAtribut(&abfrage, 0x88);  // Steuerwagen: Stromabnehmer
     addAtribut(&abfrage, 0x8e);  // Status Zugverband
+    addAtribut(&abfrage, 0xac);  // Führerstand deaktiviert
     addKnotenEnde(&abfrage);
-    addKnotenAnfang(&abfrage, 0x0C);
+  //addKnotenAnfang(&abfrage, 0x0B); // DATA_OPERATION
+  //addAtribut(&abfrage, 0x01);  // Betätigungsvorgang
+  //addKnotenEnde(&abfrage);
+    addKnotenAnfang(&abfrage, 0x0C); // DATA_PROG
     addAtribut(&abfrage, 0x02);  // Aktuelle Zugnummer
-  //addAtribut(&abfrage, 0x05);  // 1: Zug neu übernommen
+    addAtribut(&abfrage, 0x05);  // 1: Zug neu übernommen
     addKnotenEnde(&abfrage);
     addKnotenEnde(&abfrage);
     addKnotenEnde(&abfrage);
@@ -144,25 +139,106 @@ void zusi3Tcp::setIpadress(QString address){
         abfrageArr.append(static_cast<char>(abfrage[i]));
     }
     client->write(abfrageArr);
-    QTimer::singleShot(0,this,SLOT(checkClientConnection()));
-    emit sendTcpConnectionFeedback(address);
+    emit sendTcpConnectionFeedback(ipAddress);
 }
 
-void zusi3Tcp::addKnotenAnfang(QVector<unsigned char> *vector, unsigned char knoten){
+
+void zusi3Tcp::setDriverId(QString driverID){
+    QVector<unsigned char> traindata;
+    addKnotenAnfang(&traindata, 0x02      );  // <Kn>  Client-Anwendung 02
+    addKnotenAnfang(&traindata, 0x010A    );  // <Kn>  Befehl INPUT
+    addKnotenAnfang(&traindata, 0x02      );  // <Kn>  Zugbeeinflussung einstellen
+    addKnotenAnfang(&traindata, 0x02      );  // <Kn>  System aus der Indusi-Familie
+    addAtribut(&traindata, 0x02, driverID );  // Tf-Nummer
+    addKnotenEnde(&traindata);
+    addKnotenEnde(&traindata);
+    addKnotenEnde(&traindata);
+    addKnotenEnde(&traindata);
+
+    QByteArray traindataArr;
+    for(int i = 0; i < traindata.length(); i++){
+        traindataArr.append(static_cast<char>(traindata[i]));
+    }
+    client->write(traindataArr);
+}
+
+void zusi3Tcp::setTrainRunningNumber(QString trn){
+    QVector<unsigned char> traindata;
+    addKnotenAnfang(&traindata, 0x02      );  // <Kn>  Client-Anwendung 02
+    addKnotenAnfang(&traindata, 0x010A    );  // <Kn>  Befehl INPUT
+    addKnotenAnfang(&traindata, 0x02      );  // <Kn>  Zugbeeinflussung einstellen
+    addKnotenAnfang(&traindata, 0x02      );  // <Kn>  System aus der Indusi-Familie
+    addAtribut(&traindata,      0x03, trn );  // Zugnummer
+    addKnotenEnde(&traindata);
+    addKnotenEnde(&traindata);
+    addKnotenEnde(&traindata);
+    addKnotenEnde(&traindata);
+
+    QByteArray traindataArr;
+    for(int i = 0; i < traindata.length(); i++){
+        traindataArr.append(static_cast<char>(traindata[i]));
+    }
+    client->write(traindataArr);
+}
+
+void zusi3Tcp::setTrainData(quint16 BRA, quint16 BRH, quint16 ZL, quint16 VMZ, bool validated){
+    QVector<unsigned char> traindata;
+    addKnotenAnfang(&traindata, 0x02      );  // <Kn>  Client-Anwendung 02
+    addKnotenAnfang(&traindata, 0x010A    );  // <Kn>  Befehl INPUT
+    addKnotenAnfang(&traindata, 0x02      );  // <Kn>  Zugbeeinflussung einstellen
+    addKnotenAnfang(&traindata, 0x02      );  // <Kn>  System aus der Indusi-Familie
+    addKnotenAnfang(&traindata, 0x06      );  // <Kn>  Aktive Zugdaten
+    addAtribut(&traindata, 0x01, BRH      );  // BRH-Wert (Bremshundertstel)
+    addAtribut(&traindata, 0x02, BRA      );  // BRA-Wert (Bremsart)
+    addAtribut(&traindata, 0x03, ZL       );  // ZL-Wert (Zuglänge) in m
+    addAtribut(&traindata, 0x04, VMZ      );  // VMZ-Wert (Höchstgeschwindigkeit) in km/h
+    addAtribut(&traindata, 0x05, validated);  // Zugehörige Zugart (0:Automatisch | 1: Noch_unbestimmt | 2:U | 3:M | 4:O | 5:S-Bahn)
+    addAtribut(&traindata, 0x06, 0        );  // Modus (0:undefiniert | 5:Ersatzzugdaten | 6:Normalbetrieb)
+    addKnotenEnde(&traindata);
+    addKnotenEnde(&traindata);
+    addKnotenEnde(&traindata);
+    addKnotenEnde(&traindata);
+    addKnotenEnde(&traindata);
+
+    QByteArray traindataArr;
+    for(int i = 0; i < traindata.length(); i++){
+        traindataArr.append(static_cast<char>(traindata[i]));
+    }
+    client->write(traindataArr);
+}
+void zusi3Tcp::addKnotenAnfang(QVector<unsigned char> *vector, quint16 knoten){
+    unsigned char knotenHb = static_cast<unsigned char>(knoten >> 8);
+    unsigned char knotenLb = static_cast<unsigned char>(knoten & 0x00ff);
     vector->append({0x00, 0x00, 0x00, 0x00});
-    vector->append(knoten);
-    vector->append(0x00);
+    vector->append(knotenLb);
+    vector->append(knotenHb);
 }
 void zusi3Tcp::addKnotenEnde(QVector<unsigned char> *vector){
     vector->append({0xFF, 0xFF, 0xFF, 0xFF});
 }
-void zusi3Tcp::addAtribut(QVector<unsigned char> *vector, unsigned char id, unsigned char atribut){
+
+void zusi3Tcp::addAtribut(QVector<unsigned char> *vector, unsigned char id, quint16 atribut){
+    unsigned char atributHb = static_cast<unsigned char>(atribut >> 8);
+    unsigned char atributLb = static_cast<unsigned char>(atribut & 0x00ff);
     vector->append({0x04, 0x00, 0x00, 0x00});
     vector->append(id);
     vector->append(0x00);
-    vector->append(atribut);
-    vector->append(0x00);
+    vector->append(atributLb);
+    vector->append(atributHb);
 }
+void zusi3Tcp::addAtribut(QVector<unsigned char> *vector, unsigned char id, QString atribut){
+    quint32 packet_length = static_cast<quint32>(atribut.length()) + 2;
+    vector->append(packet_length         & 0x000000ff);
+    vector->append((packet_length >>  8) & 0x000000ff);
+    vector->append((packet_length >> 16) & 0x000000ff);
+    vector->append((packet_length >> 24) & 0x000000ff);
+    vector->append(id);
+    vector->append(0x00);
+    for(int i = 0; i < atribut.length(); i++){
+        vector->append(atribut.at(i).cell());
+    }
+}
+
 void zusi3Tcp::addTextAtribut(QVector<unsigned char> *vector, quint16 id, QString text){
     quint32 len = static_cast<quint32>(text.length()) + 2;
     vector->append(static_cast< unsigned char>( len & 0x000000ff));
@@ -180,47 +256,43 @@ void zusi3Tcp::addAtribut(QVector<unsigned char> *vector, unsigned char atribut)
     vector->append(atribut);
     vector->append(0x00);
 }
-void zusi3Tcp::checkClientConnection(){
-    switch(client->state()){
+void zusi3Tcp::checkClientConnection(QAbstractSocket::SocketState state){
+    switch(state){
     case QAbstractSocket::UnconnectedState:
         removeTechnicalMessage(11);
         emit newTechnicalMessage(" Verbindungsaufbau gescheitert", era::grey, era::darkBlue, 10);
         emit sendDataSourceIsZusi(false);
         QTimer::singleShot(4000,this,SLOT(remooveTechMessage10()));
-        if(autoReconnect)QTimer::singleShot(5000, this, SLOT(reconnect()));
+        if(autoReconnect || reconnectOnes)QTimer::singleShot(5000, this, SLOT(connectToZusi()));
         break;
     case QAbstractSocket::HostLookupState:
         removeTechnicalMessage(10);
         emit newTechnicalMessage(" Verbindungsaufbau zu Zusi3", era::grey, era::darkBlue, 11);
-        QTimer::singleShot(10,this,SLOT(checkClientConnection()));
         break;
-    case QAbstractSocket::ConnectingState:
-        removeTechnicalMessage(10);
-        emit newTechnicalMessage(" Verbindungsaufbau zu Zusi3", era::grey, era::darkBlue, 11);
-        QTimer::singleShot(10,this,SLOT(checkClientConnection()));
-        break;
+    case QAbstractSocket::ConnectingState:break;
     case QAbstractSocket::ConnectedState:
-        removeTechnicalMessage(10);
         removeTechnicalMessage(11);
         emit newTechnicalMessage(" Mit Zusi3 Verbunden", era::grey, era::darkBlue, 13);
         emit sendDataSourceIsZusi(true);
         QTimer::singleShot(2500,this,SLOT(remooveTechMessage13()));
+        reconnectOnes = false;
         break;
-    case QAbstractSocket::BoundState:
-        break;
-    case QAbstractSocket::ClosingState:
-        break;
-    case QAbstractSocket::ListeningState:
-        break;
+    case QAbstractSocket::BoundState:break;
+    case QAbstractSocket::ClosingState:break;
+    case QAbstractSocket::ListeningState:break;
     }
 }
-void zusi3Tcp::remooveTechMessage9(){
+/*void zusi3Tcp::handleConnectionError(QAbstractSocket::SocketError socketError){
+    qDebug() << "handleConnectionError";
+    qDebug() << socketError;
+}*/
+void zusi3Tcp::remooveTechMessage9(){   // This function can be used as SLOT in a timer to remove the message
     removeTechnicalMessage(9);
 }
-void zusi3Tcp::remooveTechMessage10(){
+void zusi3Tcp::remooveTechMessage10(){   // This function can be used as SLOT in a timer to remove the message
     removeTechnicalMessage(10);
 }
-void zusi3Tcp::remooveTechMessage13(){
+void zusi3Tcp::remooveTechMessage13(){   // This function can be used as SLOT in a timer to remove the message
     removeTechnicalMessage(13);
 }
 
@@ -257,7 +329,6 @@ void zusi3Tcp::clientReadReady(){
             nodesChanged = false;
       }
     }
-
 }
 
 int32_t zusi3Tcp::readIntegerInRawAtPos(int pos){
@@ -403,15 +474,19 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                                 case 0x0005:   // Werte der Ersatzzugdaten
                                     switch(nodeIds[5]) {
                                         case 0x0001:   // BRH-Wert (Bremshundertstel)
+                                            //emit newErsatzBrh(useData2Byte.Word);
                                             //qDebug() << "BRH Ers.: " + QString::number(useData2Byte.Word);
                                             return;
                                         case 0x0002:   // BRA-Wert (Bremsart).
+                                            //emit newErsatzBra(useData2Byte.Word);
                                             //qDebug() << "BRA Ers.: " + QString::number(useData2Byte.Word);
                                             return;
                                         case 0x0003:   // ZL-Wert (Zuglänge) in m
+                                            //emit newErsatzZl(useData2Byte.Word);
                                             //qDebug() << "ZL Ers.:  " + QString::number(useData2Byte.Word);
                                             return;
                                         case 0x0004:   // VMZ-Wert (Höchstgeschwindigkeit)in km/h
+                                            //emit newErsatzVmz(useData2Byte.Word);
                                             //qDebug() << "VMZ Ers.: " + QString::number(useData2Byte.Word);
                                             return;
                                         case 0x0005:   // Zugehörige Zugart.
@@ -422,13 +497,16 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                                 case 0x0006:   // Aktive Zugdaten
                                     switch(nodeIds[5]) {
                                         case 0x0001:   // BRH-Wert (Bremshundertstel). Werte der Ersatzzugdaten
-                                            //qDebug() << "BRH Akt.:   " + QString::number(useData2Byte.Word);
+                                            emit newBrh(useData2Byte.Word);//qDebug() << "BRH Akt.:   " + QString::number(useData2Byte.Word);
                                             return;
                                         case 0x0002:   // BRA-Wert (Bremsart). Werte der Ersatzzugdaten
-                                            //qDebug() << "BRA Akt.:   " + QString::number(useData2Byte.Word);
+                                            emit newBra(useData2Byte.Word);//qDebug() << "BRA Akt.:   " + QString::number(useData2Byte.Word);
                                             return;
                                         case 0x0003:   // ZL-Wert (Zuglänge) in m
-                                            //qDebug() << "ZL Akt.:    " + QString::number(useData2Byte.Word);
+                                            emit newZl(useData2Byte.Word);//qDebug() << "ZL Akt.:    " + QString::number(useData2Byte.Word);
+                                            return;
+                                        case 0x0004:   // VMZ-Wert (Höchstgeschwindigkeit)in km/h
+                                            emit newVmz(useData2Byte.Word);//qDebug() << "VMZ Akt.:    " + QString::number(useData2Byte.Word);
                                             return;
                                         case 0x0005:   // Zugehörige Zugart. Werte der Ersatzzugdaten
                                             //qDebug() << "ZA Akt.:    " + QString::number(useData2Byte.byte[0]);
@@ -441,11 +519,24 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                                     }
                                     return;
                                 case 0x0007: return;  // Hauptschalter qDebug() << "Indusi-HS: " + QString::number(useData2Byte.byte[0]);
-                                case 0x0008: return;  // Indusi StörschalterqDebug() << "Indusi-SS: " + QString::number(useData2Byte.byte[0]);
-                                case 0x0009: return;  // LZB StörschalterqDebug() << "LZB SS   : " + QString::number(useData2Byte.byte[0]);
-                                case 0x000A: return;  // Indusi-LuftabsperrhahnqDebug() << "Indusi-LH: " + QString::number(useData2Byte.byte[0]);
+                                case 0x0008:          // Indusi Störschalter qDebug() << "Indusi-SS: " + QString::number(useData2Byte.byte[0]);
+                                    myIndicators->setIndusiStoerschalter(useData2Byte.byte[0]);
+                                    return;
+                                case 0x0009:          // LZB Störschalter qDebug() << "LZB SS   : " + QString::number(useData2Byte.byte[0]);
+                                    myIndicators->setLzbStoerschalter(useData2Byte.byte[0]);
+                                    return;
+                                case 0x000A:          // Indusi-LuftabsperrhahnqDebug() << "Indusi-LH: " + QString::number(useData2Byte.byte[0]);
+                                    myIndicators->setPlzbLuftabsperrhahn(useData2Byte.byte[0]);
+                                    return;
                                 case 0x000B:   // Klartextmeldungen
                                     myIndicators->setKlartextmeldungen(useData2Byte.byte[0], forceTextmessages);
+                                    return;
+                                case 0x0011: // Systemstatus LZB:
+                                    //qDebug() << "Systemstatus LZB: " + QString::number(useData2Byte.byte[0]);
+                                    return;
+                                case 0x000D: // Systemstatus Indusi:
+                                    myIndicators->setSystemstatusPzb(useData2Byte.byte[0]); // 3 = Aktiv
+                                    //qDebug() << "Systemstatus Indusi: " + QString::number(useData2Byte.byte[0]);
                                     return;
                             }
                             return;
@@ -723,16 +814,38 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                             return;
                     }
                     return;
+                  case 0x00AC:  // Führerstand deaktiviert
+                    if(fstAktiv != (useData4Byte.Single < 1)){
+                        fstAktiv = useData4Byte.Single < 1;
+                        emit newCabActive(fstAktiv, VIst == 0);
+                    }
+                    return;
                 default:
                     return;
         }
+
+        case 0x000B:
+            switch(nodeIds[2]){
+                case 0x0001:
+                    switch(nodeIds[3]){
+                        case 0x0002:    // Tastaturzuordnung
+                            emit newTastaturkommando(useData2Byte.Word);
+                            return;
+                    }
+            }
+            return;
         case 0x000C:
             switch(nodeIds[2]){
                 case 0x0002: setZugnummer(QString(useDataComplex), "Fahrplan");return; // Aktuelle Zugnummer
               //case 0x0003: return; // Status Ladepause, 0: Ende Ladepause (Start der Simulation)
-              //case 0x0005: return; // 1: Zug neu übernommen
+            case 0x0005: // 1: Zug neu übernommen
+                if(useData2Byte.byte[0] > 0){
+                    emit changedTrain();
+                    //qDebug() << "Zug neu übernommen";
+                    reconnect();
+                }
+                return;
             }
-
         default:
             return;
     }
@@ -789,7 +902,6 @@ bool zusi3Tcp::checkHysterise(float *output, float input, bool isRelative){
     return false;
 }
 
-
 void zusi3Tcp::setMtdIndicator(uint8_t value, uint8_t pos){
     if(mtdLmsToDecoder[pos] != value){
         mtdLmsToDecoder[pos] = value;
@@ -805,20 +917,7 @@ void zusi3Tcp::transmitMtdIndicators(){
 void zusi3Tcp::setZugnummer(QString nummer, QString fromSystem){
     QString zugnummerAnzeige = nummer;
     emit newZugnummer(zugnummerAnzeige.replace('_', '\n'));
-    if((fromSystem == "Fahrplan" && trainHasBenMovedSinceLastNewTrainNumber && VIst == 0)){
-        trainHasBenMovedSinceLastNewTrainNumber = false;
-        disconnectFromZusi();
-        myIndicators->clearData();
-        QTimer::singleShot(1000, this, SLOT(reconnect()));
-    }
     zugnummer = nummer;
-
-}
-void zusi3Tcp::reconnect(){
-    setIpadress(ipAddress);
-}
-void zusi3Tcp::setAutoReconnect(quint8 reconnect){
-   autoReconnect = reconnect > 0;
 }
 void zusi3Tcp::setSammelschine(){
     setMtdIndicator(0,8);
@@ -844,6 +943,7 @@ void zusi3Tcp::setUseManometer(bool use){
 void zusi3Tcp::setTextUsing(quint8 useAutomText){
     if(forceTextmessages != useAutomText){  // 0: Allways, 1: Automatic, 2: Never
         forceTextmessages = useAutomText;
+        myIndicators->setDefaults();
         reconnect();
     }
 }

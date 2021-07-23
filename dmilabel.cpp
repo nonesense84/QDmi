@@ -16,28 +16,91 @@ void dmiLabel::mousePressEvent(QMouseEvent *event){
     if(isEnab){
         isPushed = true;
         update();
-        emit txtBtnClicked(labelText);
     }
 }
 
 void dmiLabel::mouseReleaseEvent(QMouseEvent *event){
     isPushed = false;
-    update();
     if(isEnab){
         emit clicked(true);
         //if(isButton)QSound::play(":/sounds/click.wav");
+        #if not defined Q_OS_ANDROID
+            if(isButton)QSound::play(":/sounds/click.wav");
+        #endif
+        update();
+        emit txtBtnClicked(emitText);
     }
+    emit dataEntryBtnClicked(labelText, isEnab);
 }
 
-void dmiLabel::setAsButton(bool asButton){
-    isButton = asButton;
+void dmiLabel::setAsButton(QString text){
+    setAsButton(true, text, text);
 }
 
-void dmiLabel::setAsButton(bool asButton, bool forDataEntry){
-    isButton = asButton;
-    isDataEntryButton = forDataEntry;
-    customAlignment = Qt::AlignLeft;
-    //alignLeft = true;
+void dmiLabel::setAsButton(bool enabled, QString text){
+    setAsButton(enabled, text, text);
+}
+
+void dmiLabel::setAsButton(bool enabled, QString text, QString textToEmit){
+    bool needUpdate = false;
+    if(isEnab != enabled || labelText != text)needUpdate = true;
+    isButton = true;
+    isEnab = enabled;
+    labelText = text;
+    emitText = textToEmit;
+    textStyle = QFont::Light;
+    if(needUpdate)update();
+}
+
+void dmiLabel::setAsDataEntryLabel(QString text, bool isInputfield, bool isEnabled, bool isValid, bool isApplicable, bool fullGrid){
+    if(!isApplicable){
+        labelText = "";
+        bgColor = era::darkBlue;
+        borderColorTopAndLeft = era::darkBlue;
+        borderColorButtomAndRight = era::darkBlue;
+        isDataEntryButton = false;
+        isButton = true;
+        update();
+        return;
+    }
+    textStyle = QFont::Light;
+    isEnab = isEnabled;
+    labelText = text;
+    emitText = text;
+    isDataEntryButton = true;
+    if(isInputfield){
+        if(!hasCustomAlignment)alignment = Qt::AlignLeft;
+        isButton = true;
+        setUnclosedFrame(!fullGrid && !isEnabled,false,false,false);
+        if(isEnabled){
+            bgColor = era::mediumGrey;
+            labelTextColorEnab = era::black;
+            borderColorTopAndLeft = era::darkGrey;
+            borderColorButtomAndRight = era::white;
+        }
+        else{
+            bgColor = era::darkGrey;
+            borderColorTopAndLeft = era::mediumGrey;
+            borderColorButtomAndRight = era::mediumGrey;
+            if(isValid){
+                labelTextColorDisab = era::white;
+            }
+            else{
+                labelTextColorDisab = era::grey;
+            }
+        }
+
+    }
+    else{
+        if(!hasCustomAlignment)alignment = Qt::AlignRight;
+        setUnclosedFrame(false,true,false,false);
+        bgColor = era::darkGrey;
+        labelTextColorEnab  = era::grey;
+        labelTextColorDisab = era::grey;
+        borderColorTopAndLeft     = era::mediumGrey;
+        borderColorButtomAndRight = era::mediumGrey;
+    }
+    update();
 }
 
 void dmiLabel::setTargetDistance(quint16 distance, bool visible){
@@ -122,14 +185,21 @@ void dmiLabel::setCustomFontFactor(qreal factor){
     customFontFactor = factor;
 }
 
-void dmiLabel::setCustomFontFactor(qreal factor, Qt::Alignment alignment){
+void dmiLabel::setCustomFontFactor(qreal factor, Qt::Alignment customAlignment){
     customFontFactor = factor;
-    customAlignment = static_cast<int>(alignment);
-    //alignLeft = alignment == Qt::AlignLeft;
-    //alignRight = alignment == Qt::AlignRight;
+    hasCustomAlignment = true;
+    alignment = static_cast<int>(customAlignment);
 }
 
 void dmiLabel::setText(QString text){
+    if(labelText != text){
+        labelText = text;
+        update();
+    }
+}
+
+void dmiLabel::setText(quint16 value){
+    QString text = QString::number(value);
     if(labelText != text){
         labelText = text;
         update();
@@ -165,12 +235,14 @@ void dmiLabel::setUnclosedFrame(bool openL, bool openR, bool openU, bool openD){
 void dmiLabel::setTextFieldUsing(quint8 numFields){
     isTextField = true;
     numTextFields = numFields;
-    customAlignment = Qt::AlignLeft;
+    if(!hasCustomAlignment)alignment = Qt::AlignLeft;
 }
-void dmiLabel::setTextFieldUsing(quint8 numFields, quint8 alignment){
+
+void dmiLabel::setTextFieldUsing(quint8 numFields, quint8 customAlignment){
     isTextField = true;
     numTextFields = numFields;
-    customAlignment = alignment;
+    hasCustomAlignment = true;
+    alignment = customAlignment;
 }
 
 void dmiLabel::setSegmentDigitToUse(quint8 position){
@@ -203,7 +275,7 @@ void dmiLabel::addTextMessage(QString text, QColor textColor, QColor bgColor, qu
             update();
             highestTextMessgePosition = i;
           //qDebug() << "highestTextMessgePosition: " + QString::number(highestTextMessgePosition);
-            if(i > numTextFields)emit messaesOutOfView(true);
+            if(i >= numTextFields)emit messaesOutOfView(true);
             return;
         }
     }
@@ -230,6 +302,7 @@ void dmiLabel::removeTextMessage(quint8 msgId){
     if(needUpdate)update();
     emit messaesOutOfView(foundMessaesOutOfView);
 }
+
 void dmiLabel::shiftTextMessageOffset(qint8 shift){
     textMessageOffset = textMessageOffset + shift;
     if(textMessageOffset < 0) textMessageOffset = 0;
@@ -247,16 +320,21 @@ void dmiLabel::paintEvent(QPaintEvent *)
                                borderThickness * borderTClosed,
                                width() -  borderThickness * (borderRClosed + borderLClosed),
                                height() - borderThickness * (borderBClosed + borderTClosed));
-        paintFrame(&painter, centralAreaLbl    , era::black,  era::shadow, 0);
-        if(isButton){
+        // First we have to draw the frame of the label.
+        // In case of a data entry button, there is no frame arround,
+        // so the buttom will be drawn by the frame itself, and without a frame if its pushed.
+        // If it is a regular button, we have to draw the button INSIDE the label with swaped worder colors.
+        // ...But only, when its not pushed, because the we only need the frame.
+        if(isDataEntryButton && isPushed){ // Pushed data enrtry button. Entire label without a frame:
+            paintFrame(&painter, centralAreaLbl, bgColor,  bgColor, 0);
+        }
+        else{ // Regualar frame:
+         paintFrame(&painter, centralAreaLbl, borderColorButtomAndRight,  borderColorTopAndLeft, 0);
+        }
+        if(isButton && !isDataEntryButton){ // Regular button inside a frame, thats allready painted
             QRect centralAreaBtn(2*borderThickness, 2 * borderThickness, width() - 4 * borderThickness, height() - 4 * borderThickness);
-            if(!isPushed){
-                if(isDataEntryButton){
-                    paintFrame(&painter, centralAreaBtn, era::white, era::darkGrey,  borderThickness);
-                }
-                else{
-                    paintFrame(&painter, centralAreaBtn, era::shadow, era::black,  borderThickness);
-                }
+            if(!isPushed){ // Regular bushed button inside a frame, thats allready painted
+                paintFrame(&painter, centralAreaBtn, borderColorTopAndLeft, borderColorButtomAndRight,  borderThickness);
             }
             paintIcon(&painter, centralAreaBtn);
         }
@@ -293,12 +371,12 @@ void dmiLabel::paintText(QPainter *iconPainter, QRect centralArea){
                                textStyle,
                                false));
 
-    QRectF textRect = iconPainter->boundingRect(field,customAlignment,labelText);
-    if(customAlignment == Qt::AlignLeft){
+    QRectF textRect = iconPainter->boundingRect(field,alignment,labelText);
+    if(alignment == Qt::AlignLeft){
         textRect.moveLeft(5*borderThickness);
         textRect.translate(0, field.height()/2 - textRect.height()/2);
     }
-    if(customAlignment == Qt::AlignRight){
+    if(alignment == Qt::AlignRight){
         textRect.translate(0, field.height()/2 - textRect.height()/2);
     }
     iconPainter->drawText(textRect,labelText);
@@ -329,8 +407,6 @@ void dmiLabel::paintDistance(QPainter *iconPainter, QRect centralArea){
     }
     QRect textRect = iconPainter->boundingRect(digitalDistPosition,Qt::AlignRight,QString::number(targetDistance));
     digitalDistPosition.setLeft(45 - textRect.width());
-    //iconPainter->drawText(digitalDistPosition,QString::number(targetDistance));
-    //iconPainter->setPen(Qt::NoPen);
     quint16 targetDistanceAnalog = targetDistance;
     if(targetDistance > distanceScale){ targetDistanceAnalog = distanceScale;}
     qreal tem = 0.0;
@@ -393,9 +469,9 @@ void dmiLabel::paintTextMessages(QPainter *iconPainter, QRect centralArea){
                                    false));
         QRect textRect = iconPainter->boundingRect(field,Qt::AlignLeft,messageTexts[i + textMessageOffset]);
         textRect.moveLeft(3*borderThickness);
-        if(customAlignment == Qt::AlignLeft)textRect.translate(0, field.height()/2 - textRect.height()/2);
-        if(customAlignment == Qt::AlignRight)textRect.translate(field.width()-textRect.width(), field.height()/2 - textRect.height()/2);
-        if(customAlignment == Qt::AlignCenter)textRect.translate(field.width()/2-textRect.width()/2, field.height()/2 - textRect.height()/2);
+        if(alignment == Qt::AlignLeft)textRect.translate(0, field.height()/2 - textRect.height()/2);
+        if(alignment == Qt::AlignRight)textRect.translate(field.width()-textRect.width(), field.height()/2 - textRect.height()/2);
+        if(alignment == Qt::AlignCenter)textRect.translate(field.width()/2-textRect.width()/2, field.height()/2 - textRect.height()/2);
         iconPainter->drawText(textRect,messageTexts[i + textMessageOffset]);
         field.translate(0,lineHeight);
     }
@@ -457,10 +533,7 @@ void dmiLabel::paintFrame(QPainter *framePainter,QRect centralArea, QColor color
     framePainter->drawRect(darkBorder);
     framePainter->setBrush(colorRightDown);
     framePainter->drawPolygon(brightBorder, 5);
-    if(isDataEntryButton)
-        framePainter->setBrush(era::mediumGrey);
-    else
-        framePainter->setBrush(bgColor);
+    framePainter->setBrush(bgColor);
 
     framePainter->drawRect(centralArea);
 }

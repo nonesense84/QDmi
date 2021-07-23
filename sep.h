@@ -29,6 +29,7 @@ signals:
     void newAfbSoll(quint16 vSoll, bool visible);
     void newSimTime(QString simtime);
     void newGeoPos(qint32 geoPos);
+    void newLevelInforamtion(quint8 level);
 
 private:
     QUdpSocket *udpSocketSep;

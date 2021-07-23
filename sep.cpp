@@ -35,6 +35,7 @@ void sep::readingPendingSep(){
         udpSocketSep->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
         //qDebug() << datagram;
         if(datagram.size() >= 44){
+            emit newLevelInforamtion(11);   // At the moment there is only PZB/LZB in SEP implemented.
             if (static_cast<quint8>(datagram[0]) != versionMajor)qDebug() << "TDF may by incompatible!";
             if (static_cast<quint8>(datagram[1]) != versionMinor)qDebug() << "May by there are new functions!";
             if (static_cast<quint8>(datagram[2]) != versionPatch)qDebug() << "May by there are hot fixes!";
@@ -42,6 +43,7 @@ void sep::readingPendingSep(){
             for(int i = 0; i < 12; i = i + 1){
                 pzbLmsToDecoder[i*2 +1] = lowNib(datagram[pzbOffset + i]);
                 pzbLmsToDecoder[i*2  ] =   upNib(datagram[pzbOffset + i]);
+                // qDebug() << pzbLmsToDecoder;
             }
             emit newLzbIndicators(pzbLmsToDecoder);
             // ==================== Read LZB values ====================
