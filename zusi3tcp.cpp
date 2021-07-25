@@ -106,7 +106,7 @@ void zusi3Tcp::subscribeZusiData(){
   //addAtribut(&abfrage, 0x91);  // Steuerwagen: Zug- und Brems-Gesamtkraftsoll normiert
   //addAtribut(&abfrage, 0x93);  // Zug- und Brems-Gesamtkraftsoll absolut normiert
   //addAtribut(&abfrage, 0x94);  // Steuerwagen: Zug- und Brems-Gesamtkraftsoll absolut normiert
-    addAtribut(&abfrage, 0x0E);  // Fahrleitungsspannung
+  //addAtribut(&abfrage, 0x0E);  // Fahrleitungsspannung
     addAtribut(&abfrage, 0x23);  // Zeit
     addAtribut(&abfrage, 0x13);  // Hauptschalter
     addAtribut(&abfrage, 0x15);  // Fahrstufe
@@ -434,7 +434,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                     }
                     return;
                 case 0x0061:    // Kilometrierung
-                    if (checkHysterise(&kilometer, useData4Byte.Single * 1000)){
+                    if (checkHysterise(&kilometer, static_cast<float>(floor(static_cast<double>(useData4Byte.Single) * 10.0))*100)){
                         emit newKilometrierung(kilometer);
                     }
                     return;
