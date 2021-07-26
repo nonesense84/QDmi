@@ -532,6 +532,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                                     myIndicators->setKlartextmeldungen(useData2Byte.byte[0], forceTextmessages);
                                     return;
                                 case 0x0011: // Systemstatus LZB:
+                                    myIndicators->setSystemstatusLzb(useData2Byte.byte[0]); // 3 = Aktiv
                                     //qDebug() << "Systemstatus LZB: " + QString::number(useData2Byte.byte[0]);
                                     return;
                                 case 0x000D: // Systemstatus Indusi:

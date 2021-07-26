@@ -403,13 +403,20 @@ void zusiIndicator::setPlzbLuftabsperrhahn(uint8_t value){
     if(value != 1)emit removeMessage(33);
     if(value == 1 && ktp)emit newTextMessage(db::messages[33], db::textFontColors[33], db::textBgColors[33], 33);
 }
+void zusiIndicator::setSystemstatusLzb(uint8_t value){
+    if(systemstatusLzb != value){
+        systemstatusLzb = value;
+        if((systemstatusPzb != 0 && systemstatusPzb != 2) || (systemstatusLzb != 0 && systemstatusLzb != 2)) emit newLevelInforamtion(levelPzbLzbNtc);
+        else{emit newLevelInforamtion(levelUndefined);}
+    }
+}
 void zusiIndicator::setSystemstatusPzb(uint8_t value){
     if(systemstatusPzb != value){
         systemstatusPzb = value;
-        if(systemstatusPzb != 0 && systemstatusPzb != 2) emit newLevelInforamtion(levelPzbLzbNtc);
+        if((systemstatusPzb != 0 && systemstatusPzb != 2) || (systemstatusLzb != 0 && systemstatusLzb != 2)) emit newLevelInforamtion(levelPzbLzbNtc);
         else{emit newLevelInforamtion(levelUndefined);}
     }
-    lmPzb = value == 3;//qDebug() << "LZB Ü        " + QString::number(value);
+    lmPzb = value == 3;
 }
 void zusiIndicator::setLmE40(uint8_t value){
     if(ersatzauftrag && value == 0){// Workaround: Ersatzauftrag does not get reset after end
