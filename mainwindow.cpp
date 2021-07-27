@@ -603,6 +603,7 @@ void MainWindow::openDriverIdEntry(){
     activeDataEntryItem = "driverId";
     myDriverId->clearText();
     myDriverId->hideText(true);
+    setEntryStrWithMaxLength(16, "");
     ui->driverIdOkBtn->setText(myDriverId->getText(),era::black,era::black,QFont::Light);
 }
 
@@ -611,7 +612,7 @@ void MainWindow::openTrainRunnimgNumberEntry(){
     ui->entryFields->setCurrentIndex(P_entry_TrainNumber);          // Data entry page for train running number
     setKeyboardType(P_Keyboard_Numeric, false);                     // Numeric keyboard without dot
     activeDataEntryItem = "trainRunningNumber";
-    dataString = "";
+    setEntryStrWithMaxLength(16, "");
     ui->TrnSettingsHolder->setCurrentIndex(0);                      // In case previous window was driver ID, triggered by cab activation
 }
 void MainWindow::arrowUpClicked(){
@@ -762,12 +763,10 @@ void MainWindow::addItemToData(QString item){
     }
     if(activeDataEntryItem == "IP-Address")
         ui->zusiIpOkBtn->setText(dataString,era::black,era::black,QFont::Light);
-    if(activeDataEntryItem == "trainData")
-
-        qDebug() << dataString;
-
+    if(activeDataEntryItem == "trainData"){
         if(dataString == "0_" || dataString == "0")dataString = dataString.remove("0");
         myZusiTrainData->setTextFromKeyboard(dataString);
+    }
     if(activeDataEntryItem == "driverId"){
         if(item == "_") myDriverId->togleCursor();
         if(item == "Del") myDriverId->deleteLastChar();
