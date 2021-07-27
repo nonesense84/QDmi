@@ -731,12 +731,10 @@ void MainWindow::applyClicked(QString data, bool enabled){
             emit newZusiIp(data);
         }
         if(activeDataEntryItem == "driverId"){
-            qDebug() << "driverId " + data;
             emit newDriverId(data);
             openMainMenu();
         }
         if(activeDataEntryItem == "trainRunningNumber"){
-            qDebug() << "trainRunningNumber " + data;
             emit newTrainRunningNumber(data);
             openMainMenu();
         }
