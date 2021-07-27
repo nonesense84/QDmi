@@ -215,7 +215,7 @@ void lzb::setStates(QVector<quint8> states){
         }
     }
     for(quint8 i = 0; i <= 21; i++){
-        if(useTxtMsgByLm && !zusiIsDataSource && i == 1) i = 5;// Set all indicators but O/M/U/PZB/LZB
+        if(useTxtMsgByLm && !zusiIsDataSource && i == 1) i = 3;// Set all indicators but O/M/U
         if(states[i]  > 0){
             addIndicator(i, ((states[i] & 0x06 ) >> 1),(states[i] & 0x08) > 0);
         }
