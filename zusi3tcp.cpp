@@ -380,18 +380,21 @@ void zusi3Tcp::cutZusiTelegram(){
         default:
             atributeId = readIdAtPos(i+4); //ID zur Codierung der Funktion des Attributs (Word)
             nodeIds[layer] = readIdAtPos(i+4);
-            switch ((packetLength - 2))
+            switch ((packetLength - 2)){
             case 4:
                 useData4Byte.chr[0] = compZusiPacket[i + 6];
                 useData4Byte.chr[1] = compZusiPacket[i + 7];
                 useData4Byte.chr[2] = compZusiPacket[i + 8];
                 useData4Byte.chr[3] = compZusiPacket[i + 9];
+                break;
             case 2:
                 useData2Byte.chr[0] = compZusiPacket[i + 6];
                 useData2Byte.chr[1] = compZusiPacket[i + 7];
+                break;
             case 1:
                 useData2Byte.chr[0] = compZusiPacket[i + 6];
                 useData2Byte.chr[1] = 0;
+            }
             useDataComplex = compZusiPacket.mid(i+6,packetLength-2);
             if (nodeIds[0] == 0x0002){ // "Client-Anwendung 02" and "Befehl DATA_FTD - Führerstandsanzeigen"
                 zusiDecoderFahrpult();
