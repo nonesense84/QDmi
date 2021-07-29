@@ -513,6 +513,8 @@ void zusiIndicator::setVIst(uint16_t value){
         this->setGrunddatenWirksam(grunddatenWirksam, true);
         this->setErsatzdatenWirksam(ersatzdatenWirksam, true);
     }
+    if(vIst == 0 && value != 0) emit startDriving();
+    if(vIst != 0 && value == 0) emit stopDriving();
     vIst = value;
 }
 void zusiIndicator::setVZiel(int16_t value){

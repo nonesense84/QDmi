@@ -87,6 +87,8 @@ private slots:
     void openSystemVersionInfo();
     void openQDmiSettings();
     void openNetworkSettings();
+    void disableTde();
+    void enableTde();
     void closeQDmi();
     void settingsBtn8Clicked();
     void geoPositionClicked();

@@ -110,7 +110,7 @@ void MainWindow::process(){
     ui->systemVersionComp2Name->setTextFieldUsing(1, Qt::AlignRight);
     ui->systemVersionComp2Name->addTextMessage("github.com/nones",era::grey,era::darkBlue,1);
     ui->systemVersionComp1Version->setBorderThickness(0);
-    ui->systemVersionComp1Version->addTextMessage("1.3T3",era::grey,era::darkBlue,1);
+    ui->systemVersionComp1Version->addTextMessage("1.3T4",era::grey,era::darkBlue,1);
     ui->systemVersionComp2Version->setBorderThickness(0);
     ui->systemVersionComp2Version->addTextMessage("ense84/QDmi",era::grey,era::darkBlue,1);
     qRegisterMetaType< QVector<quint8> >("QVector<quint8>");
@@ -218,6 +218,8 @@ void MainWindow::process(){
     connect(myTcp,SIGNAL(newSpeed(quint16)),ui->widgetTacho,SLOT(setVAct(quint16)));
     connect(mySep,SIGNAL(newSpeed(quint16)),myLzb,SLOT(setVAct(quint16)));
     connect(myTcp,SIGNAL(newSpeed(quint16)),myLzb,SLOT(setVAct(quint16)));
+    connect(myTcp->myIndicators,SIGNAL(startDriving()),this,SLOT(disableTde()));
+    connect(myTcp->myIndicators,SIGNAL(stopDriving ()),this,SLOT(enableTde()));
     connect(myTcp,SIGNAL(newHlb(quint16)),ui->widgetMano1,SLOT(setPressure1(quint16)));
     connect(myTcp,SIGNAL(newHll(quint16)),ui->widgetMano1,SLOT(setPressure2(quint16)));
     connect(myTcp,SIGNAL(newBrz(quint16)),ui->widgetMano2,SLOT(setPressure1(quint16)));
@@ -648,6 +650,17 @@ void MainWindow::openNetworkSettings(){                                     // N
     }
 
 }
+
+void MainWindow::disableTde(){
+    ui->fieldF1->setAsButton(false, "Menü");
+    settingsCloseClicked();
+    settingsCloseClicked();
+}
+
+void MainWindow::enableTde(){
+    ui->fieldF1->setAsButton(true, "Menü");
+}
+
 void MainWindow::closeQDmi(){
     settings->setValue("mainwindow/height", this->height());
     settings->setValue("mainwindow/width", this->width());

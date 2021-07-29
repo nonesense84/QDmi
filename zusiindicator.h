@@ -27,8 +27,8 @@ private:
     stromabn2Hebend = 0,stromabn3Hebend = 0,stromabn4Hebend = 0, ZwangsbremsungAktiv = 0,
     lmV40Roh = 0, lmGnt = 0, lmGnt_Ue = 0, lmGnt_G = 0, lmGnt_S = 0, endeverfahren = 0, systemstatusPzb = 0,
     systemstatusLzb = 0, indusiStoerschalter = 0;
-    uint16_t zustandZugsicherung = 0,  Uebertragungsausfall = 0, FahrtUeberLlzbHaltPerBefehl = 0, afbSoll = 0, grundZwangsbrmnsung = 0;
-    float vZiel = 0, vIst = 0;
+    uint16_t zustandZugsicherung = 0,  Uebertragungsausfall = 0, FahrtUeberLlzbHaltPerBefehl = 0, afbSoll = 0, grundZwangsbrmnsung = 0, vIst = 0;
+    float vZiel = 0;
     quint8 lastLimitMessage;
     bool restriktiv = false;
     bool ktp = false;
@@ -64,6 +64,8 @@ signals:
     void newFzgVmaxTacho(quint16 speed);
     void lzbAvailable(bool available);
     void newLevelInforamtion(quint8 level);
+    void startDriving();
+    void stopDriving();
 
 public slots:
     void setMelderbild(uint8_t value);
