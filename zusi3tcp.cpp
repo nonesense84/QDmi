@@ -859,12 +859,21 @@ void zusi3Tcp::zusiDecoderSecondaryInfos(){
     // Verbindung
     if ((nodeIds[0] == 0x0001) && (nodeIds[1] == 0x0002)){
         switch(nodeIds[2]) {
-            case 0x0001:
-                //qDebug() << "Zusi-Version: " + QString(useDataComplex);
+            case 0x0001:{
+                qDebug() << "Zusi-Version: " + QString(useDataComplex);
+                QStringList zusiVersion = QString(useDataComplex).split(".");
+                QString minReqZusiVersion = " Mindestens Zusi " + QString::number(zusiMajor) + "." + QString::number(zusiMinor) + "." + QString::number(zusiPatch) + " erforderlich!";
+                if(zusiVersion[0].toInt() != zusiMajor){
+                    emit newTechnicalMessage(minReqZusiVersion, era::grey, era::darkBlue, 14);
+                    return;
+                }
+                if(zusiVersion[1].toInt() <  zusiMinor){emit newTechnicalMessage(minReqZusiVersion, era::grey, era::darkBlue, 14);return;}
+                if(zusiVersion[2].toInt() >  zusiMinor) return;
+                if(zusiVersion[3].toInt() <  zusiPatch){emit newTechnicalMessage(minReqZusiVersion, era::grey, era::darkBlue, 14);return;}
                 return;
-            case 0x0002:
-                //qDebug() << "Zusi-Verbindungsinfo: " + QString(useDataComplex);
-                return;
+            }
+            case 0x0002: return; //qDebug() << "Zusi-Verbindungsinfo: " + QString(useDataComplex);
+            case 0x0005: return; //qDebug() << "Version des TCP-Protokolls: " + QString(useDataComplex);
         }
     }
     if ((nodeIds[0] == 0x0001) && (nodeIds[1] == 0x0002) && (nodeIds[2] == 0x0003)){

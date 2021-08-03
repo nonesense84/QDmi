@@ -11,6 +11,11 @@
 #include "era.h"
 #include "zusipower.h"
 #include <QDateTime>
+
+#define zusiMajor  3
+#define zusiMinor  4
+#define zusiPatch  5
+
 class zusi3Tcp: public QObject
 {
     Q_OBJECT
