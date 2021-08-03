@@ -528,7 +528,7 @@ void zusiIndicator::setVZiel(int16_t value){
 }
 void zusiIndicator::setZielweg(int16_t value){
     setLzbValue(value, 5);
-    emit newLzbValues(lzbValuesToDecoder);
+    if(systemstatusLzb != 0 && systemstatusLzb != 2)emit newLzbValues(lzbValuesToDecoder);
     //qDebug() << "Zielweg        " + QString::number(zielweg);
 }
 void zusiIndicator::setAfbSoll(uint16_t value){
@@ -716,7 +716,7 @@ void zusiIndicator::clearData(){
     setAfbSoll(0);
     setAfbAn(0);
     for(quint8 i = 0; db::messages->size(); i++){
-        removeMessage(i);
+        emit removeMessage(i);
     }
     emit removeMessage(lastLimitMessage);
 }
