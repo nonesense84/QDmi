@@ -33,7 +33,10 @@ void lzb::setZusiAsDataSource(bool value){
 void lzb::setAnalogValues(QVector<quint8> values){
     if(values.length()>=7){
         vPerm = static_cast<quint16>((values[4] << 8) + values[3]);
-        //vDest = static_cast<quint16>((values[4] << 8) + values[3]);
+        quint16 newVDest = static_cast<quint16>((values[2] << 8) + values[1]);
+        if(newVDest < vDest) geschwWechsel = true;
+        if(newVDest == vPerm) geschwWechsel = false;
+        vDest = newVDest;
         emit newVTarget(static_cast<quint16>((values[2] << 8) + values[1]), (values[0] & 0x0f) > 0);
         emit newVPermit(static_cast<quint16>((values[4] << 8) + values[3]), (values[0] & 0x0f) > 0);
         emit newTarDist(static_cast<quint16>((values[6] << 8) + values[5]), (values[0] & 0x0f) > 0);
@@ -48,48 +51,82 @@ void lzb::setVAct(quint16 V){
 
 void lzb::setStates(QVector<quint8> states){
     intervenation = ((states[12] > 1 && states[13] > 1) || states[ 6] >  0);
-
     overspeed = states[ 8] >  1;
     emit newOverspeed(overspeed || ((vAct > vPerm) &&  vPerm > 0));
     emit newIntervenation(intervenation);
     emit newVMaxReducing(states[ 8] >  0);
     if(useTxtMsgByLm && !zusiIsDataSource){
         quint8 blinkFrequency = 2;
-      //if(states[1] == 0 && states[2] >  0 && states[3] == 0) zustLmBlau = ZugartM;
-      //if(states[1] == 0 && states[2] == 0 && states[3] >  0) zustLmBlau = ZugartU;
-      //if(states[1] == 0 && states[2] == 0 && states[3] == 0) zustLmBlau = Keine;
-      //if(states[1] > 1  && states[2] == 0 && states[3] == 0) zustLmBlau = ZugartOBlink;
-      //if(states[1] == 0 && states[2] >  1 && states[3] == 0) zustLmBlau = ZugartMBlink;
-      //if(states[1] == 0 && states[2] == 0 && states[3] >  1) zustLmBlau = ZugartUBlink;
         zugart = states[23];
         if(states[1] == 0 && states[2] == 0 && states[3] == 0) zugart = Keine; // When direction switch is not set to forward. -> No blue indicator.
-      //if((states[4] == 6) || (states[4] == 7)){blinkFrequency = 1;} // If system has LZB, use slow blinking.
         bool restriktiv = states[ 1] > 1 && states[ 2] > 1;
-      //if((zustLmBlau == ZugartO) || ((zustLmBlau == ZugartOBlink) && (zustLmBlau != ZugartMBlink))) zugart = ZugartO;
-      //if((zustLmBlau == ZugartM) || ((zustLmBlau == ZugartMBlink) && (zustLmBlau != ZugartOBlink))) zugart = ZugartM;
-      //if((zustLmBlau == ZugartU) || zustLmBlau == ZugartUBlink)                                     zugart = ZugartU;
-      //if (zustLmBlau == Keine)                                                                      zugart = Keine;
-      //blauBlink = ((zustLmBlau == ZugartOBlink) || (zustLmBlau == ZugartMBlink) || (zustLmBlau == ZugartUBlink));
         blauBlink = states[1] > 1 || states[2] > 1 || states[3] >  1;
         bool tausendBeinfl =  (states[12] == 1 && states[13] == 0);
         bool fuenfhuBeinfl =  (states[12] == 0 && states[13] == 1);
         bool zweitauBeinfl =   states[11] == 1;
       //bool stoerschalter =  (states[12] >  1 && states[13] == 0);
         bool bremsEinsPunkt =  states[8 ] == 1;
+        if(bremsEinsPunkt) geschwWechsel = 0;                   // The message Geschwindigkeitswechsel has to disapear, when G appears.
         bool vorsAuftrag    =  states[10] >  0;
-        bool ersAuftrag     =  states[10] >  0;
-        bool freiTastErw    = (states[10] >  1 ||
-                               states[17] >  1 ||
-                              (intervenation && vAct <= 30));
+        bool ersAuftrag     =  states[ 9] == 1;
+        if(states[ 9] >  1 && !gegenGlAuftr){                   // Workaround: messages WT-Erwartet disapers after some time (Chaper 10.3) and it is not identifiable by indicators. So just use a timer.
+            wachTastErw =  true;
+            QTimer::singleShot(5000, this, SLOT(resetExpectWt()));
+        }
+        if(states[ 14] == 0 && pantoSenken){                    // Workaround: messages Panto-heben disapers after 20s (Chaper 11.2) and it is not identifiable by indicators. So just use a timer.
+            pantoHeben =  true;
+            QTimer::singleShot(20000, this, SLOT(resetPanto()));
+        }
+        pantoSenken = states[14] >  1;
+
+        if(states[ 14] == 0 && hsAus){                          // Workaround: messages HS-an disapers after 20s (Chaper 12.2) and it is not identifiable by indicators. So just use a timer.
+            hsAn =  true;
+            QTimer::singleShot(20000, this, SLOT(resetHs()));
+        }
+        hsAus = states[14] == 1;
+        if(states[15] > 1)ueAusfall = true;
+        if(states[15] == 1 ||                                   // Uebertragung zurueck
+           states[0] == 0  ||                                   // LZB turned off (B = 0)
+           states[4] >  0)ueAusfall = false;                    // PZB-Melder an
+
+        gegenGlAuftr   =  states[ 9] >  1;
+        bool freiTastErw    = (states[10] >  1 ||               // Vorsichtsauftrag
+                               states[17] >  1 ||               // LZB Ende
+                               states[15] >  1);                // Uebertragungsausfall
         bool lzbEnde        = (states[17] >  0);
+        bool sigUFplBeacht  = (states[17] == 1);
+        states[17] = 0;                                         // The Ende-Indicator has to be hidden, since we are using text messages.
+        if(states[12] > 1)states[12] = 0;                       // The 1000Hz-Indicator has to be hidden if blinking, since we are using text messages. (Chapter 3.2)
+        bool lzbHaltueberf = states[7] == 1;
+        bool vMax40 = states[11] == 1;
+        bool fdlBeteil = (lzbHaltueberf && (vAct == 0)) ||      // LZB-Halt ueberfahren
+                         (ueAusfall && states[11] > 1)  ;       // Zweite Quitierung nach Uebertragungsausfall
+        bool lzbNotHalt = false;
+        if(states[7] > 1) lzbNotHalt = true;
+        if(states[7] ==0) lzbNotHalt = false;
+
+        addOrRemoveMessage(2,  lzbNotHalt);
+        addOrRemoveMessage(38, fdlBeteil);
+        addOrRemoveMessage(58, geschwWechsel);
+        addOrRemoveMessage(1,  lzbHaltueberf);
         addOrRemoveMessage(0,  intervenation);
+        addOrRemoveMessage(21, vMax40);
         addOrRemoveMessage(5,  overspeed);
         addOrRemoveMessage(61, bremsEinsPunkt);
       //addOrRemoveMessage(66, stoerschalter);
         addOrRemoveMessage(29, vorsAuftrag);
-        addOrRemoveMessage(29, ersAuftrag);
+        addOrRemoveMessage(30, ersAuftrag);
+        addOrRemoveMessage(31, gegenGlAuftr);
+        addOrRemoveMessage(44, wachTastErw);
         addOrRemoveMessage(28, lzbEnde);
+        addOrRemoveMessage(36, ueAusfall);
         addOrRemoveMessage(45, freiTastErw);
+        addOrRemoveMessage(57, sigUFplBeacht);
+        addOrRemoveMessage(40, pantoSenken);
+        addOrRemoveMessage(41, pantoHeben);
+        addOrRemoveMessage(27, pantoHeben);
+        addOrRemoveMessage(42, hsAus);
+        addOrRemoveMessage(43, hsAn);
       /*qDebug() << "=============================================";
         qDebug() << "zugart:        " + QString::number(zugart);
         qDebug() << "restriktiv:    " + QString::number(restriktiv);
@@ -353,4 +390,17 @@ void lzb::removeIndicator(quint8 indId){
         emit newIcon7("", "");
         emit newIconBehav7(false, 0, false);
     }
+}
+void lzb::resetExpectWt(){
+    wachTastErw = false;
+    addOrRemoveMessage(44, wachTastErw);
+}
+void lzb::resetPanto(){
+    pantoHeben = false;
+    addOrRemoveMessage(41, pantoHeben);
+    addOrRemoveMessage(27, pantoHeben);
+}
+void lzb::resetHs(){
+    hsAn = false;
+    addOrRemoveMessage(43, hsAn);
 }

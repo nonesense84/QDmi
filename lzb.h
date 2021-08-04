@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QColor>
+#include <QTimer>
 #include "db.h"
 class lzb : public QObject
 {
@@ -19,8 +20,13 @@ public slots:
     void setVAct(quint16 V);
 
 private slots:
+    void addOrRemoveMessage(quint8 message, bool add);
     void addIndicator(quint8 indId, quint8 blinking, bool invers);
     void removeIndicator(quint8 indId);
+    void sentSpetLimitMessage(quint8 limit);
+    void resetExpectWt();
+    void resetPanto();
+    void resetHs();
 
 signals:
     void newTextMessage(QString text, QColor forColor, QColor bgColor, quint8 id);
@@ -66,12 +72,15 @@ private:
     bool zusiIsDataSource = false;
     bool blauBlink = false;
     bool intervenation = false;
-    //bool tausendBeinfl = false;
-    //bool fuenfhuBeinfl = false;
-    //bool zweitauBeinfl = false;
     bool overspeed = false;
-    //bool restriktiv = false;
-    //bool showLzb;
+    bool geschwWechsel = false;
+    bool gegenGlAuftr = false;
+    bool wachTastErw =  false;
+    bool pantoSenken = false;
+    bool pantoHeben = false;
+    bool hsAus = false;
+    bool hsAn = false;
+    bool ueAusfall = false;
     quint8 stoerschalter;
     quint8 zugart = 2;
     quint8 zustLmBlau;
@@ -82,14 +91,9 @@ private:
     quint8 indicatorFieldBehav[7] = {255,255,255,255,255,255,255};
     quint8 emittedMessages[69];
     quint8 actMessages[3];
-    qreal vAct = 0;
+    quint16 vAct = 0;
     quint16 vPerm;
     quint16 vDest;
-
-private slots:
-    void sentSpetLimitMessage(quint8 limit);
-    void addOrRemoveMessage(quint8 message, bool add);
-
 };
 
 #endif // LZB_H
