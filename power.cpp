@@ -94,7 +94,7 @@ void power::setUnitBrakingText(QString unit){
     }
 }
 void power::setDriveMode(quint8 mode){
-    if(driveMode != mode){
+    if(driveMode != QString::number(mode)){
         driveMode = QString::number(mode);
         update();
     }
