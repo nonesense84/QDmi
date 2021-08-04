@@ -7,7 +7,7 @@
 #include <QSvgRenderer>
 #include <QMimeDatabase>
 #include <QGraphicsSvgItem>
-#include <QSound>
+#include <QMediaPlayer>
 
 class dmiLabel : public QWidget
 {

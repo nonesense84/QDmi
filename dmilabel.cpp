@@ -23,10 +23,12 @@ void dmiLabel::mouseReleaseEvent(QMouseEvent *event){
     isPushed = false;
     if(isEnab){
         emit clicked(true);
-        //if(isButton)QSound::play(":/sounds/click.wav");
-        #if not defined Q_OS_ANDROID
-            if(isButton)QSound::play(":/sounds/click.wav");
-        #endif
+        if(isButton){
+            QMediaPlayer *click =new QMediaPlayer;          // workaround: QSound::play crash on some android devices
+            click->setMedia(QUrl("qrc:/sounds/click.wav"));
+            click->setVolume(50);
+            click->play();
+        }
         update();
         emit txtBtnClicked(emitText);
     }
