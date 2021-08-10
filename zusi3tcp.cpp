@@ -532,7 +532,8 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                                     myIndicators->setPlzbLuftabsperrhahn(useData2Byte.byte[0]);
                                     return;
                                 case 0x000B:   // Klartextmeldungen
-                                    myIndicators->setKlartextmeldungen(useData2Byte.byte[0], forceTextmessages);
+                                    zusiTextMessagesPossible = useData2Byte.byte[0];
+                                    myIndicators->setKlartextmeldungen(zusiTextMessagesPossible, forceTextmessages);
                                     return;
                                 case 0x0011: // Systemstatus LZB:
                                     myIndicators->setSystemstatusLzb(useData2Byte.byte[0]); // 3 = Aktiv
@@ -959,4 +960,5 @@ void zusi3Tcp::setTextUsing(quint8 useAutomText){
         myIndicators->setDefaults();
         reconnect();
     }
+    myIndicators->setKlartextmeldungen(zusiTextMessagesPossible, forceTextmessages);
 }

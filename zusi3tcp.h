@@ -72,6 +72,7 @@ public:
 
 private:
     //bool DATA_OP_Tast_Zugbeeinf = false;
+    uint8_t zusiTextMessagesPossible = false;
     bool autoReconnect = true;
     bool reconnectOnes = false;
     QString ipAddress;
