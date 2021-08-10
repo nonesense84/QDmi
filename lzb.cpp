@@ -5,11 +5,10 @@ lzb::lzb(){
 }
 
 void lzb::setTextUsing(quint8 useAutomText){
-    if(useTxtMsgByLm != useAutomText){
+    if(useTxtMsgByLm != (useAutomText == 0)){
         //qDebug()  << db::numMessages;
         for(quint8 i = 0; i < db::numMessages; i++){
             removeMessage(i);
-            //qDebug()  << i;
         }
         removeMessage(lastLimitMessage);
         lastLimitMessage = 255;
@@ -22,7 +21,6 @@ void lzb::setZusiAsDataSource(bool value){
         //qDebug()  << db::numMessages;
         for(quint8 i = 0; i < db::numMessages; i++){
             removeMessage(i);
-            //qDebug()  << i;
         }
         removeMessage(lastLimitMessage);
         lastLimitMessage = 255;
@@ -50,17 +48,35 @@ void lzb::setVAct(quint16 V){
 }
 
 void lzb::setStates(QVector<quint8> states){
+    quint8 lmO = states[1];
+    quint8 lmM = states[2];
+    quint8 lmU = states[3];
+    pzb90 = (states[26] == 3 || states[26] == 5 || states[26] == 7 || states[26] == 10);
+    qDebug() << "System: " + QString::number((states[26]));
+    states[ 1] = states[ 1] *  pzb90;  // 85
+    states[ 2] = states[ 2] *  pzb90;  // 70
+    states[ 3] = states[ 3] *  pzb90;  // 55
+    states[ 4] = states[ 4] *  pzb90;  // PZB
+    states[22] = states[22] * !pzb90;  // 95
+    states[23] = states[23] * !pzb90;  // 75
+    states[24] = states[24] * !pzb90;  // 65
+    states[25] = states[25] * !pzb90;  // indusi
     intervenation = ((states[12] > 1 && states[13] > 1) || states[ 6] >  0);
     overspeed = states[ 8] >  1;
     emit newOverspeed(overspeed || ((vAct > vPerm) &&  vPerm > 0));
     emit newIntervenation(intervenation);
     emit newVMaxReducing(states[ 8] >  0);
+    for(quint8 i = 0; i <= 25; i++){    // Remove all indicators, that have to be rmoved, to make space for new ones.
+        if(states[i]  == 0){
+            removeIndicator(i);
+        }
+    }
     if(useTxtMsgByLm && !zusiIsDataSource){
         quint8 blinkFrequency = 2;
-        zugart = states[23];
-        if(states[1] == 0 && states[2] == 0 && states[3] == 0) zugart = Keine; // When direction switch is not set to forward. -> No blue indicator.
-        bool restriktiv = states[ 1] > 1 && states[ 2] > 1;
-        blauBlink = states[1] > 1 || states[2] > 1 || states[3] >  1;
+        zugart = states[27];
+        if(lmO == 0 && lmM == 0 && lmU == 0) zugart = Keine; // When direction switch is not set to forward. -> No blue indicator.
+        bool restriktiv = lmO > 1 && lmM > 1;
+        blauBlink = lmO > 1 || lmM > 1 || lmU >  1;
         bool tausendBeinfl =  (states[12] == 1 && states[13] == 0);
         bool fuenfhuBeinfl =  (states[12] == 0 && states[13] == 1);
         bool zweitauBeinfl =   states[11] == 1;
@@ -103,8 +119,13 @@ void lzb::setStates(QVector<quint8> states){
                          (ueAusfall && states[11] > 1)  ;       // Zweite Quitierung nach Uebertragungsausfall
         bool lzbNotHalt = false;
         if(states[7] > 1) lzbNotHalt = true;
-        if(states[7] ==0) lzbNotHalt = false;
-
+        if(states[7] ==0) lzbNotHalt = false;    
+        if(intervenation){                                      // In case of intervenation 500Hz and 1000Hz must be off
+            states[12] = 0;
+            states[13] = 0;
+            removeIndicator(12);
+            removeIndicator(13);
+        }
         addOrRemoveMessage(2,  lzbNotHalt);
         addOrRemoveMessage(38, fdlBeteil);
         addOrRemoveMessage(58, geschwWechsel);
@@ -133,110 +154,128 @@ void lzb::setStates(QVector<quint8> states){
         qDebug() << "fuenfhuBeinfl: " + QString::number(fuenfhuBeinfl);
         qDebug() << "1000Hz: " + QString::number(states[12]);
         qDebug() << "500Hz:  " + QString::number(states[13]);*/
+        quint8 indBlau = 0;
         switch (zugart){
             case ZugartO:
-                blinkFrequency = (states[1] & 0x06) >> 1;
+                indBlau = 1;
+                if(!pzb90)indBlau =22;
+                blinkFrequency = (lmO & 0x06) >> 1;
                 removeIndicator(2);
                 removeIndicator(3);
                 if( restriktiv &&  !fuenfhuBeinfl){//45km/h / 1000 / 85'
-                    addIndicator(1, blinkFrequency, false);
+                    addIndicator(indBlau, blinkFrequency, false);
                     sentSpetLimitMessage(20);//45
                 }
                 if( restriktiv &&  fuenfhuBeinfl){//25km/h / 500  / 85'
-                    addIndicator(1, blinkFrequency, false);
+                    addIndicator(indBlau, blinkFrequency, false);
                     sentSpetLimitMessage(24);//25
                 }
                 if(!restriktiv && blauBlink && !(fuenfhuBeinfl || tausendBeinfl)){//85km/h /      / 85'
-                    addIndicator(1, blinkFrequency, false);
-                    sentSpetLimitMessage(14);//85
+                    addIndicator(indBlau, blinkFrequency, false);
+                    if( pzb90)sentSpetLimitMessage(14);//85
+                    if(!pzb90)sentSpetLimitMessage(70);//95
                 }
                 if(!restriktiv &&  tausendBeinfl){//85km/h / 1000 / 85'
-                    addIndicator(1, blinkFrequency, false);
-                    sentSpetLimitMessage(14);//85
+                    addIndicator(indBlau, blinkFrequency, false);
+                    if( pzb90)sentSpetLimitMessage(14);//85
+                    if(!pzb90)sentSpetLimitMessage(70);//95
                 }
                 if(!restriktiv &&  fuenfhuBeinfl){//45km/h / 500  /25
-                    addIndicator(1, 0, false);
+                    addIndicator(indBlau, 0, false);
                     sentSpetLimitMessage(20);//45
                 }
                 if(!blauBlink &&  !restriktiv && !fuenfhuBeinfl && !tausendBeinfl){//   /85
-                    addIndicator(1, 0, false);
+                    addIndicator(indBlau, 0, false);
                     emit removeMessage(lastLimitMessage);
-                    lastLimitMessage = 0;
+                    lastLimitMessage = 255;
                 }
             break;
             case ZugartM:
-                blinkFrequency = (states[2] & 0x06) >> 1;
+                indBlau = 2;
+                if(!pzb90)indBlau = 23;
+                blinkFrequency = (lmM & 0x06) >> 1;
                 removeIndicator(1);
                 removeIndicator(3);
                 if( restriktiv &&  !tausendBeinfl && !fuenfhuBeinfl){//45km/h / 1000 / 70'
-                    addIndicator(2, blinkFrequency, false);
+                    addIndicator(indBlau, blinkFrequency, false);
                     sentSpetLimitMessage(20);//45
                 }
                 if( restriktiv &&  tausendBeinfl){//45km/h / 1000 / 70'
-                    addIndicator(2, blinkFrequency, false);
+                    addIndicator(indBlau, blinkFrequency, false);
                     sentSpetLimitMessage(20);//45
                 }
                 if( restriktiv &&  fuenfhuBeinfl){//25km/h / 500  / 70'
-                    addIndicator(2, blinkFrequency, false);
+                    addIndicator(indBlau, blinkFrequency, false);
                     sentSpetLimitMessage(24);//25
                 }
                 if(!restriktiv && blauBlink && !(fuenfhuBeinfl || tausendBeinfl)){//70km/h /      / 70'
-                    addIndicator(2, blinkFrequency, false);
-                    sentSpetLimitMessage(16);//70
+                    addIndicator(indBlau, blinkFrequency, false);
+                    if( pzb90)sentSpetLimitMessage(16);//70
+                    if(!pzb90)sentSpetLimitMessage(71);//75
                 }
                 if(!restriktiv &&  tausendBeinfl){//70km/h / 1000 / 70'
-                    addIndicator(2, blinkFrequency, false);
-                    sentSpetLimitMessage(16);//70
+                    addIndicator(indBlau, blinkFrequency, false);
+                    if( pzb90)sentSpetLimitMessage(16);//70
+                    if(!pzb90)sentSpetLimitMessage(71);//75
                 }
                 if(!restriktiv &&  fuenfhuBeinfl){//45km/h / 500  /70
-                    addIndicator(2, 0, false);
-                    sentSpetLimitMessage(20);//45
+                    addIndicator(indBlau, 0, false);
+                    if( pzb90)sentSpetLimitMessage(23);//30
+                    if(!pzb90)sentSpetLimitMessage(20);//45
                 }
                 if(!blauBlink &&  !restriktiv && !fuenfhuBeinfl && !tausendBeinfl){//   /70
-                    addIndicator(2, 0, false);
+                    addIndicator(indBlau, 0, false);
                     emit removeMessage(lastLimitMessage);
                     lastLimitMessage = 0;
                 }
             break;
             case ZugartU:
-                if(!restriktiv)blinkFrequency = (states[3] & 0x06) >> 1;
-                if( restriktiv)blinkFrequency = (states[2] & 0x06) >> 1;
+                indBlau = 3;
+                if(!pzb90)indBlau = 24;
+                if(!restriktiv)blinkFrequency = (lmU & 0x06) >> 1;
+                if( restriktiv)blinkFrequency = (lmM & 0x06) >> 1;
                 removeIndicator(1);
                 removeIndicator(2);
                 if( restriktiv &&  !tausendBeinfl && !fuenfhuBeinfl){//45km/h / 1000 / 55'
-                    addIndicator(3, blinkFrequency, false);
+                    addIndicator(indBlau, blinkFrequency, false);
                     sentSpetLimitMessage(20);//45
                 }
                 if( restriktiv &&  tausendBeinfl){//45km/h / 1000 / 55'
-                    addIndicator(3, blinkFrequency, false);
+                    addIndicator(indBlau, blinkFrequency, false);
                     sentSpetLimitMessage(20);//45
                 }
                 if( restriktiv &&  fuenfhuBeinfl){//25km/h / 500  / 55'
-                    addIndicator(3, blinkFrequency, false);
+                    addIndicator(indBlau, blinkFrequency, false);
                     sentSpetLimitMessage(24);//25
                 }
                 if(!restriktiv && blauBlink && !(fuenfhuBeinfl || tausendBeinfl)){//55km/h /      / 55'
-                    addIndicator(3, blinkFrequency, false);
-                    sentSpetLimitMessage(18);//55
+                    addIndicator(indBlau, blinkFrequency, false);
+                    if( pzb90)sentSpetLimitMessage(18);//55
+                    if(!pzb90)sentSpetLimitMessage(17);//60
                 }
                 if(!restriktiv &&  tausendBeinfl){//55km/h / 1000 / 55'
-                    addIndicator(3, blinkFrequency, false);
-                    sentSpetLimitMessage(18);//55
+                    addIndicator(indBlau, blinkFrequency, false);
+                    if( pzb90)sentSpetLimitMessage(18);//55
+                    if(!pzb90)sentSpetLimitMessage(17);//60
                 }
                 if(!restriktiv &&  fuenfhuBeinfl){//25km/h / 500  /55
-                    addIndicator(3, 0, false);
-                    sentSpetLimitMessage(24);//25
+                    addIndicator(indBlau, 0, false);
+                    if(!pzb90)sentSpetLimitMessage(24);//25
+                    if(!pzb90)sentSpetLimitMessage(21);//40
                 }
                 if(!blauBlink &&  !restriktiv && !fuenfhuBeinfl && !tausendBeinfl){//   /55
-                addIndicator(3, 0, false);
+                addIndicator(indBlau, 0, false);
                 emit removeMessage(lastLimitMessage);
-                lastLimitMessage = 0;
+                lastLimitMessage = 255;
             }
             break;
             case Keine:
                 removeIndicator(1);
                 removeIndicator(2);
                 removeIndicator(3);
+                removeIndicator(22);
+                removeIndicator(23);
+                removeIndicator(24);
                 emit removeMessage(lastLimitMessage);
                 lastLimitMessage = 255;
             break;
@@ -247,17 +286,15 @@ void lzb::setStates(QVector<quint8> states){
         else{
             if(lastLimitMessage == 21){
                 emit removeMessage(lastLimitMessage);
-                lastLimitMessage = 0;
+                lastLimitMessage = 255;
             }
         }
     }
-    for(quint8 i = 0; i <= 21; i++){
-        if(useTxtMsgByLm && !zusiIsDataSource && i == 1) i = 3;// Set all indicators but O/M/U
+    for(quint8 i = 0; i <= 25; i++){
+        if(useTxtMsgByLm && !zusiIsDataSource && i ==  1) i =  3;// Set all indicators but O/M/U (PZB90)
+        if(useTxtMsgByLm && !zusiIsDataSource && i == 22) i = 25;// Set all indicators but O/M/U (I60)
         if(states[i]  > 0){
             addIndicator(i, ((states[i] & 0x06 ) >> 1),(states[i] & 0x08) > 0);
-        }
-        else{
-            removeIndicator(i);
         }
     }
 }
@@ -306,7 +343,7 @@ void lzb::addIndicator(quint8 indId, quint8 blinking, bool invers){
     }
     if(indId == 15 || indId == 19)i = 6;    // "Ue" or "Ue GNT" must be at pos 6
     if(indId == 0                )i = 0;    // "B" must be at field 1
-    if(indId == 4                )i = 5;    // "PZB"  must be at field 5
+    if(indId == 4  || indId == 25)i = 5;    // "PZB"  must be at field 5. Also "Indusi" for I60.
     if(indId == 16){                        // Era Brake
         emit newIconC9(db::indicatorFiles[16][0],db::indicatorFiles[16][1]);
         emit newIconBehavC9(true, blinking, invers);

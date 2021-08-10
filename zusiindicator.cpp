@@ -9,6 +9,12 @@ zusiIndicator::zusiIndicator(QObject *parent) : QObject(parent){
 
 void zusiIndicator::setZugbeeinflussungssystem(QString value){
     lzbVorhanden = value.contains("LZB") || value.contains("EBICAB 2000");
+    if(value.contains("Indusi")){
+        indusiDevice = 1;
+    }
+    else{
+        indusiDevice = 7;
+    }
     emit lzbAvailable(lzbVorhanden);
     if(!lzbVorhanden){  // Nach Wechsel von LZB- nach PZB Fahrzeug bleiben Fuhrungsgrößen sethen
         setZielweg(-1);
@@ -577,7 +583,9 @@ void zusiIndicator::calcPzbTextmessages(){
             }
 
             if( melderbild == meBi1000HzV700m || melderbild == meBi1000HzN700m){//85km/h /      / 85'
-                sentSpetLimitMessage(14);//85
+                if(indusiDevice == 1)sentSpetLimitMessage(70);//90
+                if(indusiDevice != 1)sentSpetLimitMessage(14);//85
+
             }
             if(!restriktiv &&  lm500Hz){//45km/h / 500  /25
                 sentSpetLimitMessage(20);//45
@@ -588,10 +596,12 @@ void zusiIndicator::calcPzbTextmessages(){
                 sentSpetLimitMessage(20);//45
             }
             if(melderbild == meBi1000HzV700m || melderbild == meBi1000HzN700m){//70km/h /      / 70'
-                sentSpetLimitMessage(16);//70
+                if(indusiDevice == 1)sentSpetLimitMessage(71);//75
+                if(indusiDevice != 1)sentSpetLimitMessage(16);//70
             }
             if(!restriktiv &&  lm500Hz){//35km/h / 500  /70
-                sentSpetLimitMessage(22);//35
+                if(indusiDevice == 1)sentSpetLimitMessage(20);//45
+                if(indusiDevice != 1)sentSpetLimitMessage(22);//35
             }
             break;
         case ZugartU:
@@ -602,10 +612,12 @@ void zusiIndicator::calcPzbTextmessages(){
                 sentSpetLimitMessage(20);//45
             }
             if(melderbild == meBi1000HzN700m || melderbild == meBi1000HzV700m){//55km/h /      / 55'
-                sentSpetLimitMessage(18);//55
+                if(indusiDevice == 1)sentSpetLimitMessage(72);//65
+                if(indusiDevice != 1)sentSpetLimitMessage(18);//55
             }
             if(!restriktiv &&  lm500Hz){//25km/h / 500  /55
-                sentSpetLimitMessage(24);//25
+                if(indusiDevice == 1)sentSpetLimitMessage(21);//40
+                if(indusiDevice != 1)sentSpetLimitMessage(24);//25
             }
 
            break;
@@ -666,7 +678,7 @@ void zusiIndicator::makeLzbLmDatagram(){
         }
         if(ktp)calcPzbTextmessages();
     }
-    QVector<quint8> lmsToDecoder(24,0);
+    QVector<quint8> lmsToDecoder(28,0);
     lmsToDecoder[0] = lmB;
     lmsToDecoder[1] = lm85;
     lmsToDecoder[2] = lm70;
@@ -689,6 +701,12 @@ void zusiIndicator::makeLzbLmDatagram(){
     lmsToDecoder[19] = lmGnt_Ue;
     lmsToDecoder[20] = lmGnt_G;
     lmsToDecoder[21] = lmGnt_S;
+    lmsToDecoder[22] = lm85;            // For I60 indicator 95
+    lmsToDecoder[23] = lm70;            // For I60 indicator 75
+    lmsToDecoder[24] = lm55;            // For I60 indicator 60
+    lmsToDecoder[25] = lmPzb;           // For I60 indicator indusi
+    lmsToDecoder[26] = indusiDevice;    // 1: I60. 7: I80 (Or for this application: All other systems).
+    lmsToDecoder[27] = 0;               // Zugart on SEP
     if(lmsToDecoder != lmsToDecoderOld){
         lmsToDecoderOld = lmsToDecoder;
         emit newLzbIndicators(lmsToDecoder);

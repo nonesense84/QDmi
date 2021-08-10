@@ -15,7 +15,7 @@ public:
     static const quint8 numMessages = 71;
 };
     const quint8 numMessages = 71;
-    const QString messages[71] = {
+    const QString messages[73] = {
         "Zwangsbremsung",
         "LZB-Halt überfahren",
         "LZB-Nothalt",
@@ -85,27 +85,29 @@ public:
         "PZB mit Störschalter abgeschaltet ",
         "PZB Störung ",
         "Zwangsbremsausgabe Störung",
-        "Ersatzzugdaten wirksam"
+        "Ersatzzugdaten wirksam",
+        "V-Überwachung 95 km/h",    // Fuer I60. Nicht Teil des DB-LH.
+        "V-Überwachung 75 km/h",    // Fuer I60. Nicht Teil des DB-LH.
     };
-    const QColor textBgColors[71]{
+    const QColor textBgColors[74]{
         QColor(191,0,2), QColor(191,0,2), QColor(191,0,2), QColor(191,0,2), QColor(191,0,2), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0),
         QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0),
         QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0),
         QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan,
         Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan,
         Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::gray, Qt::gray, Qt::gray, Qt::gray,
-        QColor(255,219,0),QColor(255,219,0),QColor(255,219,0),QColor(255,219,0),QColor(255,219,0),Qt::gray, QColor(191,0,2),Qt::gray
+        QColor(255,219,0),QColor(255,219,0),QColor(255,219,0),QColor(255,219,0),QColor(255,219,0),Qt::gray, QColor(191,0,2),Qt::gray, QColor(255,219,0), QColor(255,219,0), QColor(255,219,0)
     };
-    const QColor textFontColors[71]{
+    const QColor textFontColors[74]{
         Qt::white, Qt::white, Qt::white, Qt::white, Qt::white, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,
         Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,Qt::black,
         Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,Qt::black,
         Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,
         Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,
         Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,
-        Qt::black, Qt::black, Qt::black, Qt::black, Qt::black
+        Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black
     };
-    const QString indicatorFiles[22][2] = {
+    const QString indicatorFiles[26][2] = {
         {   ":/icons/LmB_on.svg",       ":/icons/LmB_off.svg",},
         {   ":/icons/Lm85_on.svg",      ":/icons/Lm85_off.svg",},           // 0
         {   ":/icons/Lm70_on.svg",      ":/icons/Lm70_off.svg",},
@@ -128,6 +130,10 @@ public:
         {   ":/icons/LmUe_Gnt_on.svg",     ":/icons/LmUe_Gnt_off.svg",},
         {   ":/icons/LmG_Gnt_on.svg",     ":/icons/LmG_Gnt_off.svg",},
         {   ":/icons/LmS_Gnt_on.svg",     ":/icons/LmS_Gnt_off.svg",},
+        {   ":/icons/Lm95_on.svg",      ":/icons/Lm95_off.svg",},
+        {   ":/icons/Lm75_on.svg",      ":/icons/Lm75_off.svg",},
+        {   ":/icons/Lm60_on.svg",      ":/icons/Lm60_off.svg",},
+        {   ":/icons/LmIndusi_on.svg",  ":/icons/LmIndusi_on.svg",},
     };
 }
 #endif // DB_H

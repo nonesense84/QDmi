@@ -93,5 +93,12 @@
         <file>icons/tool_small.svg</file>
         <file>icons/LmPzb_off.svg</file>
         <file>icons/LmPzb_on.svg</file>
+        <file>icons/Lm95_on.svg</file>
+        <file>icons/Lm75_on.svg</file>
+        <file>icons/Lm75_off.svg</file>
+        <file>icons/Lm95_off.svg</file>
+        <file>icons/LmIndusi_on.svg</file>
+        <file>icons/Lm60_on.svg</file>
+        <file>icons/Lm60_off.svg</file>
     </qresource>
 </RCC>

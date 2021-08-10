@@ -81,6 +81,7 @@ private:
     bool hsAus = false;
     bool hsAn = false;
     bool ueAusfall = false;
+    bool pzb90 = false;
     quint8 stoerschalter;
     quint8 zugart = 2;
     quint8 zustLmBlau;

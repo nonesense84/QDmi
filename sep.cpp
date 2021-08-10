@@ -16,31 +16,31 @@ quint16 sep::twoByteToquint16(qint8 lowByte, qint8 highByte){
 
 void sep::readingPendingSep(){
     #define pzbOffset        3
-    #define lzbOffset       15
-    #define speedOffset     22
-    #define trModOffset     24
-    #define forceOffset     25
-    #define MtdOffset       27
-    #define vmfzgOffset     32
-    #define dbcOffset       35
-    #define timeOffset      37
-    #define pressureOffset  41
-    #define geoPosOffset    44
+    #define lzbOffset       17
+    #define speedOffset     24
+    #define trModOffset     26
+    #define forceOffset     27
+    #define MtdOffset       29
+    #define vmfzgOffset     34
+    #define dbcOffset       37
+    #define timeOffset      39
+    #define pressureOffset  43
+    #define geoPosOffset    46
     QVector<quint8> lzbValuesToDecoder(7,0);
-    QVector<quint8> pzbLmsToDecoder(24,0);
+    QVector<quint8> pzbLmsToDecoder(28,0);
     QVector<quint8> lmsToDecoder(13,0);
     QByteArray datagram;
     while (udpSocketSep->hasPendingDatagrams()) {
         datagram.resize(udpSocketSep->pendingDatagramSize());
         udpSocketSep->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
         //qDebug() << datagram;
-        if(datagram.size() >= 44){
+        if(datagram.size() >= 46){
             emit newLevelInforamtion(11);   // At the moment there is only PZB/LZB in SEP implemented.
             if (static_cast<quint8>(datagram[0]) != versionMajor)qDebug() << "TDF may by incompatible!";
             if (static_cast<quint8>(datagram[1]) != versionMinor)qDebug() << "May by there are new functions!";
             if (static_cast<quint8>(datagram[2]) != versionPatch)qDebug() << "May by there are hot fixes!";
             // ==================== Read PZB indicators ====================
-            for(int i = 0; i < 12; i = i + 1){
+            for(int i = 0; i < 14; i = i + 1){
                 pzbLmsToDecoder[i*2 +1] = lowNib(datagram[pzbOffset + i]);
                 pzbLmsToDecoder[i*2  ] =   upNib(datagram[pzbOffset + i]);
                 // qDebug() << pzbLmsToDecoder;

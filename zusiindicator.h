@@ -26,7 +26,7 @@ private:
     stromabn2Oben = 0, stromabn3Oben = 0, stromabn4Oben = 0, stromabn1Hebend = 0,
     stromabn2Hebend = 0,stromabn3Hebend = 0,stromabn4Hebend = 0, ZwangsbremsungAktiv = 0,
     lmV40Roh = 0, lmGnt = 0, lmGnt_Ue = 0, lmGnt_G = 0, lmGnt_S = 0, endeverfahren = 0, systemstatusPzb = 0,
-    systemstatusLzb = 0, indusiStoerschalter = 0;
+    systemstatusLzb = 0, indusiStoerschalter = 0, indusiDevice = 7;
     uint16_t zustandZugsicherung = 0,  Uebertragungsausfall = 0, FahrtUeberLlzbHaltPerBefehl = 0, afbSoll = 0, grundZwangsbrmnsung = 0, vIst = 0;
     float vZiel = 0;
     quint8 lastLimitMessage;
