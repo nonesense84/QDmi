@@ -8,6 +8,7 @@
 #include <QMimeDatabase>
 #include <QGraphicsSvgItem>
 #include <QMediaPlayer>
+#include <QTimer>
 
 class dmiLabel : public QWidget
 {
@@ -59,6 +60,7 @@ signals:
     void messaesOutOfView(bool outOfView);
 
 private:
+    QTimer *attenuationTimer = new QTimer();
     bool fileNameIsSet;
     bool isTextField = false;
     bool isSegment = false;
@@ -83,6 +85,8 @@ private:
     QString fileForDistanceScale;
     quint16 distanceScale;
     quint16 targetDistance;
+    quint16 targetDistanceGraph;
+    quint16 targetDistanceDest;
     quint8 segmentPosition;
     qreal fontFactor;
     qreal customFontFactor = 0.3;
@@ -123,6 +127,9 @@ private:
     void paintSegment(QPainter *iconPainter, QRect centralArea);
     void paintDistance(QPainter *iconPainter, QRect centralArea);
     QRect calcOptimalRect(QRect destArea, QRect iconArea);
+
+private slots:
+    void attenuationRoutine();
 };
 
 #endif // DMILABEL_H

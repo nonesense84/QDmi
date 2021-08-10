@@ -12,6 +12,20 @@ dmiLabel::dmiLabel(QWidget *parent) : QWidget(parent){
 void dmiLabel::setDpi(qreal dpi){
 }
 
+void dmiLabel::attenuationRoutine(){
+    bool updateNedded = false;
+    qreal attenuation = 0.1;
+    if(targetDistanceGraph < targetDistanceDest){
+        targetDistanceGraph =targetDistanceDest;
+        updateNedded = true;
+    }
+    if(targetDistanceGraph > targetDistanceDest){
+        targetDistanceGraph = targetDistanceGraph - (targetDistanceGraph - targetDistanceDest) * attenuation;
+        updateNedded = true;
+    }
+    if(updateNedded)update();
+}
+
 void dmiLabel::mousePressEvent(QMouseEvent *event){
     if(isEnab){
         isPushed = true;
@@ -106,12 +120,23 @@ void dmiLabel::setAsDataEntryLabel(QString text, bool isInputfield, bool isEnabl
 }
 
 void dmiLabel::setTargetDistance(quint16 distance, bool visible){
+    targetDistanceDest = distance;
     targetDistance = distance;
     targetDistanceVisible = visible;
+    if(targetDistance > distanceScale){
+        targetDistanceGraph = distanceScale;
+        attenuationTimer->stop();
+    }
+    else{
+        attenuationTimer->start();
+    }
     update();
 }
 
 void dmiLabel::setIsDistanceScale(){
+    connect(attenuationTimer, SIGNAL(timeout()),this,SLOT(attenuationRoutine()));
+    attenuationTimer->setInterval(80);
+    attenuationTimer->start();
     isTargetDistance = true;
     if(useEraStyle){
         fileForDistanceScale = ":/icons/targetDistEra1000m.svg";
@@ -409,16 +434,15 @@ void dmiLabel::paintDistance(QPainter *iconPainter, QRect centralArea){
     }
     QRect textRect = iconPainter->boundingRect(digitalDistPosition,Qt::AlignRight,QString::number(targetDistance));
     digitalDistPosition.setLeft(45 - textRect.width());
-    quint16 targetDistanceAnalog = targetDistance;
-    if(targetDistance > distanceScale){ targetDistanceAnalog = distanceScale;}
+    //quint16 targetDistanceAnalog = targetDistance;
     qreal tem = 0.0;
     if(useEraStyle){
         iconPainter->drawText(digitalDistPosition,QString::number(ceil((targetDistance / 10)) * 10));
-        if(targetDistance < 1000)
-            tem = -2.50582750582749E-10 * qPow(targetDistance,4)
-                  +7.07459207459205E-07 * qPow(targetDistance,3)
-                  -0.000815792540793 * qPow(targetDistance,2)
-                  +0.545314685314686 * targetDistance
+        if(targetDistanceGraph < 1000)
+            tem = -2.50582750582749E-10 * qPow(targetDistanceGraph,4)
+                  +7.07459207459205E-07 * qPow(targetDistanceGraph,3)
+                  -0.000815792540793 * qPow(targetDistanceGraph,2)
+                  +0.545314685314686 * targetDistanceGraph
                   +0.300699300699198;
         else
             tem = 187;
@@ -428,11 +452,11 @@ void dmiLabel::paintDistance(QPainter *iconPainter, QRect centralArea){
     else{
         if(targetDistance > 4000)iconPainter->drawText(digitalDistPosition,QString::number(ceil((targetDistance + 100)/ 200) * 200));
         if(targetDistance <= 100)
-            tem = 0.19135135136 * targetDistanceAnalog + 1.58882185807825E-15;
-        if(targetDistanceAnalog >  100 && targetDistanceAnalog <= 1000)
-            tem = 0.09567567568 * targetDistanceAnalog + 9.56756756800004;
-        if(targetDistanceAnalog >  1000)
-            tem = 0.02391891892 * targetDistanceAnalog + 81.3243243279999;
+            tem = 0.19135135136 * targetDistanceGraph + 1.58882185807825E-15;
+        if(targetDistanceGraph >  100 && targetDistanceGraph <= 1000)
+            tem = 0.09567567568 * targetDistanceGraph + 9.56756756800004;
+        if(targetDistanceGraph >  1000)
+            tem = 0.02391891892 * targetDistanceGraph + 81.3243243279999;
         QRect distBar(42,213,10,-(static_cast<int>(tem)));
         iconPainter->drawRect(distBar);
     }

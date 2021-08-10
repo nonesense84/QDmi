@@ -52,7 +52,6 @@ void lzb::setStates(QVector<quint8> states){
     quint8 lmM = states[2];
     quint8 lmU = states[3];
     pzb90 = (states[26] == 3 || states[26] == 5 || states[26] == 7 || states[26] == 10);
-    qDebug() << "System: " + QString::number((states[26]));
     states[ 1] = states[ 1] *  pzb90;  // 85
     states[ 2] = states[ 2] *  pzb90;  // 70
     states[ 3] = states[ 3] *  pzb90;  // 55

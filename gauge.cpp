@@ -6,10 +6,49 @@ gauge::gauge(QWidget *parent) : QWidget(parent)
     setVMaxDial(400);
     setVPerm(0, false);
     setVAct(0.0);
+    connect(attenuationTimer, SIGNAL(timeout()),this,SLOT(attenuationRoutine()));
+    attenuationTimer->setInterval(40);
+    attenuationTimer->start();
 }
 void gauge::setDpi(qreal dpi){
     fontSiceDial = 26.0 * 96 / dpi;
     fontSiceNose = 37.0 * 96 / dpi;
+}
+
+void gauge::attenuationRoutine(){
+    bool updateNedded = false;
+    qreal attenuation = 0.1;
+    if(posNeedle < posNeedleDest){
+        posNeedle = posNeedle + (posNeedleDest - posNeedle) * attenuation;
+        if((posNeedleDest - posNeedle) < 0.25)posNeedle = posNeedleDest;
+        updateNedded = true;
+    }
+    if(posNeedle > posNeedleDest){
+        posNeedle = posNeedle - (posNeedle - posNeedleDest) * attenuation;
+        if((posNeedle - posNeedleDest) < 0.25)posNeedle = posNeedleDest;
+        updateNedded = true;
+    }
+    if(posCsg < posCsgDest){
+        posCsg = posCsg + (posCsgDest - posCsg) * attenuation;
+        if((posCsgDest - posCsg) < 0.25)posCsg = posCsgDest;
+        updateNedded = true;
+    }
+    if(posCsg > posCsgDest){
+        posCsg = posCsg - (posCsg - posCsgDest) * attenuation;
+        if((posCsg - posCsgDest) < 0.25)posCsg = posCsgDest;
+        updateNedded = true;
+    }
+    if(posVSet < posVSetDest){
+        posVSet = posVSet + (posVSetDest - posVSet) * attenuation;
+        if((posVSetDest - posVSet) < 0.25)posVSet = posVSetDest;
+        updateNedded = true;
+    }
+    if(posVSet > posVSetDest){
+        posVSet = posVSet - (posVSet - posVSetDest) * attenuation;
+        if((posVSet - posVSetDest) < 0.25)posVSet = posVSetDest;
+        updateNedded = true;
+    }
+    if(updateNedded)update();
 }
 
 void gauge::setVAct(quint16 V){
@@ -20,7 +59,7 @@ void gauge::setVAct(quint16 V){
             update();
         }
         else{
-            posNeedle = calcPosition(V);
+            posNeedleDest = calcPosition(V);
             showNeedle = true;
             update();
         }
@@ -32,7 +71,7 @@ void gauge::setVPerm(quint16 V, bool visible){
     if((V != vPerm) || (visible != csgVisible)){
         vPerm = V;
         csgVisible = visible;
-        posCsg = calcPosition(V);
+        posCsgDest = calcPosition(V);
         update();
     }
 }
@@ -41,7 +80,7 @@ void gauge::setVSet(quint16 V, bool visible){
     if((V != vSet) || (visible != vSetVisible)){
         vSet = V;
         vSetVisible = visible;
-        posVSet = calcPosition(V);
+        posVSetDest = calcPosition(V);
         update();
     }
 }

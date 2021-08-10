@@ -4,6 +4,7 @@
 #include <QPainter>
 #include "era.h"
 #include <QFontDatabase>
+#include <QTimer>
 #include <QDebug>
 class gauge : public QWidget
 {
@@ -26,6 +27,7 @@ public slots:
     void setEraUse(bool useEra);
     void setCsmReducing(bool reducing);
 private:
+    QTimer *attenuationTimer = new QTimer();
     int VMaxDial;
     quint16 vAct, vPerm, vSet, vTarget, vOverspeed;
     qreal scaleDegStep;
@@ -62,14 +64,20 @@ private:
     quint16 lenNeedleThin = 185;
     quint16 lenHook = 40;
     qreal posCsg = 0;
+    qreal posCsgDest = 0;
     qreal posTarget = 0;
-    qreal posVSet = false;
+    qreal posVSet = 0;
+    qreal posVSetDest = 0;
     qreal posNeedle = 0;
+    qreal posNeedleDest = 0;
     qreal posOverspeed = 0;
     qreal fontSiceDial = 26;
     qreal fontSiceNose = 37;
     bool csgVisible = false;
     bool vSetVisible =false;
+
+private slots:
+    void attenuationRoutine();
 
 protected:
     void paintEvent(QPaintEvent *event) override;

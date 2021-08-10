@@ -6,14 +6,14 @@
 
 QT       += core gui svg network multimedia
 #ifdef Q_OS_ANDROID
-#QT       += androidextras
+QT       += androidextras
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = QDmi
 TEMPLATE = app
 ANDROID_VERSION_CODE = 15
-ANDROID_VERSION_NAME = "1.3.0T5"
+ANDROID_VERSION_NAME = "1.3.0T6"
 ANDROID_TARGET_SDK_VERSION = 29
 APP_NAME = QDmi
 
