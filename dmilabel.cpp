@@ -14,13 +14,17 @@ void dmiLabel::setDpi(qreal dpi){
 
 void dmiLabel::attenuationRoutine(){
     bool updateNedded = false;
-    qreal attenuation = 0.1;
+    qreal attenuation = 0.2;
     if(targetDistanceGraph < targetDistanceDest){
         targetDistanceGraph =targetDistanceDest;
         updateNedded = true;
     }
     if(targetDistanceGraph > targetDistanceDest){
         targetDistanceGraph = targetDistanceGraph - (targetDistanceGraph - targetDistanceDest) * attenuation;
+        if((targetDistanceGraph - targetDistanceDest) < 0.25){
+            targetDistanceGraph = targetDistanceDest;
+            attenuationTimer->stop();
+        }
         updateNedded = true;
     }
     if(updateNedded)update();
@@ -120,6 +124,7 @@ void dmiLabel::setAsDataEntryLabel(QString text, bool isInputfield, bool isEnabl
 }
 
 void dmiLabel::setTargetDistance(quint16 distance, bool visible){
+    if(!visible) distance = 0;
     targetDistanceDest = distance;
     targetDistance = distance;
     targetDistanceVisible = visible;
@@ -446,7 +451,7 @@ void dmiLabel::paintDistance(QPainter *iconPainter, QRect centralArea){
                   +0.300699300699198;
         else
             tem = 187;
-        QRect distBar(30,217,10,-(static_cast<int>(tem)));
+        QRectF distBar(30,217,10,-tem);
         iconPainter->drawRect(distBar);
     }
     else{
@@ -457,7 +462,7 @@ void dmiLabel::paintDistance(QPainter *iconPainter, QRect centralArea){
             tem = 0.09567567568 * targetDistanceGraph + 9.56756756800004;
         if(targetDistanceGraph >  1000)
             tem = 0.02391891892 * targetDistanceGraph + 81.3243243279999;
-        QRect distBar(42,213,10,-(static_cast<int>(tem)));
+        QRectF distBar(42,213,10,-tem);
         iconPainter->drawRect(distBar);
     }
     iconPainter->restore();

@@ -85,7 +85,7 @@ private:
     QString fileForDistanceScale;
     quint16 distanceScale;
     quint16 targetDistance;
-    quint16 targetDistanceGraph;
+    qreal targetDistanceGraph = 0;
     quint16 targetDistanceDest;
     quint8 segmentPosition;
     qreal fontFactor;
