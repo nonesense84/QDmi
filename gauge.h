@@ -39,7 +39,8 @@ private:
     bool useHook = true;
     bool pointerRed = false;
     bool pointerOrange = false;
-    bool csmYellow = false;
+    //bool csmYellow = false;
+    bool csmReducing = false;
     qreal arcOpenTotal = 288;   // 288° 0 to Vmax
     qreal startPosZero = -234; //-(144 + 90)
     qreal dimensionMatrix = 548;
@@ -70,7 +71,6 @@ private:
     qreal posVSetDest = 0;
     qreal posNeedle = 0;
     qreal posNeedleDest = 0;
-    qreal posOverspeed = 0;
     qreal fontSiceDial = 26;
     qreal fontSiceNose = 37;
     bool csgVisible = false;
@@ -78,6 +78,7 @@ private:
 
 private slots:
     void attenuationRoutine();
+    void resetCsmReducing();
 
 protected:
     void paintEvent(QPaintEvent *event) override;

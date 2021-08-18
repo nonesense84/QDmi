@@ -29,8 +29,7 @@ void gauge::attenuationRoutine(){
         updateNedded = true;
     }
     if(posCsg < posCsgDest){
-        posCsg = posCsg + (posCsgDest - posCsg) * attenuation;
-        if((posCsgDest - posCsg) < 0.25)posCsg = posCsgDest;
+        posCsg = posCsgDest;
         updateNedded = true;
     }
     if(posCsg > posCsgDest){
@@ -63,7 +62,6 @@ void gauge::setVAct(quint16 V){
             showNeedle = true;
             update();
         }
-        if(pointerOrange||pointerRed)posOverspeed = calcPosition(V);
     }
 }
 
@@ -96,7 +94,6 @@ void gauge::setVTarget(quint16 V, bool visible){
 
 void gauge::setIntervenation(bool intervenation){
     if(pointerRed != intervenation){
-        posOverspeed = calcPosition(vAct);
         pointerRed = intervenation;
         update();
     }
@@ -104,17 +101,25 @@ void gauge::setIntervenation(bool intervenation){
 
 void gauge::setOverspeed(bool overspeedWarning){
     if(overspeedWarning != pointerOrange){
-        posOverspeed = calcPosition(vAct);
         pointerOrange = overspeedWarning;
         update();
     }
 }
 
 void gauge::setCsmReducing(bool reducing){
-    if(reducing != csmYellow){
-        csmYellow = reducing;
+    if( reducing && !csmReducing){
+        csmReducing = reducing;
         update();
     }
+
+    if(!reducing && csmReducing){
+        QTimer::singleShot(1000, this, SLOT(resetCsmReducing()));
+    }
+}
+
+void gauge::resetCsmReducing(){
+    csmReducing = false;
+    update();
 }
 
 qreal gauge::calcPosition(quint16 V){
@@ -332,7 +337,7 @@ void gauge::paintEvent(QPaintEvent *)
         painter.drawConvexPolygon(speedPointer, 8);
     }
     painter.restore();
-    // Draw nose text===========================================
+    // Draw nose text ==========================================
     painter.save();
     painter.setPen(era::black);
     if(pointerRed)painter.setPen(era::white);
@@ -346,47 +351,43 @@ void gauge::paintEvent(QPaintEvent *)
     if(csgVisible){
         painter.save();
         painter.rotate(startPosZero);
-        painter.rotate(posCsg);
+        //painter.rotate(posCsg);
         if(useHook){
+            #define zeroOffset  64 // 4 * 16. This is the position, where CSG starts. It is 4deg below zero
             int t = int(dimensionMatrix) - widthCsgRing;
-            if((posOverspeed > posCsg) && (pointerRed || pointerOrange)){
+            // Draw over speed, if needed:
+            if((posNeedle > posCsg) && (pointerRed || pointerOrange)){
                 if(pointerRed){
                     painter.setPen(QPen(era::red, lenHook, Qt::SolidLine, Qt::FlatCap,Qt::BevelJoin));
                 }
                 else{
                     painter.setPen(QPen(era::orange, lenHook, Qt::SolidLine, Qt::FlatCap,Qt::BevelJoin));
                 }
-                painter.drawArc(-(t-22)/2,-(t-22)/2,(t-22),(t-22), 0,  static_cast<int>(posCsg-posOverspeed)*16);
+                painter.rotate(posCsg);
+                painter.drawArc(-(t-22)/2,-(t-22)/2,(t-22),(t-22), 0,  static_cast<int>(posCsg*16-posNeedle*16));
+                painter.rotate(-posCsg);
             }
-            if(posCsg > posTarget){ // If permitted speed is bigger than target speed, we have to draw
-                                    // the upper part bright grey or yellow, when CSM is reducing
-                // First the hook
-                QColor hookColor = era::grey;
-                if(csmYellow) hookColor = era::yellow;
-                painter.setPen(QPen(hookColor, lenHook, Qt::SolidLine, Qt::FlatCap,Qt::BevelJoin));
-                painter.drawArc(-(t-22)/2,-(t-22)/2,(t-22),(t-22), -22, 44);
-                painter.restore();
-                // Then lower part from zero to target speed:
-                painter.rotate(startPosZero);
-                painter.setPen(QPen(era::darkGrey, widthCsgRing));
-                painter.drawArc(-t/2,-t/2,t,t,4*16, static_cast<int>(-(posTarget+3.0)*16));
-                // Finaly the upper part from permitted to target speed:
-                painter.setPen(QPen(hookColor, widthCsgRing));
-                painter.rotate((posTarget+6.0));
-                painter.drawArc(-t/2,-t/2,t,t,4*16, static_cast<int>(-(posCsg-posTarget-4)*16));
+            // Find out, whats the hook color:
+            QColor hookColor = era::darkGrey;
+            if(posCsg > posTarget){
+                hookColor = era::grey;
+                if(csmReducing || posCsg > posCsgDest) hookColor = era::yellow;
             }
-            else{// If permitted speed and target speed are the same, draw everything dark grey.
-                // First the hook
-                painter.setPen(QPen(era::darkGrey, lenHook, Qt::SolidLine, Qt::FlatCap,Qt::BevelJoin));
-                painter.drawArc(-(t-22)/2,-(t-22)/2,(t-22),(t-22), -22, 44);
-                // Then lower part from zero to the hook:
-                painter.restore();
-                painter.setPen(QPen(era::darkGrey, widthCsgRing));
-                painter.rotate(startPosZero);
-                painter.drawArc(-t/2,-t/2,t,t,4*16, static_cast<int>(-(posCsg+2.0)*16));
-            }
+            painter.rotate(posCsg);
+            // Then draw the upper part from permitted to target speed:
+            painter.setPen(QPen(hookColor, widthCsgRing, Qt::SolidLine, Qt::FlatCap,Qt::BevelJoin));
+            painter.drawArc(-t/2,-t/2,t,t, 0, static_cast<int>((posCsg*16 - posTarget*16)));
+            // Then the lower part from zero to target speed (can be same as hook). Go 2/16deg more, to make shure, that it overlaps the upper part.
+            painter.rotate(-posCsg);
+            painter.setPen(QPen(era::darkGrey, widthCsgRing, Qt::SolidLine, Qt::FlatCap,Qt::BevelJoin));
+            painter.drawArc(-t/2,-t/2,t,t, zeroOffset, static_cast<int>(-posTarget*16) - zeroOffset - 2);
+            // As last the hook, overlapping the upper part:
+            painter.rotate(posCsg);
+            painter.setPen(QPen(hookColor, lenHook, Qt::SolidLine, Qt::FlatCap,Qt::BevelJoin));
+            painter.drawArc(-(t-22)/2,-(t-22)/2,(t-22),(t-22), -22, 44);
         }
         else{
+            painter.rotate(posCsg);
             painter.setBrush(era::red);
             painter.setPen(Qt::NoPen);
             painter.drawPolygon(vSollTriangle, 3);
