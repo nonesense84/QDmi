@@ -486,6 +486,10 @@ void dmiLabel::paintTextMessages(QPainter *iconPainter, QRect centralArea){
     int lineHeight = centralArea.height()/numTextFields;
     QRect field(centralArea.x(),centralArea.y(),centralArea.width(), lineHeight);
     iconPainter->save();
+    QFont font = QFont("FreeSans");
+    font.setBold(true);
+    font.setPointSizeF(fontFactor * 0.44 * lineHeight);
+    iconPainter->setFont(font);
     for(quint8 i=0; i < numTextFields; i++){
         if(i == numTextFields - 1){
             field.setHeight(centralArea.height() - i * lineHeight);
@@ -494,10 +498,6 @@ void dmiLabel::paintTextMessages(QPainter *iconPainter, QRect centralArea){
         iconPainter->setBrush(messageBackQolors[i + textMessageOffset]);
         iconPainter->drawRect(field);
         iconPainter->setPen(messageTextColors[i + textMessageOffset]);
-        iconPainter->setFont(QFont("FreeSans",
-                                   static_cast<int>(fontFactor * 0.44 * lineHeight),
-                                   QFont::Bold,
-                                   false));
         QRect textRect = iconPainter->boundingRect(field,Qt::AlignLeft,messageTexts[i + textMessageOffset]);
         textRect.moveLeft(3*borderThickness);
         if(alignment == Qt::AlignLeft)textRect.translate(0, field.height()/2 - textRect.height()/2);
