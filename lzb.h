@@ -93,8 +93,8 @@ private:
     quint8 emittedMessages[69];
     quint8 actMessages[3];
     quint16 vAct = 0;
-    quint16 vPerm;
-    quint16 vDest;
+    quint16 vPerm = 0;
+    quint16 vDest = 0;
 };
 
 #endif // LZB_H
