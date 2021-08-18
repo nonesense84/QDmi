@@ -110,7 +110,7 @@ void MainWindow::process(){
     ui->systemVersionComp2Name->setTextFieldUsing(1, Qt::AlignRight);
     ui->systemVersionComp2Name->addTextMessage("github.com/nones",era::grey,era::darkBlue,1);
     ui->systemVersionComp1Version->setBorderThickness(0);
-    ui->systemVersionComp1Version->addTextMessage("1.3T6",era::grey,era::darkBlue,1);
+    ui->systemVersionComp1Version->addTextMessage("1.3T7",era::grey,era::darkBlue,1);
     ui->systemVersionComp2Version->setBorderThickness(0);
     ui->systemVersionComp2Version->addTextMessage("ense84/QDmi",era::grey,era::darkBlue,1);
     qRegisterMetaType< QVector<quint8> >("QVector<quint8>");
@@ -1012,6 +1012,18 @@ void MainWindow::configureSettingsWindow(){
     ui->pulldown_showTextmessages->setCurrentIndex(settings->value("pulldown_showTextmessages").toInt());
     ui->pulldown_showManometer->setCurrentIndex(settings->value("pulldown_showManometer").toInt());
     ui->pulldown_tcpConnection->setCurrentIndex(settings->value("pulldown_tcpConnection").toInt());
+    ui->pulldown_targetdistance->setItemData(0, era::darkGrey, Qt::BackgroundColorRole);
+    ui->pulldown_targetdistance->setItemData(1, era::darkGrey, Qt::BackgroundColorRole);
+    ui->pulldown_gauge->setItemData(0, era::darkGrey, Qt::BackgroundColorRole);
+    ui->pulldown_gauge->setItemData(1, era::darkGrey, Qt::BackgroundColorRole);
+    ui->pulldown_showTextmessages->setItemData(0, era::darkGrey, Qt::BackgroundColorRole);
+    ui->pulldown_showTextmessages->setItemData(1, era::darkGrey, Qt::BackgroundColorRole);
+    ui->pulldown_showTextmessages->setItemData(2, era::darkGrey, Qt::BackgroundColorRole);
+    ui->pulldown_showManometer->setItemData(0, era::darkGrey, Qt::BackgroundColorRole);
+    ui->pulldown_showManometer->setItemData(1, era::darkGrey, Qt::BackgroundColorRole);
+    ui->pulldown_tcpConnection->setItemData(0, era::darkGrey, Qt::BackgroundColorRole);
+    ui->pulldown_tcpConnection->setItemData(1, era::darkGrey, Qt::BackgroundColorRole);
+
     applySettings();
     emit newZusiIp(settings->value("zusiIp").toString());
 
