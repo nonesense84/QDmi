@@ -8,6 +8,7 @@ zusiIndicator::zusiIndicator(QObject *parent) : QObject(parent){
 }
 
 void zusiIndicator::setZugbeeinflussungssystem(QString value){
+    if(value.contains("ETCS")) return;
     lzbVorhanden = value.contains("LZB") || value.contains("EBICAB 2000");
     if(value.contains("Indusi")){
         indusiDevice = 1;
