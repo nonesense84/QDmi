@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //settings->setPath(QSettings::IniFormat, QSettings::SystemScope, ".");
     this->setGeometry(0,0,settings->value("mainwindow/width").toInt(),settings->value("mainwindow/height").toInt());
     this->setGeometry(0,0,768,480); // For 4:3 800*600. For 16:9 848*480. For 16:10 768*480
+    showFullScreen();
     #ifdef Q_OS_ANDROID
     QTimer::singleShot(1000,this,SLOT(showFullScreen()));
     QTimer::singleShot(500,this,SLOT(keepScreenOn()));
@@ -277,6 +278,7 @@ void MainWindow::process(){
     connect(myTcp,SIGNAL(newSimTime(QString)),ui->fieldG13,SLOT(setText(QString)));
     connect(mySep,SIGNAL(newSimTime(QString)),ui->fieldG13,SLOT(setText(QString)));
     connect(myTcp,SIGNAL(newZugnummer(QString)),ui->fieldG11,SLOT(setText(QString)));
+    connect(mySep,SIGNAL(newTrainnumber(QString)),ui->fieldG11,SLOT(setText(QString)));
     connect(this,SIGNAL(newDriverId(QString)),myTcp,SLOT(setDriverId(QString)));
     connect(this,SIGNAL(newTrainRunningNumber(QString)),myTcp,SLOT(setTrainRunningNumber(QString)));
     ui->settingsBtn1->setIcon(":/icons/lang_ena.svg",":/icons/lang_dis.svg");
@@ -319,9 +321,9 @@ void MainWindow::process(){
     ui->fieldC6->setVisib(false);
     ui->fieldC7->setVisib(false);
     ui->fieldF1->setAsButton(true, "Menü");
-    ui->fieldF2->setAsButton();
-    ui->fieldF3->setAsButton();
-    ui->fieldF4->setAsButton();
+    ui->fieldF2->setAsButton(false);
+    ui->fieldF3->setAsButton(false);
+    ui->fieldF4->setAsButton(false);
     ui->fieldF5->setAsButton();
     ui->fieldF5->setIcon(":/icons/tool.svg");
     ui->dataEntrySettings->setAsButton();
@@ -393,7 +395,7 @@ void MainWindow::process(){
     ui->braBtn9->setAsButton(true, "P/R + SchBr", "9");
 
     ui->zusiIpOkBtn->setAsButton();
-    ui->zusiIpOkBtn->setAsDataEntryLabel("Nach Eingabe hier tippen",true,true);
+    ui->zusiIpOkBtn->setAsDataEntryLabel("",true,true);//Nach Eingabe hier tippen
     ui->driverIdOkBtn->setAsButton();
     ui->driverIdOkBtn->setAsDataEntryLabel("",true,true);
     ui->trainRunningNumberOkBtn->setAsButton();
@@ -595,8 +597,11 @@ void MainWindow::openTrainDataEntry(){
     dataString = "";
 }
 void MainWindow::cabActivation(bool cabActivated, bool standstill){
-    if(cabActivated && standstill)ui->TrnSettingsHolder->setCurrentIndex(1);
-    if(cabActivated && standstill)openDriverIdEntry();
+    if(cabActivated && standstill){
+        settingsCloseClicked();
+        ui->TrnSettingsHolder->setCurrentIndex(1);
+        openDriverIdEntry();
+    }
 }
 void MainWindow::openDriverIdEntry(){
     ui->fieldDG->setCurrentIndex(P_DG_Data_entry);                  // Data entry page for all kind of data

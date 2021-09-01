@@ -28,6 +28,7 @@ signals:
     void newFzgVmaxTacho(quint16 speed);
     void newAfbSoll(quint16 vSoll, bool visible);
     void newSimTime(QString simtime);
+    void newTrainnumber(QString trainNumber);
     void newGeoPos(qint32 geoPos);
     void newLevelInforamtion(quint8 level);
 
@@ -41,6 +42,7 @@ private:
     quint16 senderPort;
     quint32 simTime;
     quint32 simTimeOld;
+    quint32 trainNumber;
 
 private slots:
     void readingPendingSep();

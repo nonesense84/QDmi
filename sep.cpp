@@ -26,6 +26,7 @@ void sep::readingPendingSep(){
     #define timeOffset      39
     #define pressureOffset  43
     #define geoPosOffset    46
+    #define trainNbrOffset  50
     QVector<quint8> lzbValuesToDecoder(7,0);
     QVector<quint8> pzbLmsToDecoder(28,0);
     QVector<quint8> lmsToDecoder(13,0);
@@ -90,9 +91,19 @@ void sep::readingPendingSep(){
             emit newBrz(static_cast<quint8>(datagram[pressureOffset + 1]));
             emit newHlb(static_cast<quint8>(datagram[pressureOffset + 2]));
             emit newGeoPos(static_cast<qint32>(( static_cast<quint8>(datagram[geoPosOffset + 3]) << 24)
-                           + (static_cast<quint8>(datagram[geoPosOffset + 2]) << 16)
-                           + (static_cast<quint8>(datagram[geoPosOffset + 1]) <<  8)
-                           +  static_cast<quint8>(datagram[geoPosOffset + 0])      ));
+                        + (static_cast<quint8>(datagram[geoPosOffset + 2]) << 16)
+                        + (static_cast<quint8>(datagram[geoPosOffset + 1]) <<  8)
+                        +  static_cast<quint8>(datagram[geoPosOffset + 0])      ));
+            quint32 trainnumber = static_cast<quint32>(( static_cast<quint8>(datagram[trainNbrOffset + 3]) << 24)
+                    + (static_cast<quint8>(datagram[trainNbrOffset + 2]) << 16)
+                    + (static_cast<quint8>(datagram[trainNbrOffset + 1]) <<  8)
+                    +  static_cast<quint8>(datagram[trainNbrOffset + 0])      );
+            if(trainnumber == 0){
+                emit newTrainnumber("");
+            }
+            else{
+                emit newTrainnumber(QString::number(trainnumber));
+            }
         }
     }
 }
