@@ -32,7 +32,10 @@ void lzb::setAnalogValues(QVector<quint8> values){
     if(values.length()>=7){
         vPerm = static_cast<quint16>((values[4] << 8) + values[3]);
         quint16 newVDest = static_cast<quint16>((values[2] << 8) + values[1]);
-        if(newVDest < vDest) geschwWechsel = true;
+        if(newVDest < vDest){
+            geschwWechsel = true;
+            QTimer::singleShot(20000 ,this,SLOT(remooveMessage58()));
+        }
         if(newVDest == vPerm) geschwWechsel = false;
         vDest = newVDest;
         emit newVTarget(static_cast<quint16>((values[2] << 8) + values[1]), (values[0] & 0x0f) > 0);
@@ -335,12 +338,12 @@ void lzb::addIndicator(quint8 indId, quint8 blinking, bool invers){
         }
     }
     // If the inidcator is not used jet, search for the first free field.
-    if((indId > 0) && (indId != 4) && (indId != 15) && (indId != 16) && (indId != 19) && !indAllrUsed){
+    if((indId > 0) && (indId != 4) && (indId != 15) && (indId != 16) && !indAllrUsed){
         for(i=1; i<=6; i++){
             if(indicatorField[i] == 255)break;
         }
     }
-    if(indId == 15 || indId == 19)i = 6;    // "Ue" or "Ue GNT" must be at pos 6
+    if(indId == 15 || indId == 18)i = 6;    // "Ue" or "GNT" must be at pos 6
     if(indId == 0                )i = 0;    // "B" must be at field 1
     if(indId == 4  || indId == 25)i = 5;    // "PZB"  must be at field 5. Also "Indusi" for I60.
     if(indId == 16){                        // Era Brake
@@ -348,11 +351,11 @@ void lzb::addIndicator(quint8 indId, quint8 blinking, bool invers){
         emit newIconBehavC9(true, blinking, invers);
         return;
     }
-    if(indId == 18){                        // Indicator GNT
+  /*if(indId == 18){                        // Indicator GNT
         emit newIconG10(db::indicatorFiles[18][0],db::indicatorFiles[18][1]);
         emit newIconBehavG10(true, blinking, invers);
         return;
-    }
+    }*/
     indicatorField[i] = indId;
     indicatorFieldBehav[i] = blinking;
     switch (i){
@@ -439,4 +442,8 @@ void lzb::resetPanto(){
 void lzb::resetHs(){
     hsAn = false;
     addOrRemoveMessage(43, hsAn);
+}
+void lzb::remooveMessage58(){
+    emit removeMessage(58);
+    geschwWechsel = false;
 }
