@@ -3290,6 +3290,12 @@
                      </property>
                      <item>
                       <widget class="QWidget" name="qdmiSettingsNameHolder" native="true">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                         <horstretch>3</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
                        <property name="styleSheet">
                         <string notr="true">background:rgb(150,150,150)
 </string>
@@ -3546,7 +3552,7 @@
                         <item>
                          <widget class="QComboBox" name="pulldown_targetdistance">
                           <property name="sizePolicy">
-                           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                           <sizepolicy hsizetype="Preferred" vsizetype="Ignored">
                             <horstretch>0</horstretch>
                             <verstretch>20</verstretch>
                            </sizepolicy>
@@ -3598,7 +3604,7 @@
                         <item>
                          <widget class="QComboBox" name="pulldown_gauge">
                           <property name="sizePolicy">
-                           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                           <sizepolicy hsizetype="Preferred" vsizetype="Ignored">
                             <horstretch>0</horstretch>
                             <verstretch>20</verstretch>
                            </sizepolicy>
@@ -3641,7 +3647,7 @@
                         <item>
                          <widget class="QComboBox" name="pulldown_showTextmessages">
                           <property name="sizePolicy">
-                           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                           <sizepolicy hsizetype="Preferred" vsizetype="Ignored">
                             <horstretch>0</horstretch>
                             <verstretch>20</verstretch>
                            </sizepolicy>
@@ -3681,7 +3687,7 @@
                         <item>
                          <widget class="QComboBox" name="pulldown_showManometer">
                           <property name="sizePolicy">
-                           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                           <sizepolicy hsizetype="Preferred" vsizetype="Ignored">
                             <horstretch>0</horstretch>
                             <verstretch>20</verstretch>
                            </sizepolicy>
@@ -3721,7 +3727,7 @@
                         <item>
                          <widget class="QComboBox" name="pulldown_tcpConnection">
                           <property name="sizePolicy">
-                           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                           <sizepolicy hsizetype="Preferred" vsizetype="Ignored">
                             <horstretch>0</horstretch>
                             <verstretch>20</verstretch>
                            </sizepolicy>
