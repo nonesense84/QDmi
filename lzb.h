@@ -27,6 +27,7 @@ private slots:
     void resetExpectWt();
     void resetPanto();
     void resetHs();
+    void remooveMessage58();
 
 signals:
     void newTextMessage(QString text, QColor forColor, QColor bgColor, quint8 id);
