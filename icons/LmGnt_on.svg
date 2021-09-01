@@ -7,12 +7,12 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="49"
+   width="37"
    height="50"
-   viewBox="0 0 49 50"
+   viewBox="0 0 37 50"
    id="svg2"
    version="1.1"
-   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
    sodipodi:docname="LmGnt_on.svg">
   <defs
      id="defs4" />
@@ -21,20 +21,20 @@
      pagecolor="#ffffff"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="0.0"
+     inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="9.2900546"
-     inkscape:cx="18.85175"
-     inkscape:cy="25.714007"
+     inkscape:zoom="5.39407"
+     inkscape:cx="46.345197"
+     inkscape:cy="38.767675"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     units="px"
      inkscape:window-width="1920"
-     inkscape:window-height="1027"
+     inkscape:window-height="1017"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
+     units="px"
      inkscape:document-rotation="0" />
   <metadata
      id="metadata7">
@@ -52,41 +52,26 @@
      inkscape:label="Ebene 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-1002.3623)">
+     transform="translate(0,-1002.3621)">
     <rect
-       style="opacity:1;fill:#0000f2;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="rect4147"
-       width="49.000004"
-       height="50.000004"
-       x="0"
-       y="1002.3623"
-       ry="0.048698887" />
+       style="opacity:1;fill:#0000ea;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4197"
+       width="37"
+       height="50"
+       x="1.602695e-06"
+       y="1002.3621"
+       ry="0.16140208" />
     <path
-       style="fill:#000000"
-       d=""
-       id="path4173"
-       inkscape:connector-curvature="0" />
+       d="m 3.5326137,1025.6966 q 0,0.5957 0.109747,1.2072 0.109747,0.5958 0.391952,1.2542 0.282206,0.6585 0.721193,1.1602 0.454664,0.486 1.191535,0.8153 0.73687,0.3135 1.677556,0.3135 1.567809,0 2.5712083,-0.9876 1.019076,-0.9878 1.019076,-2.5242 v -0.3136 H 7.7343437 v -1.2856 h 4.7661403 v 6.0988 h -0.925007 l -0.360596,-1.5208 q -1.6305223,1.8186 -3.9038463,1.8186 -2.320358,0 -3.778421,-1.6618 -1.458063,-1.6619 -1.458063,-4.2958 0,-0.7526 0.141103,-1.5052 0.141103,-0.7682 0.533056,-1.5991 0.391952,-0.8309 0.972041,-1.4581 0.595768,-0.627 1.583488,-1.0347 1.003398,-0.4233 2.257646,-0.4233 1.959761,0 3.2140093,0.9563 1.269926,0.9564 1.567809,2.6966 h -1.489418 q -0.235172,-1.0974 -1.1288233,-1.7245 -0.877974,-0.6428 -2.179256,-0.6428 -1.818659,0 -2.916125,1.2856 -1.097467,1.2699 -1.097467,3.3708 z"
+       style="font-style:normal;font-weight:normal;font-size:20.4472px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:FreeSans;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.480593"
+       id="path48" />
     <path
-       style="fill:#000000"
-       d=""
-       id="path4171"
-       inkscape:connector-curvature="0" />
-    <g
-       style="font-style:normal;font-weight:normal;font-size:49.0459px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.22615"
-       id="text17"
-       aria-label="GNT">
-      <path
-         id="path12"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:22.8882px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';fill:#ffffff;stroke-width:1.22615"
-         d="m 13.867832,1024.4739 q -0.915528,-2.678 -3.9825467,-2.678 -2.1743791,0 -3.4332301,1.5336 -1.2359628,1.5335 -1.2359628,4.2343 0,2.5635 1.3275156,4.2114 1.3504039,1.648 3.4332301,1.648 0.3204349,0 0.7324229,-0.069 0.434875,-0.092 1.029969,-0.3204 0.595093,-0.2518 1.098633,-0.6409 0.503541,-0.3891 0.89264,-1.0758 0.389099,-0.7095 0.480652,-1.6021 h -3.799441 v -2.8611 h 6.683355 v 9.018 H 15.03513 l -0.411987,-2.1973 q -0.961305,1.3962 -2.151491,2.0371 -1.190186,0.6408 -2.8839133,0.6408 -3.3874537,0 -5.6076092,-2.4719 -2.1972672,-2.4719 -2.1972672,-6.2713 0,-3.891 2.2430436,-6.3172 2.2430437,-2.4261 5.8364912,-2.4261 3.0212429,0 4.9667399,1.5106 1.945497,1.5106 2.265932,4.097 z" />
-      <path
-         id="path14"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:22.8882px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';fill:#ffffff;stroke-width:1.22615"
-         d="m 29.415359,1035.8722 -6.706243,-11.5357 v 11.5357 h -3.43323 v -16.6855 h 3.524783 l 6.61469,11.3525 v -11.3525 h 3.43323 v 16.6855 z" />
-      <path
-         id="path16"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:22.8882px;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';fill:#ffffff;stroke-width:1.22615"
-         d="m 42.624711,1022.0477 v 13.8245 h -3.43323 v -13.8245 h -5.058293 v -2.861 h 13.36671 v 2.861 z" />
-    </g>
+       d="m 23.710319,1019.9427 v 11.4293 H 22.06412 l -5.910641,-9.2657 v 9.2657 h -1.379673 v -11.4293 h 1.583488 l 5.973354,9.3441 v -9.3441 z"
+       style="font-style:normal;font-weight:normal;font-size:20.4472px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:FreeSans;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.480593"
+       id="path50" />
+    <path
+       d="m 30.451871,1021.2283 v 10.1437 h -1.458063 v -10.1437 h -3.762743 v -1.2856 h 8.967871 v 1.2856 z"
+       style="font-style:normal;font-weight:normal;font-size:20.4472px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:FreeSans;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.480593"
+       id="path52" />
   </g>
 </svg>

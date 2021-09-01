@@ -8,7 +8,7 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    sodipodi:docname="LmS_Gnt_on.svg"
-   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
    version="1.1"
    id="svg2"
    viewBox="0 0 37 50"
@@ -22,14 +22,14 @@
      inkscape:window-maximized="1"
      inkscape:window-y="-8"
      inkscape:window-x="-8"
-     inkscape:window-height="1027"
+     inkscape:window-height="1017"
      inkscape:window-width="1920"
      showgrid="false"
      inkscape:current-layer="layer1"
      inkscape:document-units="px"
-     inkscape:cy="22.209247"
-     inkscape:cx="29.44048"
-     inkscape:zoom="8.098555"
+     inkscape:cy="28.934802"
+     inkscape:cx="37.487809"
+     inkscape:zoom="4.0492775"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0"
      borderopacity="1.0"
@@ -62,20 +62,18 @@
        x="0"
        y="1002.3621"
        ry="0.16140208" />
-    <g
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:16px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none"
-       id="text21"
-       aria-label="GNT">
-      <path
-         id="path12"
-         d="m 11.900832,1039.8143 q -0.64,-1.872 -2.7840004,-1.872 -1.52,0 -2.4,1.072 -0.864,1.072 -0.864,2.96 0,1.792 0.928,2.944 0.944,1.152 2.4,1.152 0.224,0 0.512,-0.048 0.304,-0.064 0.7200004,-0.224 0.416,-0.176 0.768,-0.448 0.352,-0.272 0.624,-0.752 0.272,-0.496 0.336,-1.12 H 9.4848316 v -2 h 4.6720004 v 6.304 h -1.44 l -0.288,-1.536 q -0.672,0.976 -1.504,1.424 -0.832,0.448 -2.0160004,0.448 -2.368,0 -3.92,-1.728 -1.536,-1.728 -1.536,-4.384 0,-2.72 1.568,-4.416 1.568,-1.696 4.08,-1.696 2.1120004,0 3.4720004,1.056 1.36,1.056 1.584,2.864 z" />
-      <path
-         id="path14"
-         d="m 22.769332,1047.7823 -4.688,-8.064 v 8.064 h -2.4 v -11.664 h 2.464 l 4.624,7.936 v -7.936 h 2.4 v 11.664 z" />
-      <path
-         id="path16"
-         d="m 32.003332,1038.1183 v 9.664 h -2.4 v -9.664 h -3.536 v -2 h 9.344 v 2 z" />
-    </g>
+    <path
+       d="m 4.672592,1041.967 q 0,0.5957 0.109747,1.2072 0.109747,0.5958 0.391952,1.2542 0.282206,0.6585 0.721193,1.1602 0.454664,0.486 1.191535,0.8153 0.73687,0.3135 1.677556,0.3135 1.567813,0 2.571213,-0.9876 1.019076,-0.9878 1.019076,-2.5242 v -0.3136 H 8.874322 v -1.2856 h 4.766144 v 6.0988 H 12.71546 l -0.360596,-1.5208 q -1.630523,1.8186 -3.903851,1.8186 -2.320358,0 -3.778421,-1.6618 -1.458063,-1.6619 -1.458063,-4.2958 0,-0.7526 0.141103,-1.5052 0.141103,-0.7682 0.533056,-1.5991 0.391952,-0.8309 0.972041,-1.4581 0.595768,-0.627 1.583488,-1.0347 1.003398,-0.4233 2.257646,-0.4233 1.959765,0 3.214014,0.9563 1.269926,0.9564 1.567808,2.6966 h -1.489417 q -0.235172,-1.0974 -1.128824,-1.7245 -0.8779744,-0.6428 -2.17926,-0.6428 -1.818659,0 -2.916125,1.2856 -1.097467,1.2699 -1.097467,3.3708 z"
+       style="font-style:normal;font-weight:normal;font-size:20.4472px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:FreeSans;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.480593"
+       id="path48" />
+    <path
+       d="m 24.850301,1036.2131 v 11.4293 h -1.646199 l -5.910641,-9.2657 v 9.2657 h -1.379673 v -11.4293 h 1.583488 l 5.973354,9.3441 v -9.3441 z"
+       style="font-style:normal;font-weight:normal;font-size:20.4472px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:FreeSans;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.480593"
+       id="path50" />
+    <path
+       d="m 31.591853,1037.6297 v 10.1437 H 30.13379 v -10.1437 h -3.762743 v -1.2856 h 8.967871 v 1.2856 z"
+       style="font-style:normal;font-weight:normal;font-size:20.4472px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:FreeSans;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.480593"
+       id="path52" />
     <g
        id="text4191"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:44.2389px;line-height:125%;font-family:FreeSans;-inkscape-font-specification:FreeSans;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
