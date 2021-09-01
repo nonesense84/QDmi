@@ -861,7 +861,6 @@ void zusi3Tcp::zusiDecoderSecondaryInfos(){
     if ((nodeIds[0] == 0x0001) && (nodeIds[1] == 0x0002)){
         switch(nodeIds[2]) {
             case 0x0001:{
-                qDebug() << "Zusi-Version: " + QString(useDataComplex);
                 QStringList zusiVersion = QString(useDataComplex).split(".");
                 QString minReqZusiVersion = " Mindestens Zusi " + QString::number(zusiMajor) + "." + QString::number(zusiMinor) + "." + QString::number(zusiPatch) + " erforderlich!";
                 if(zusiVersion[0].toInt() != zusiMajor){
@@ -929,6 +928,7 @@ void zusi3Tcp::transmitMtdIndicators(){
     }
 }
 void zusi3Tcp::setZugnummer(QString nummer, QString fromSystem){
+    if(nummer == "")return;
     QString zugnummerAnzeige = nummer;
     emit newZugnummer(zugnummerAnzeige.replace('_', '\n'));
     zugnummer = nummer;

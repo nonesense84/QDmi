@@ -149,7 +149,7 @@ public: signals:
     void newBrz(quint16 Brz);
     void newHlb(quint16 Hlb);
     void newSimTime(QString simtime);
-    void newZugnummer(QString simtime);
+    void newZugnummer(QString trainNumber);
     void changedTrain();
     void newMtdIndicators(QVector<quint8> lmsToDecoder);
     void newTechnicalMessage(QString text, QColor forColor, QColor bgColor, quint8 id);
