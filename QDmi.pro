@@ -12,8 +12,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = QDmi
 TEMPLATE = app
-ANDROID_VERSION_CODE = 15
-ANDROID_VERSION_NAME = "1.3.0T7"
+ANDROID_VERSION_CODE = 21
+ANDROID_VERSION_NAME = "1.3.0"
 ANDROID_TARGET_SDK_VERSION = 29
 APP_NAME = QDmi
 
@@ -81,7 +81,7 @@ RESOURCES += \
     icons.qrc \
     sunds.qrc
 
-ANDROID_ABIS = armeabi-v7a
+#ANDROID_ABIS = armeabi-v7a arm64-v8a arm64-v8a x86
 
 DISTFILES += \
     android/AndroidManifest.xml \
