@@ -67,7 +67,7 @@
 		{ "type": "uint8", 		"name": "brakeCylinderPressure", "factor": 10					},
 		{ "type": "uint8", 		"name": "mainAirReservoir",		 "factor": 10, "default": 100	},
 		{ "type": "uint32", 	"name": "InfSimAbsPos", 		 "hysteresis": 5		 		},
-		{ "type": "uint32", 	"name": "JdLzbZugnu", 											}
+		{ "type": "uint32", 	"name": "JdLzbZugnu" 											}
 		]
 	}
   ]
