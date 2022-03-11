@@ -4,8 +4,8 @@ QDmi erfüllt ausschließlich den Zweck Daten aus dem Eisenbahnsimulator unmitte
 Es werden keine Daten gesammelt oder an Dritte übertragen.
 
 Auf dem Gerät selber werden Einstellungen gespeichert, die der Benutzer vorgenommen hat.
-Dies erfüllt ausschließlich den Zweck, die Einstellungen beim Neustart der wieder zu Verfügung zu haben.
-Diese Daten werden nicht gesammelt  oder an Dritte übertragen.
+Dies erfüllt ausschließlich den Zweck, die Einstellungen beim Neustart der App wieder zu Verfügung zu haben.
+Diese Daten werden nicht gesammelt oder an Dritte übertragen.
 
 === Privacy Policy ===
 
