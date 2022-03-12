@@ -32,7 +32,7 @@ private slots:
     void remooveTechMessage10();
     void remooveTechMessage13();
     void resetVehicleBlocking();
-    void guesTractionType();
+    void setTractionType();
     int32_t readIntegerInRawAtPos(int pos);
     int32_t readIntegerAtPos(int pos);
     uint16_t readIdAtPos(int pos);
@@ -91,7 +91,8 @@ private:
     uint16_t VSoll=0;
     uint16_t VMFzg=0;
     bool fstAktiv;
-    float fahrlSpng;
+    uint8_t tractionType;
+    uint8_t currentType;
     uint8_t stromabnehmerLok;
     uint8_t stromabnehmerSteuerwagen;
     float zugkraftProAchs;

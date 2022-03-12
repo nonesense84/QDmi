@@ -568,7 +568,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                                 case 0x000C:  // Zusatzinfo Melderbild
                                     myIndicators->setMelderbild(useData2Byte.byte[0]);
                                     return;
-                                case 0x000D:  // LZB-Zustand    // Möglicherweise geht das nicht mit "(bool)", sondern ich muss >0 abfragen
+                                case 0x000D:  // LZB-Zustand
                                     myIndicators->setLzbZustand(useData2Byte.byte[0]);
                                     return;
                                 case 0x000E:
@@ -734,19 +734,19 @@ void zusi3Tcp::zusiDecoderFahrpult(){
               //case 0x0004: return;   // Druck Hauptluftbehälter
               //case 0x0009: myPower->setZugkraft(useData4Byte.Single);  return;                     //              Zugkraft gesammt
                 case 0x000A: myPower->setZugkraftProAchse(useData4Byte.Single);                     //              Zugkraft pro Achse
-                             zugkraftProAchs = useData4Byte.Single; guesTractionType(); return;
+                             zugkraftProAchs = useData4Byte.Single; return; //guesTractionType(); return;
               //case 0x000B: myPower->setZugkraftSollGesammt(useData4Byte.Single); return;           //              Zugkraft-Soll gesammt
                 case 0x000C: myPower->setZugkraftSollProAchse(useData4Byte.Single); return;          //              Zugkraft-Soll pro Achse
               //case 0x007C: myPower->setZugkraftGesammtSteuerwagen(useData4Byte.Single); return;    // Steuerwagen: Zugkraft gesammt
                 case 0x007D: myPower->setZugkraftProAchseSteuerwagen(useData4Byte.Single);           // Steuerwagen: Zugkraft pro Achse
-                            zugkraftProAchsSteuerwagen = useData4Byte.Single; guesTractionType(); return;
+                            zugkraftProAchsSteuerwagen = useData4Byte.Single; return;//guesTractionType(); return;
               //case 0x007E: myPower->setZugkraftSollGesammtSteuerwagen(useData4Byte.Single); return;// Steuerwagen: Zugkraft-soll gesammt
                 case 0x007F: myPower->setZugkraftSollProAchseSteuerwagen(useData4Byte.Single); return;// Steuerwagen: Zugkraft-Soll gesamt pro Achse
               //case 0x0090: myPower->setZugkraftSollNormiert(useData4Byte.Single); return;          //              Zug- und Brems-Gesamtkraft soll normiert
               //case 0x0091: myPower->setZugkraftSollNormiertSteuerwagen(useData4Byte.Single); return;// Steuerwagen: Zug- und Brems-Gesamtkraft soll normiert
               //case 0x0093: myPower->setZugkraftNormiert(useData4Byte.Single); return;              //              Zug- und Brems-Gesamtkraft absolut normiert
               //case 0x0094: myPower->setZugkraftNormiertSteuerwagen(useData4Byte.Single); return;// Steuerwagen: Zug- und Brems-Gesamtkraft absolut normiert
-                case 0x000E: fahrlSpng = useData4Byte.Single; guesTractionType(); return;
+              //case 0x000E: fahrlSpng = useData4Byte.Single; guesTractionType(); return;
                 case 0x0013:   // Hauptschalter
                     hauptschalter = useData4Byte.Single > 0;
                     myIndicators->setLmHauptschalter(hauptschalter);
@@ -807,6 +807,16 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                                 case 0x0006:
                                     myPower->setBaureihe(QString(useDataComplex));
                                     return;
+                                case 0x0025:
+                                    switch (nodeIds[5]){
+                                        case 0x0001:
+                                            tractionType = useData2Byte.byte[0];
+                                        return;
+                                        case 0x0002:
+                                            currentType = useData2Byte.byte[0];
+                                            setTractionType();
+                                        return;
+                                    }
                             }
                             return;
                         case 0x0002:
@@ -939,14 +949,24 @@ void zusi3Tcp::setSammelschine(){
 void zusi3Tcp::resetVehicleBlocking(){
     istVMaxErstesFahrzeug = true;
 }
-void zusi3Tcp::guesTractionType(){
-    if(fahrlSpng > 0){
+void zusi3Tcp::setTractionType(){
+    qDebug() << "Antriebstyp: " + QString::number(tractionType);
+    qDebug() << "Stromtyp:    " + QString::number(currentType);
+    if((tractionType == 6 || tractionType == 7) && (currentType == 2 || currentType == 3 || currentType == 4 || currentType == 6)){
+        setMtdIndicator(1, 12);
+    }
+    else{
+        setMtdIndicator(2, 12);
+    }
+}
+/*void zusi3Tcp::guesTractionType(){
+  if(fahrlSpng > 0){
         setMtdIndicator(1, 12);
     }
     if(fahrlSpng <= 0 && ((zugkraftProAchs > 0) || (zugkraftProAchsSteuerwagen > 0))){
         setMtdIndicator(2, 12);
     }
-}
+}*/
 void zusi3Tcp::setUseManometer(bool use){
     if(useManometer != use){
         useManometer = use;
