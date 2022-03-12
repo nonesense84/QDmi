@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //settings->setPath(QSettings::IniFormat, QSettings::SystemScope, ".");
     this->setGeometry(0,0,settings->value("mainwindow/width").toInt(),settings->value("mainwindow/height").toInt());
     this->setGeometry(0,0,768,480); // For 4:3 800*600. For 16:9 848*480. For 16:10 768*480
-    showFullScreen();
+    //showFullScreen();
     #ifdef Q_OS_ANDROID
     QTimer::singleShot(1000,this,SLOT(showFullScreen()));
     QTimer::singleShot(500,this,SLOT(keepScreenOn()));
@@ -432,7 +432,7 @@ void MainWindow::connectPzbIcons(){
     connect(myLzb,SIGNAL(newIconBehav6(bool,quint8,bool)),ui->fieldCL6,SLOT(setWorking(bool,quint8,bool)));
     connect(myLzb,SIGNAL(newIconBehav7(bool,quint8,bool)),ui->fieldCL7,SLOT(setWorking(bool,quint8,bool)));
     connect(myLzb,SIGNAL(newIconBehavC9(bool,quint8,bool)),ui->fieldC9,SLOT(setWorking(bool,quint8,bool)));
-    connect(myLzb,SIGNAL(newIconBehavG10(bool,quint8,bool)),ui->fieldG10,SLOT(setWorking(bool,quint8,bool)));
+    connect(myLzb,SIGNAL(newIconBehavG1(bool,quint8,bool)),ui->fieldG1,SLOT(setWorking(bool,quint8,bool)));
     connect(myLzb,SIGNAL(newIcon1(QString,QString)),ui->fieldCL1,SLOT(setIcon(QString,QString)));
     connect(myLzb,SIGNAL(newIcon2(QString,QString)),ui->fieldCL2,SLOT(setIcon(QString,QString)));
     connect(myLzb,SIGNAL(newIcon3(QString,QString)),ui->fieldCL3,SLOT(setIcon(QString,QString)));
@@ -441,7 +441,7 @@ void MainWindow::connectPzbIcons(){
     connect(myLzb,SIGNAL(newIcon6(QString,QString)),ui->fieldCL6,SLOT(setIcon(QString,QString)));
     connect(myLzb,SIGNAL(newIcon7(QString,QString)),ui->fieldCL7,SLOT(setIcon(QString,QString)));
     connect(myLzb,SIGNAL(newIconC9(QString,QString)),ui->fieldC9,SLOT(setIcon(QString,QString)));
-    connect(myLzb,SIGNAL(newIconG10(QString,QString)),ui->fieldG10,SLOT(setIcon(QString,QString)));
+    connect(myLzb,SIGNAL(newIconG1(QString,QString)),ui->fieldG1,SLOT(setIcon(QString,QString)));
     connect(myLzb,SIGNAL(newTextMessage(QString, QColor, QColor, quint8)),ui->FieldE5to7,SLOT(addTextMessage(QString, QColor, QColor, quint8)));
     connect(myLzb,SIGNAL(removeMessage(quint8)),ui->FieldE5to7,SLOT(removeTextMessage(quint8)));
     ui->fieldVZile100->setSegmentDigitToUse(3);
@@ -459,13 +459,13 @@ void MainWindow::connectPzbIcons(){
 }
 void MainWindow::connectMtdIcons(){
     connect(myMtd,SIGNAL(newIconBehavE3(bool,quint8,bool)),ui->fieldE3,SLOT(setWorking(bool,quint8,bool)));
-    connect(myMtd,SIGNAL(newIconBehavG1(bool,quint8,bool)),ui->fieldG1,SLOT(setWorking(bool,quint8,bool)));
+    connect(myMtd,SIGNAL(newIconBehavG6(bool,quint8,bool)),ui->fieldG6,SLOT(setWorking(bool,quint8,bool)));
     connect(myMtd,SIGNAL(newIconBehavG2(bool,quint8,bool)),ui->fieldG2,SLOT(setWorking(bool,quint8,bool)));
     connect(myMtd,SIGNAL(newIconBehavG3(bool,quint8,bool)),ui->fieldG3,SLOT(setWorking(bool,quint8,bool)));
     connect(myMtd,SIGNAL(newIconBehavG4(bool,quint8,bool)),ui->fieldG4,SLOT(setWorking(bool,quint8,bool)));
     connect(myMtd,SIGNAL(newIconBehavG5(bool,quint8,bool)),ui->fieldG5,SLOT(setWorking(bool,quint8,bool)));
     connect(myMtd,SIGNAL(newIconE3(QString,QString)),ui->fieldE3,SLOT(setIcon(QString,QString)));
-    connect(myMtd,SIGNAL(newIconG1(QString,QString)),ui->fieldG1,SLOT(setIcon(QString,QString)));
+    connect(myMtd,SIGNAL(newIconG6(QString,QString)),ui->fieldG6,SLOT(setIcon(QString,QString)));
     connect(myMtd,SIGNAL(newIconG2(QString,QString)),ui->fieldG2,SLOT(setIcon(QString,QString)));
     connect(myMtd,SIGNAL(newIconG3(QString,QString)),ui->fieldG3,SLOT(setIcon(QString,QString)));
     connect(myMtd,SIGNAL(newIconG4(QString,QString)),ui->fieldG4,SLOT(setIcon(QString,QString)));

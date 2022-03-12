@@ -40,7 +40,7 @@ signals:
     void newIcon6(QString lmOn, QString lmOff);
     void newIcon7(QString lmOn, QString lmOff);
     void newIconC9(QString lmOn, QString lmOff);
-    void newIconG10(QString lmOn, QString lmOff);
+    void newIconG1(QString lmOn, QString lmOff);
     void newIconBehav1(bool anabled, quint8 freq, bool inverse);
     void newIconBehav2(bool anabled, quint8 freq, bool inverse);
     void newIconBehav3(bool anabled, quint8 freq, bool inverse);
@@ -49,7 +49,7 @@ signals:
     void newIconBehav6(bool anabled, quint8 freq, bool inverse);
     void newIconBehav7(bool anabled, quint8 freq, bool inverse);
     void newIconBehavC9(bool anabled, quint8 freq, bool inverse);
-    void newIconBehavG10(bool anabled, quint8 freq, bool inverse);
+    void newIconBehavG1(bool anabled, quint8 freq, bool inverse);
     void newVTarget(quint16 vZiel, bool visible);
     void newVPermit(quint16 vSoll, bool visible);
     void newOverspeed(bool warning);

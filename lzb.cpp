@@ -320,6 +320,11 @@ void lzb::sentSpetLimitMessage(quint8 limit){
 void lzb::addIndicator(quint8 indId, quint8 blinking, bool invers){
     //qDebug() << "lzb::addIndicator";
     // indId represents an indicatorFiles in db.h
+    if(indId == 18){                        // Indicator GNT
+          emit newIconG1(db::indicatorFiles[18][0],db::indicatorFiles[18][1]);
+          emit newIconBehavG1(true, blinking, invers);
+          return;
+    }
     quint8 i = 0;
     bool indAllrUsed = false;
     // Search for a position, this indicator is allready used. ...
@@ -343,7 +348,7 @@ void lzb::addIndicator(quint8 indId, quint8 blinking, bool invers){
             if(indicatorField[i] == 255)break;
         }
     }
-    if(indId == 15 || indId == 18)i = 6;    // "Ue" or "GNT" must be at pos 6
+    if(indId == 15 || indId == 19)i = 6;    // "Ue" or "GNT" must be at pos 6
     if(indId == 0                )i = 0;    // "B" must be at field 1
     if(indId == 4  || indId == 25)i = 5;    // "PZB"  must be at field 5. Also "Indusi" for I60.
     if(indId == 16){                        // Era Brake
@@ -351,11 +356,6 @@ void lzb::addIndicator(quint8 indId, quint8 blinking, bool invers){
         emit newIconBehavC9(true, blinking, invers);
         return;
     }
-  /*if(indId == 18){                        // Indicator GNT
-        emit newIconG10(db::indicatorFiles[18][0],db::indicatorFiles[18][1]);
-        emit newIconBehavG10(true, blinking, invers);
-        return;
-    }*/
     indicatorField[i] = indId;
     indicatorFieldBehav[i] = blinking;
     switch (i){

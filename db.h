@@ -108,32 +108,32 @@ public:
         Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black
     };
     const QString indicatorFiles[26][2] = {
-        {   ":/icons/LmB_on.svg",       ":/icons/LmB_off.svg",},
-        {   ":/icons/Lm85_on.svg",      ":/icons/Lm85_off.svg",},           // 0
-        {   ":/icons/Lm70_on.svg",      ":/icons/Lm70_off.svg",},
-        {   ":/icons/Lm55_on.svg",      ":/icons/Lm55_off.svg",},
-        {   ":/icons/LmPzb_on.svg",     ":/icons/LmPzb_off.svg",},
-        {   ":/icons/LmLzb_on.svg",     ":/icons/LmLzb_off.svg",},
-        {   ":/icons/LmS_on.svg",       ":/icons/LmS_off.svg",},            // 5
-        {   ":/icons/LmH_on.svg",       ":/icons/LmH_off.svg",},
-        {   ":/icons/LmG_on.svg",       ":/icons/LmG_off.svg",},
-        {   ":/icons/LmE40_on.svg",     ":/icons/LmE40_off.svg",},
-        {   ":/icons/LmV40_on.svg",     ":/icons/LmV40_off.svg",},
-        {   ":/icons/LmBef40_on.svg",   ":/icons/LmBef40_off.svg",},      // 10
-        {   ":/icons/Lm1000Hz_on.svg",  ":/icons/Lm1000Hz_off.svg",},
-        {   ":/icons/Lm500Hz_on.svg",   ":/icons/Lm500Hz_off.svg",},
-        {   ":/icons/LmEL_on.svg",      ":/icons/LmEL_off.svg",},
-        {   ":/icons/LmUe_on.svg",      ":/icons/LmUe_off.svg",},
-        {   ":/icons/ST_01.svg",        ":/icons/ST_01.svg",}, //Forced brake
-        {   ":/icons/LmEnde_on.svg",     ":/icons/LmEnde_off.svg",},
-        {   ":/icons/LmGnt_on.svg",     ":/icons/LmGnt_off.svg",},
-        {   ":/icons/LmUe_Gnt_on.svg",     ":/icons/LmUe_Gnt_off.svg",},
-        {   ":/icons/LmG_Gnt_on.svg",     ":/icons/LmG_Gnt_off.svg",},
-        {   ":/icons/LmS_Gnt_on.svg",     ":/icons/LmS_Gnt_off.svg",},
-        {   ":/icons/Lm95_on.svg",      ":/icons/Lm95_off.svg",},
-        {   ":/icons/Lm75_on.svg",      ":/icons/Lm75_off.svg",},
-        {   ":/icons/Lm60_on.svg",      ":/icons/Lm60_off.svg",},
-        {   ":/icons/LmIndusi_on.svg",  ":/icons/LmIndusi_on.svg",},
+        {   ":/icons/LmB_on.svg",       ":/icons/LmB_off.svg",},        // 0
+        {   ":/icons/Lm85_on.svg",      ":/icons/Lm85_off.svg",},       // 1
+        {   ":/icons/Lm70_on.svg",      ":/icons/Lm70_off.svg",},       // 2
+        {   ":/icons/Lm55_on.svg",      ":/icons/Lm55_off.svg",},       // 3
+        {   ":/icons/LmPzb_on.svg",     ":/icons/LmPzb_off.svg",},      // 4
+        {   ":/icons/LmLzb_on.svg",     ":/icons/LmLzb_off.svg",},      // 5
+        {   ":/icons/LmS_on.svg",       ":/icons/LmS_off.svg",},        // 6
+        {   ":/icons/LmH_on.svg",       ":/icons/LmH_off.svg",},        // 7
+        {   ":/icons/LmG_on.svg",       ":/icons/LmG_off.svg",},        // 8
+        {   ":/icons/LmE40_on.svg",     ":/icons/LmE40_off.svg",},      // 9
+        {   ":/icons/LmV40_on.svg",     ":/icons/LmV40_off.svg",},      // 10
+        {   ":/icons/LmBef40_on.svg",   ":/icons/LmBef40_off.svg",},    // 11
+        {   ":/icons/Lm1000Hz_on.svg",  ":/icons/Lm1000Hz_off.svg",},   // 12
+        {   ":/icons/Lm500Hz_on.svg",   ":/icons/Lm500Hz_off.svg",},    // 13
+        {   ":/icons/LmEL_on.svg",      ":/icons/LmEL_off.svg",},       // 14
+        {   ":/icons/LmUe_on.svg",      ":/icons/LmUe_off.svg",},       // 15
+        {   ":/icons/ST_01.svg",        ":/icons/ST_01.svg",},          // 16 Forced brake
+        {   ":/icons/LmEnde_on.svg",     ":/icons/LmEnde_off.svg",},    // 17
+        {   ":/icons/LmGnt_on.svg",     ":/icons/LmGnt_off.svg",},      // 18
+        {   ":/icons/LmUe_Gnt_on.svg",     ":/icons/LmUe_Gnt_off.svg",},// 19
+        {   ":/icons/LmG_Gnt_on.svg",     ":/icons/LmG_Gnt_off.svg",},  // 20
+        {   ":/icons/LmS_Gnt_on.svg",     ":/icons/LmS_Gnt_off.svg",},  // 21
+        {   ":/icons/Lm95_on.svg",      ":/icons/Lm95_off.svg",},       // 22
+        {   ":/icons/Lm75_on.svg",      ":/icons/Lm75_off.svg",},       // 23
+        {   ":/icons/Lm60_on.svg",      ":/icons/Lm60_off.svg",},       // 24
+        {   ":/icons/LmIndusi_on.svg",  ":/icons/LmIndusi_on.svg",},    // 25
     };
 }
 #endif // DB_H

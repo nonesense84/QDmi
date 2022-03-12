@@ -70,7 +70,7 @@ void mtd::setStates(QVector<quint8> states){
     if(!indSifaOpto && !indSifaAudio && !indSifaBrake){
         emit newIconBehavE3(false, 0, false);
     }
-    emit newIconBehavG1(indSifaOff, 0, false);
+    emit newIconBehavG6(indSifaOff, 0, false);
     if(tractionType == 1){
         if((InfPanto & 0x0f) > 0){  // One or more pantographs are up or rising
             if((InfPanto & 0xf0) > 0){
