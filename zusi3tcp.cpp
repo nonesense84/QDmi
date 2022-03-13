@@ -443,134 +443,65 @@ void zusi3Tcp::zusiDecoderFahrpult(){
             return;
         case 0x0065:    // 11.3.3.3.4 Status Zugbeeinﬂussung
             switch (nodeIds[3]){
-            case 0x0001:      // Grundblock 11.3.3.3.4.1 Bauart Zugbeeinflussungssystem als Text
-                myIndicators->setZugbeeinflussungssystem(QString(useDataComplex));
-                return;
+            case 0x0001: myIndicators->setZugbeeinflussungssystem(QString(useDataComplex));return;          // Grundblock 11.3.3.3.4.1 Bauart Zugbeeinflussungssystem als Text
             case 0x0002:        // 11.3.3.3.4.2 System aus der Indusi-Familie - Einstellungen
                 switch(nodeIds[4]) {
-                case 0x0001:      // Zugart
-                    myIndicators->setZugart(useData2Byte.byte[0]);
-                    return;
-                case 0x0002: return;  // Tf-Nummer qDebug() << "Tf-Nummer: " + QString(useDataComplex);
-                case 0x0003:   // Zugnummer
-                    setZugnummer(QString(useDataComplex), "PZB");
-                    return;
-                case 0x0004:   // Werte der Grunddaten
+                case 0x0001: myIndicators->setZugart(useData2Byte.byte[0]);return;                          // Zugart
+              //case 0x0002: qDebug() << "Tf-Nummer: " + QString(useDataComplex);return;                    // Tf-Nummer
+                case 0x0003: setZugnummer(QString(useDataComplex), "PZB");return;                           // Zugnummer
+              /*case 0x0004:   // Werte der Grunddaten
                     switch(nodeIds[5]){
-                    case 0x0001:   // BRH-Wert (Bremshundertstel).
-                        //qDebug() << "BRH Grund.: " + QString::number(useData2Byte.Word);
-                        return;
-                    case 0x0002:   // BRA-Wert (Bremsart).
-                        //qDebug() << "BRA Grund.: " + QString::number(useData2Byte.Word);
-                        return;
-                    case 0x0003:   // ZL-Wert (Zuglänge) in m
-                        //qDebug() << "ZL Grund:   " + QString::number(useData2Byte.Word);
-                        return;
-                    case 0x0004:   // VMZ-Wert (Höchstgeschwindigkeit)in km/h
-                        //qDebug() << "VMZ Grund.: " + QString::number(useData2Byte.Word);
-                        return;
-                    case 0x0005:   // Zugehörige Zugart. Werte der Ersatzzugdaten
-                        //qDebug() << "ZA Grund.:  " + QString::number(useData2Byte.byte[0]);
-                        return;
+                    case 0x0001: qDebug() << "BRH Grund.: " + QString::number(useData2Byte.Word);return;    // BRH-Wert (Bremshundertstel).
+                    case 0x0002: qDebug() << "BRA Grund.: " + QString::number(useData2Byte.Word);return;    // BRA-Wert (Bremsart).
+                    case 0x0003: qDebug() << "ZL Grund:   " + QString::number(useData2Byte.Word);return;    // ZL-Wert (Zuglänge) in m
+                    case 0x0004: qDebug() << "VMZ Grund.: " + QString::number(useData2Byte.Word);return;    // VMZ-Wert (Höchstgeschwindigkeit)in km/h
+                    case 0x0005: qDebug() << "ZA Grund.:  " + QString::number(useData2Byte.byte[0]);return; // Zugehörige Zugart. Werte der Ersatzzugdaten
                     }
-                    return;
-                case 0x0005:   // Werte der Ersatzzugdaten
+                    return;*/
+              /*case 0x0005:   // Werte der Ersatzzugdaten
                     switch(nodeIds[5]) {
-                    case 0x0001:   // BRH-Wert (Bremshundertstel)
-                        //emit newErsatzBrh(useData2Byte.Word);
-                        //qDebug() << "BRH Ers.: " + QString::number(useData2Byte.Word);
-                        return;
-                    case 0x0002:   // BRA-Wert (Bremsart).
-                        //emit newErsatzBra(useData2Byte.Word);
-                        //qDebug() << "BRA Ers.: " + QString::number(useData2Byte.Word);
-                        return;
-                    case 0x0003:   // ZL-Wert (Zuglänge) in m
-                        //emit newErsatzZl(useData2Byte.Word);
-                        //qDebug() << "ZL Ers.:  " + QString::number(useData2Byte.Word);
-                        return;
-                    case 0x0004:   // VMZ-Wert (Höchstgeschwindigkeit)in km/h
-                        //emit newErsatzVmz(useData2Byte.Word);
-                        //qDebug() << "VMZ Ers.: " + QString::number(useData2Byte.Word);
-                        return;
-                    case 0x0005:   // Zugehörige Zugart.
-                        //qDebug() << "ZA Ers.:  " + QString::number(useData2Byte.byte[0]);
-                        return;
+                    case 0x0001: emit newErsatzBrh(useData2Byte.Word);return;                               // BRH-Wert (Bremshundertstel)
+                    case 0x0002: emit newErsatzBra(useData2Byte.Word); return;                              // BRA-Wert (Bremsart).
+                    case 0x0003: emit newErsatzZl(useData2Byte.Word);return;                                // ZL-Wert (Zuglänge) in m
+                    case 0x0004: emit newErsatzVmz(useData2Byte.Word);return;                               // VMZ-Wert (Höchstgeschwindigkeit)in km/h
+                    case 0x0005: return;                                                                    // Zugehörige Zugart.
                     }
-                    return;
+                    return;*/
                 case 0x0006:   // Aktive Zugdaten
                     switch(nodeIds[5]) {
-                    case 0x0001:   // BRH-Wert (Bremshundertstel). Werte der Ersatzzugdaten
-                        emit newBrh(useData2Byte.Word);//qDebug() << "BRH Akt.:   " + QString::number(useData2Byte.Word);
-                        return;
-                    case 0x0002:   // BRA-Wert (Bremsart). Werte der Ersatzzugdaten
-                        emit newBra(useData2Byte.Word);//qDebug() << "BRA Akt.:   " + QString::number(useData2Byte.Word);
-                        return;
-                    case 0x0003:   // ZL-Wert (Zuglänge) in m
-                        emit newZl(useData2Byte.Word);//qDebug() << "ZL Akt.:    " + QString::number(useData2Byte.Word);
-                        return;
-                    case 0x0004:   // VMZ-Wert (Höchstgeschwindigkeit)in km/h
-                        emit newVmz(useData2Byte.Word);//qDebug() << "VMZ Akt.:    " + QString::number(useData2Byte.Word);
-                        return;
-                    case 0x0005:   // Zugehörige Zugart. Werte der Ersatzzugdaten
-                        //qDebug() << "ZA Akt.:    " + QString::number(useData2Byte.byte[0]);
-                        return;
-                    case 0x0006:   // Modus (Grunddaten / Ersatzzugdaten / Normalbetrieb)
-                        //qDebug() << "Grund./Ers./Norm.: " + QString::number(useData2Byte.byte[0]);
+                    case 0x0001: emit newBrh(useData2Byte.Word);return;                                     // BRH-Wert (Bremshundertstel). Werte der Ersatzzugdaten
+                    case 0x0002: emit newBra(useData2Byte.Word);return;                                     // BRA-Wert (Bremsart). Werte der Ersatzzugdaten
+                    case 0x0003: emit newZl(useData2Byte.Word);return;                                      // ZL-Wert (Zuglänge) in m
+                    case 0x0004: emit newVmz(useData2Byte.Word);return;                                     // VMZ-Wert (Höchstgeschwindigkeit)in km/h
+                    case 0x0005: return;                                                                    // Zugehörige Zugart. Werte der Ersatzzugdaten
+                    case 0x0006:                                                                            // Modus (Grunddaten / Ersatzzugdaten / Normalbetrieb)
                         myIndicators->setGrunddatenWirksam(useData2Byte.byte[0] == 4, VIst <= 50);
                         myIndicators->setErsatzdatenWirksam(useData2Byte.byte[0] == 5, VIst <= 50);
                         return;
                     }
                     return;
-                case 0x0007: return;  // Hauptschalter qDebug() << "Indusi-HS: " + QString::number(useData2Byte.byte[0]);
-                case 0x0008:          // Indusi Störschalter qDebug() << "Indusi-SS: " + QString::number(useData2Byte.byte[0]);
-                    myIndicators->setIndusiStoerschalter(useData2Byte.byte[0]);
-                    return;
-                case 0x0009:          // LZB Störschalter qDebug() << "LZB SS   : " + QString::number(useData2Byte.byte[0]);
-                    myIndicators->setLzbStoerschalter(useData2Byte.byte[0]);
-                    return;
-                case 0x000A:          // Indusi-LuftabsperrhahnqDebug() << "Indusi-LH: " + QString::number(useData2Byte.byte[0]);
-                    myIndicators->setPlzbLuftabsperrhahn(useData2Byte.byte[0]);
-                    return;
-                case 0x000B:   // Klartextmeldungen
+              //case 0x0007: return;                                                                        // Hauptschalter qDebug() << "Indusi-HS: " + QString::number(useData2Byte.byte[0]);
+                case 0x0008: myIndicators->setIndusiStoerschalter(useData2Byte.byte[0]);return;             // Indusi Störschalter qDebug() << "Indusi-SS: " + QString::number(useData2Byte.byte[0]);
+                case 0x0009: myIndicators->setLzbStoerschalter(useData2Byte.byte[0]);return;                // LZB Störschalter
+                case 0x000A:myIndicators->setPlzbLuftabsperrhahn(useData2Byte.byte[0]);return;              // Indusi-LuftabsperrhahnqDebug() << "Indusi-LH: " + QString::number(useData2Byte.byte[0]);
+                case 0x000B:                                                                                // Klartextmeldungen
                     zusiTextMessagesPossible = useData2Byte.byte[0];
                     myIndicators->setKlartextmeldungen(zusiTextMessagesPossible, forceTextmessages);
                     return;
-                case 0x0011: // Systemstatus LZB:
-                    myIndicators->setSystemstatusLzb(useData2Byte.byte[0]); // 3 = Aktiv
-                    //qDebug() << "Systemstatus LZB: " + QString::number(useData2Byte.byte[0]);
-                    return;
-                case 0x000D: // Systemstatus Indusi:
-                    myIndicators->setSystemstatusPzb(useData2Byte.byte[0]); // 3 = Aktiv
-                    //qDebug() << "Systemstatus Indusi: " + QString::number(useData2Byte.byte[0]);
-                    return;
+                case 0x0011: myIndicators->setSystemstatusLzb(useData2Byte.byte[0]); return;                // Systemstatus LZB:// 3 = Aktiv
+                case 0x000D: myIndicators->setSystemstatusPzb(useData2Byte.byte[0]); return;                // Systemstatus Indusi:// 3 = Aktiv
                 }
                 return;
             case 0x0003:        // 11.3.3.3.4.2 System aus der Indusi-Familie - Betriebsdaten
                 switch(nodeIds[4]) {
-                case 0x0002:  // Zustand Zugbeeinflussung
-                    myIndicators->setZustandZugsicherung(useData2Byte.Word);
-                    return;
-                case 0x0003:  // Zwangsbremsung aktiv wegen
-                    myIndicators->setGrundZwangsbrmnsung(useData2Byte.Word);
-                    return;
-                case 0x0004:  // Grund der Zwangsbremsung als Text
-                        //qDebug() << "ZB wegen Tx: " + QString(useDataComplex);
-                        return;
-                case 0x0005:  // Melder 1000 Hz
-                    myIndicators->setLm1000Hz(useData2Byte.byte[0]);
-                    return;
-                case 0x000A:  // Melder 500 Hz
-                    myIndicators->setLm500Hz(useData2Byte.byte[0]);
-                    return;
-                case 0x000B:  // Melder Befehl
-                    myIndicators->setLmBefehl(useData2Byte.byte[0]);
-                    return;
-                case 0x000C:  // Zusatzinfo Melderbild
-                    myIndicators->setMelderbild(useData2Byte.byte[0]);
-                    return;
-                case 0x000D:  // LZB-Zustand
-                    myIndicators->setLzbZustand(useData2Byte.byte[0]);
-                    return;
+                case 0x0002: myIndicators->setZustandZugsicherung(useData2Byte.Word);return;                // Zustand Zugbeeinflussung
+                case 0x0003: myIndicators->setGrundZwangsbrmnsung(useData2Byte.Word);return;                // Zwangsbremsung aktiv wegen
+              //case 0x0004: return;                                                                        // Grund der Zwangsbremsung als Text
+                case 0x0005: myIndicators->setLm1000Hz(useData2Byte.byte[0]);return;                        // Melder 1000 Hz
+                case 0x000A: myIndicators->setLm500Hz(useData2Byte.byte[0]);return;                         // Melder 500 Hz
+                case 0x000B: myIndicators->setLmBefehl(useData2Byte.byte[0]);return;                        // Melder Befehl
+                case 0x000C: myIndicators->setMelderbild(useData2Byte.byte[0]);return;                      // Zusatzinfo Melderbild
+                case 0x000D: myIndicators->setLzbZustand(useData2Byte.byte[0]);return;                      // LZB-Zustand
                 case 0x000E:
                     switch (nodeIds[5]){
                     case 0x0001:myIndicators->setEndeverfahren(useData2Byte.byte[0]);return;
@@ -600,118 +531,52 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                     case 0x0001: myIndicators->setLzbElAuftrag(useData2Byte.byte[0]);return;
                     }
                     return;
-                case 0x0018:  // Melder E40 an
-                    myIndicators->setLmE40(useData2Byte.byte[0]);
-                    return;
-                case 0x001A:  // Melder B an
-                    myIndicators->setLmB(useData2Byte.byte[0]);
-                    return;
-                case 0x001B:  // Melder Ü an
-                    myIndicators->setLmUe(useData2Byte.byte[0]);
-                    return;
-                case 0x0024:  // Melder G   // Ersetzt 0x001C
-                    myIndicators->setLmG(useData2Byte.byte[0]);
-                    return;
-                case 0x001D:  // Melder EL an
-                    myIndicators->setLmEl(useData2Byte.byte[0]);
-                    return;
-                case 0x001E:  // Melder V40 an
-                    myIndicators->setLmV40(useData2Byte.byte[0]);
-                    return;
-                case 0x001F:  // Melder S an
-                    myIndicators->setLmS(useData2Byte.byte[0]);
-                    return;
-                case 0x0025:  // Melder Prüf/Stör // Ersetzt 0x0020
-                    myIndicators->setLmPruefStoer(useData2Byte.byte[0]);
-                    return;
-                case 0x0021:  // Sollgeschwindigkeit in m/s
-                    myIndicators->setVSoll(qFabs(ceil(useData4Byte.Single * 3.6 - 0.5)));
-                    //myIndicators->setLzbValue(useData4Byte.Single, 3);
-                    return;
-                case 0x0022:  // Zielgeschwindigkeit in m/s (Wert<0 → dunkel)
-                    myIndicators->setVZiel(qFabs(ceil(useData4Byte.Single * 3.6 - 0.5)));
-                    //myIndicators->setLzbValue(useData4Byte.Single, 1);
-                    return;
-                case 0x0023:  // Zielweg in m (Wert<0 → dunkel)
-                    //if(useData4Byte.Single <0 ) useData4Byte.Single = 0;
-                    myIndicators->setZielweg(ceil(useData4Byte.Single - 0.5));
-                    //myIndicators->setLzbValue(useData4Byte.Single, 5);
-                   return;
+                case 0x0018: myIndicators->setLmE40(useData2Byte.byte[0]);return;                           // Melder E40 an
+                case 0x001A: myIndicators->setLmB(useData2Byte.byte[0]);return;                             // Melder B an
+                case 0x001B: myIndicators->setLmUe(useData2Byte.byte[0]);return;                            // Melder Ü an
+                case 0x0024: myIndicators->setLmG(useData2Byte.byte[0]);return;                             // Melder G   // Ersetzt 0x001C
+                case 0x001D: myIndicators->setLmEl(useData2Byte.byte[0]);return;                            // Melder EL an
+                case 0x001E: myIndicators->setLmV40(useData2Byte.byte[0]);return;                           // Melder V40 an
+                case 0x001F: myIndicators->setLmS(useData2Byte.byte[0]);return;                             // Melder S an
+                case 0x0025: myIndicators->setLmPruefStoer(useData2Byte.byte[0]);return;                    // Melder Prüf/Stör // Ersetzt 0x0020
+                case 0x0021: myIndicators->setVSoll(qFabs(ceil(useData4Byte.Single * 3.6 - 0.5)));return;   // Sollgeschwindigkeit in m/s
+                case 0x0022: myIndicators->setVZiel(qFabs(ceil(useData4Byte.Single * 3.6 - 0.5)));return;   // Zielgeschwindigkeit in m/s (Wert<0 → dunkel)
+                case 0x0023: myIndicators->setZielweg(ceil(useData4Byte.Single - 0.5));return;              // Zielweg in m (Wert<0 → dunkel)
                 }
                 return;
             case 0x0007:        // 11.3.3.3.4.10 ZUB
                 switch(nodeIds[4]) {
-                case 0x0001:   // Status Melder GNT
-                    myIndicators->setLmGnt(useData2Byte.Word);
-                    return;
-                case 0x0002:   // Status Melder Ü
-                    myIndicators->setLmGntUe(useData2Byte.Word);
-                    return;
-                case 0x0003:   // Status Melder G
-                    myIndicators->setLmGntG(useData2Byte.Word);
-                    return;
-                case 0x0004:   // Status Melder S
-                    myIndicators->setLmGntS(useData2Byte.Word);
-                    return;
-              /*case 0x0007:   // Status Melder GNT Ü
-                    myIndicators->setLmGntUe(useData2Byte.Word);
-                    return;
-                case 0x0008:   // Status Melder GNT G
-                    myIndicators->setLmGntG(useData2Byte.Word);
-                    return;
-                case 0x0009:   // Status Melder GNT S
-                    myIndicators->setLmGntS(useData2Byte.Word);
-                    return;*/
+                case 0x0001: myIndicators->setLmGnt(useData2Byte.Word);return;                              // Status Melder GNT
+                case 0x0002: myIndicators->setLmGntUe(useData2Byte.Word);return;                            // Status Melder Ü
+                case 0x0003: myIndicators->setLmGntG(useData2Byte.Word);return;                             // Status Melder G
+                case 0x0004: myIndicators->setLmGntS(useData2Byte.Word);return;                             // Status Melder S
+              /*case 0x0007: myIndicators->setLmGntUe(useData2Byte.Word);return;                            // Status Melder GNT Ü
+                case 0x0008: myIndicators->setLmGntG(useData2Byte.Word);return;                             // Status Melder GNT G
+                case 0x0009: myIndicators->setLmGntS(useData2Byte.Word);return;                             // Status Melder GNT S*/
                 }
                 return;
             }
             return;
-            case 0x064:     // 11.3.3.3.3 Status Sifa
+            case 0x064:                                                                                     // 11.3.3.3.3 Status Sifa
                 switch (nodeIds[3]){
-                case 0x0001:      // Bauart Sifasystem als Text
-                    //qDebug() << "Sifasystem: " + QString(useDataComplex);
-                    return;
-                case 0x0002:   // Status Sifa-Leuchtmelder
-                    setMtdIndicator(useData2Byte.byte[0],1);
-                    return;
-            case 0x0003:   // Status Sifa-Hupe
-                    setMtdIndicator(useData2Byte.byte[0],2);
-                    return;
-            case 0x0004:   // Sifa-Hauptschalter
-                    return;
-            case 0x0005:   // Sifa-Störschalter         //myIndicators->setSifaStoerschalter(useData2Byte.byte[0]);
-                //qDebug() << "Sifa-SS:    " + QString::number(useData2Byte.byte[0]);
-                setMtdIndicator(useData2Byte.byte[0] % 2 ,0); // 2 = Sifa on, 1 = Sifa off
-                return;
-            }
+              //case 0x0001: return;                                                                        // Bauart Sifasystem als Text
+                case 0x0002: setMtdIndicator(useData2Byte.byte[0],1);return;                                // Status Sifa-Leuchtmelder
+                case 0x0003: setMtdIndicator(useData2Byte.byte[0],2);return;                                // Status Sifa-Hupe
+              //case 0x0004: return;                                                                        // Sifa-Hauptschalter
+                case 0x0005: setMtdIndicator(useData2Byte.byte[0] % 2 ,0); return;                          // Sifa-Störschalter // 2 = Sifa on, 1 = Sifa off
+                }
             return;
         case 0x066:     // 11.3.3.3.5 Status Tueren
             switch(nodeIds[3]) {
             case 0x0001:      // Bezeichnung des Türsystems als Text
-                if (QString(useDataComplex).contains("SAT")){
-                    setMtdIndicator(2,9);   // Türsystem SAT
-                    return;
-                }
-                if (QString(useDataComplex).contains("TB0")){
-                    setMtdIndicator(3,9);   // Türsystem TB0
-                    return;
-                }
-                if (QString(useDataComplex).contains("TAV")){
-                    setMtdIndicator(4,9);   // Türsystem TAV
-                    return;
-                }
-                if (QString(useDataComplex).contains("SST")){
-                    setMtdIndicator(5,9);   // Türsystem SST
-                    return;
-                }
-                setMtdIndicator(1,9);       // Türsystem undefiniert
+                if (QString(useDataComplex).contains("SAT")){setMtdIndicator(2,9);return;}                  // Türsystem SAT
+                if (QString(useDataComplex).contains("TB0")){setMtdIndicator(3,9);return;}                  // Türsystem TB0
+                if (QString(useDataComplex).contains("TAV")){setMtdIndicator(4,9);return;}                  // Türsystem TAV
+                if (QString(useDataComplex).contains("SST")){setMtdIndicator(5,9);return;}                  // Türsystem SST
+                setMtdIndicator(1,9);                                                                       // Türsystem undefiniert
                 return;
-            case 0x0002:      // Status linke Seite
-                setMtdIndicator(useData2Byte.byte[0],10);
-                return;
-            case 0x0003:      // Status rechte Seite
-                setMtdIndicator(useData2Byte.byte[0],11);
-                return;
+            case 0x0002: setMtdIndicator(useData2Byte.byte[0],10);return;                                   // Status linke Seite
+            case 0x0003: setMtdIndicator(useData2Byte.byte[0],11);return;                                   // Status rechte Seite
           //case 0x0004:return;   // Traktionssperre aktiv
           //case 0x0005:return;   // Freigabestatus (Seitenwahlschalter)
           //case 0x0006:return;   // Melder links an
@@ -804,14 +669,10 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                         QTimer::singleShot(2000, this, SLOT(resetVehicleBlocking()));
                     }
                     return;
-                case 0x0006:
-                    myPower->setBaureihe(QString(useDataComplex));
-                    return;
+                case 0x0006: myPower->setBaureihe(QString(useDataComplex));return;
                 case 0x0025:
                     switch (nodeIds[5]){
-                    case 0x0001:
-                        tractionType = useData2Byte.byte[0];
-                        return;
+                    case 0x0001:tractionType = useData2Byte.byte[0];return;
                     case 0x0002:
                         currentType = useData2Byte.byte[0];
                         setTractionType();
@@ -843,20 +704,17 @@ void zusi3Tcp::zusiDecoderFahrpult(){
         switch(nodeIds[2]){
         case 0x0001:
             switch(nodeIds[3]){
-            case 0x0002:    // Tastaturzuordnung
-                emit newTastaturkommando(useData2Byte.Word);
-                return;
+            case 0x0002: emit newTastaturkommando(useData2Byte.Word);return;   // Tastaturzuordnung
             }
         }
         return;
     case 0x000C:
         switch(nodeIds[2]){
         case 0x0002: setZugnummer(QString(useDataComplex), "Fahrplan");return; // Aktuelle Zugnummer
-            //case 0x0003: return; // Status Ladepause, 0: Ende Ladepause (Start der Simulation)
+      //case 0x0003: return; // Status Ladepause, 0: Ende Ladepause (Start der Simulation)
         case 0x0005: // 1: Zug neu übernommen
             if(useData2Byte.byte[0] > 0){
                 emit changedTrain();
-                //qDebug() << "Zug neu übernommen";
                 reconnect();
             }
             return;
