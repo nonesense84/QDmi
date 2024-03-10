@@ -49,7 +49,7 @@ private slots:
 public slots:
 
 signals:
-    void newIconE3(QString lmOn, QString lmOff);
+    void newIconE2(QString lmOn, QString lmOff);
     void newIconG1(QString lmOn, QString lmOff);
     void newIconG2(QString lmOn, QString lmOff);
     void newIconG3(QString lmOn, QString lmOff);
@@ -60,7 +60,7 @@ signals:
     void newIconG8(QString lmOn, QString lmOff);
     void newIconG9(QString lmOn, QString lmOff);
     void newIconG10(QString lmOn, QString lmOff);
-    void newIconBehavE3(bool anabled, quint8 freq, bool inverse);
+    void newIconBehavE2(bool anabled, quint8 freq, bool inverse);
     void newIconBehavG1(bool anabled, quint8 freq, bool inverse);
     void newIconBehavG2(bool anabled, quint8 freq, bool inverse);
     void newIconBehavG3(bool anabled, quint8 freq, bool inverse);

@@ -4,7 +4,7 @@
 
 dmiLabel::dmiLabel(QWidget *parent) : QWidget(parent){
     fontFactor = 96 / QApplication::screens().at(0)->logicalDotsPerInch();
-    setTargetDistance(100,false);
+    setTargetDistance(100,false, false, false);
     QFontDatabase::addApplicationFont(":/fonts/FreeSans.ttf");
     QFontDatabase::addApplicationFont(":/fonts/Segment7Standard.otf");
 }
@@ -39,13 +39,12 @@ void dmiLabel::mousePressEvent(QMouseEvent *event){
 
 void dmiLabel::mouseReleaseEvent(QMouseEvent *event){
     isPushed = false;
+    static quint8 count = 0;
     if(isEnab){
         emit clicked(true);
-        if(isButton){
-            QMediaPlayer *click =new QMediaPlayer;          // workaround: QSound::play crash on some android devices
-            click->setMedia(QUrl("qrc:/sounds/click.wav"));
-            click->setVolume(50);
-            click->play();
+        if(isButton && !isDataEntryButton){
+            click1->stop();
+            click1->play();
         }
         update();
         emit txtBtnClicked(emitText);
@@ -62,6 +61,11 @@ void dmiLabel::setAsButton(bool enabled, QString text){
 }
 
 void dmiLabel::setAsButton(bool enabled, QString text, QString textToEmit){
+    if(click1 == nullptr){
+        click1 =new QMediaPlayer;          // workaround: QSound::play crash on some android devices
+        click1->setMedia(QUrl("qrc:/sounds/click.wav"));
+        click1->setVolume(50);
+    }
     bool needUpdate = false;
     if(isEnab != enabled || labelText != text)needUpdate = true;
     isButton = true;
@@ -123,11 +127,15 @@ void dmiLabel::setAsDataEntryLabel(QString text, bool isInputfield, bool isEnabl
     update();
 }
 
-void dmiLabel::setTargetDistance(quint16 distance, bool visible){
-    if(!visible) distance = 0;
+void dmiLabel::setTargetDistance(quint16 distance, bool barVisible, bool digitalVisible, bool fromEtcs){
+    if(targetDistanceFromEtcs != fromEtcs){
+        targetDistanceFromEtcs = fromEtcs;
+        setIsDistanceScale();
+    }
     targetDistanceDest = distance;
     targetDistance = distance;
-    targetDistanceVisible = visible;
+    targetDistanceBarVisible = barVisible;
+    targetDistanceDigitalVisible = digitalVisible;
     if(targetDistance > distanceScale){
         targetDistanceGraph = distanceScale;
         attenuationTimer->stop();
@@ -143,7 +151,7 @@ void dmiLabel::setIsDistanceScale(){
     attenuationTimer->setInterval(80);
     attenuationTimer->start();
     isTargetDistance = true;
-    if(useEraStyle){
+    if(useEraStyle || targetDistanceFromEtcs){
         fileForDistanceScale = ":/icons/targetDistEra1000m.svg";
         distanceScale = 1000;
     }
@@ -160,9 +168,10 @@ void dmiLabel::setEraUse(bool useEra){
 }
 
 void dmiLabel::updateBlinking(){
-    blinkerFast = !blinkerFast;
+    blinkerSuperFast = !blinkerSuperFast;
+    if(blinkerSuperFast)blinkerFast = !blinkerFast;
     if(blinkerFast) blinkerSlow = !blinkerSlow;
-    if((blinkFrequency != 0 && fileNameIsSet)){
+    if((blinkFrequency != 0 && fileNameIsSet) || acklowedgeFrameActive){
         update();
     }
 }
@@ -218,9 +227,14 @@ void dmiLabel::setCustomFontFactor(qreal factor){
 }
 
 void dmiLabel::setCustomFontFactor(qreal factor, Qt::Alignment customAlignment){
-    customFontFactor = factor;
+    setCustomFontFactor(factor);
     hasCustomAlignment = true;
     alignment = static_cast<int>(customAlignment);
+}
+
+void dmiLabel::setCustomFontFactor(qreal factor, Qt::Alignment customAlignment, quint8 style){
+    textStyle = style;
+    setCustomFontFactor(factor, customAlignment);
 }
 
 void dmiLabel::setText(QString text){
@@ -232,6 +246,7 @@ void dmiLabel::setText(QString text){
 
 void dmiLabel::setText(quint16 value){
     QString text = QString::number(value);
+    if(value == 0) text = "";
     if(labelText != text){
         labelText = text;
         update();
@@ -263,6 +278,9 @@ void dmiLabel::setUnclosedFrame(bool openL, bool openR, bool openU, bool openD){
     borderTClosed = !openU;
     borderBClosed = !openD;
 }
+void dmiLabel::setAcklowedgeFrame(bool active){
+    acklowedgeFrameActive = active;
+}
 
 void dmiLabel::setTextFieldUsing(quint8 numFields){
     isTextField = true;
@@ -281,7 +299,7 @@ void dmiLabel::setSegmentDigitToUse(quint8 position){
     segmentPosition = position;
 }
 
-void dmiLabel::setSegmentText(quint16 value, bool textVisible){
+void dmiLabel::setSegmentText(quint16 value, bool textVisible, bool fromEtcs){
     if(isSegment != textVisible || segmentValue != value){
         segmentValue = value;
         isSegment = textVisible;
@@ -291,7 +309,7 @@ void dmiLabel::setSegmentText(quint16 value, bool textVisible){
     }
 }
 
-void dmiLabel::addTextMessage(QString text, QColor textColor, QColor bgColor, quint8 msgId){
+void dmiLabel::addTextLzbMessage(QString text, QColor textColor, QColor bgColor, quint8 msgId){
     if(!isTextField)setTextFieldUsing(1);
     for(quint8 i=0; i<10; i++){
         if(messageIds[i] == msgId){
@@ -343,6 +361,13 @@ void dmiLabel::shiftTextMessageOffset(qint8 shift){
   //qDebug() << "textMessageOffset: " + QString::number(textMessageOffset);
 }
 
+void dmiLabel::setTextMessageOffset(qint8 offset){
+    textMessageOffset = offset;
+    if(textMessageOffset < 0) textMessageOffset = 0;
+    if(textMessageOffset >= highestTextMessgePosition) textMessageOffset = highestTextMessgePosition - numTextFields + 1;
+    update();
+}
+
 void dmiLabel::paintEvent(QPaintEvent *)
 {
     if(isVisible){
@@ -355,7 +380,7 @@ void dmiLabel::paintEvent(QPaintEvent *)
         // First we have to draw the frame of the label.
         // In case of a data entry button, there is no frame arround,
         // so the buttom will be drawn by the frame itself, and without a frame if its pushed.
-        // If it is a regular button, we have to draw the button INSIDE the label with swaped worder colors.
+        // If it is a regular button, we have to draw the button INSIDE the label with swaped border colors.
         // ...But only, when its not pushed, because the we only need the frame.
         if(isDataEntryButton && isPushed){ // Pushed data enrtry button. Entire label without a frame:
             paintFrame(&painter, centralAreaLbl, bgColor,  bgColor, 0);
@@ -370,21 +395,12 @@ void dmiLabel::paintEvent(QPaintEvent *)
             }
             paintIcon(&painter, centralAreaBtn);
         }
-        if(isTextField){
-            paintTextMessages(&painter, centralAreaLbl);
-        }
-        if(isSegment){
-            paintSegment(&painter, centralAreaLbl);
-        }
-        if(isTargetDistance && targetDistanceVisible){
-            paintDistance(&painter, centralAreaLbl);
-        }
-        if(!isTargetDistance && !isSegment && !isButton){
-            paintIcon(&painter, centralAreaLbl);
-        }
-        if(labelText != ""){
-            paintText(&painter, centralAreaLbl);
-        }
+        if(acklowedgeFrameActive && blinkerSuperFast)       paintAckFrame(&painter, centralAreaLbl, era::yellow);
+        if(isTextField)                                     paintTextMessages(&painter, centralAreaLbl);
+        if(isSegment)                                       paintSegment(&painter, centralAreaLbl);
+        if(isTargetDistance)                                paintDistance(&painter, centralAreaLbl);
+        if(!isTargetDistance && !isSegment && !isButton)    paintIcon(&painter, centralAreaLbl);
+        if(labelText != "")                                 paintText(&painter, centralAreaLbl);
     }
 }
 
@@ -416,12 +432,14 @@ void dmiLabel::paintText(QPainter *iconPainter, QRect centralArea){
 
 void dmiLabel::paintDistance(QPainter *iconPainter, QRect centralArea){
     iconPainter->save();
-    svgActive.load(fileForDistanceScale);
-    svgActive.render(iconPainter,centralArea);
+    if(targetDistanceBarVisible){
+        svgActive.load(fileForDistanceScale);
+        svgActive.render(iconPainter,centralArea);
+    }
     iconPainter->scale(static_cast<qreal>(width()) / 58.0, static_cast<qreal>(height()) / 221.0);
 
     QRect digitalDistPosition(8,5,48,18);
-    if(useEraStyle){
+    if(useEraStyle || targetDistanceFromEtcs){
         iconPainter->setBrush(era::grey);
         iconPainter->setPen(era::grey);
         iconPainter->setFont(QFont("FreeSans",
@@ -441,30 +459,36 @@ void dmiLabel::paintDistance(QPainter *iconPainter, QRect centralArea){
     digitalDistPosition.setLeft(45 - textRect.width());
     //quint16 targetDistanceAnalog = targetDistance;
     qreal tem = 0.0;
-    if(useEraStyle){
-        iconPainter->drawText(digitalDistPosition,QString::number(ceil((targetDistance / 10)) * 10));
-        if(targetDistanceGraph < 1000)
-            tem = -2.50582750582749E-10 * qPow(targetDistanceGraph,4)
-                  +7.07459207459205E-07 * qPow(targetDistanceGraph,3)
-                  -0.000815792540793 * qPow(targetDistanceGraph,2)
-                  +0.545314685314686 * targetDistanceGraph
-                  +0.300699300699198;
-        else
-            tem = 187;
-        QRectF distBar(30,217,10,-tem);
-        iconPainter->drawRect(distBar);
+    if(useEraStyle || targetDistanceFromEtcs){
+        if( targetDistanceFromEtcs && targetDistanceDigitalVisible)iconPainter->drawText(digitalDistPosition,QString::number(ceil((targetDistance / 10)) * 10));
+        if(!targetDistanceFromEtcs && targetDistanceBarVisible)iconPainter->drawText(digitalDistPosition,QString::number(ceil((targetDistance / 10)) * 10));
+        if(targetDistanceBarVisible){
+            if(targetDistanceGraph < 1000)
+                tem = -2.50582750582749E-10 * qPow(targetDistanceGraph,4)
+                      +7.07459207459205E-07 * qPow(targetDistanceGraph,3)
+                      -0.000815792540793 * qPow(targetDistanceGraph,2)
+                      +0.545314685314686 * targetDistanceGraph
+                      +0.300699300699198;
+            else
+                tem = 187;
+            QRectF distBar(30,217,10,-tem);
+            iconPainter->drawRect(distBar);
+        }
     }
     else{
-        if(targetDistance > 4000)iconPainter->drawText(digitalDistPosition,QString::number(ceil((targetDistance + 100)/ 200) * 200));
-        if(targetDistance <= 100)
-            tem = 0.19135135136 * targetDistanceGraph + 1.58882185807825E-15;
-        if(targetDistanceGraph >  100 && targetDistanceGraph <= 1000)
-            tem = 0.09567567568 * targetDistanceGraph + 9.56756756800004;
-        if(targetDistanceGraph >  1000)
-            tem = 0.02391891892 * targetDistanceGraph + 81.3243243279999;
-        QRectF distBar(42,213,10,-tem);
-        iconPainter->drawRect(distBar);
+        if(targetDistanceDigitalVisible)iconPainter->drawText(digitalDistPosition,QString::number(ceil((targetDistance + 100)/ 200) * 200));
+        if(targetDistanceBarVisible){
+            if(targetDistance <= 100)
+                tem = 0.19135135136 * targetDistanceGraph + 1.58882185807825E-15;
+            if(targetDistanceGraph >  100 && targetDistanceGraph <= 1000)
+                tem = 0.09567567568 * targetDistanceGraph + 9.56756756800004;
+            if(targetDistanceGraph >  1000)
+                tem = 0.02391891892 * targetDistanceGraph + 81.3243243279999;
+            QRectF distBar(42,213,10,-tem);
+            iconPainter->drawRect(distBar);
+        }
     }
+
     iconPainter->restore();
 }
 
@@ -566,5 +590,11 @@ void dmiLabel::paintFrame(QPainter *framePainter,QRect centralArea, QColor color
     framePainter->drawPolygon(brightBorder, 5);
     framePainter->setBrush(bgColor);
 
+    framePainter->drawRect(centralArea);
+}
+void dmiLabel::paintAckFrame(QPainter *framePainter,QRect centralArea, QColor framecolor){
+    centralArea.adjust(borderThickness,borderThickness, -borderThickness, -borderThickness);
+    QPen pen(framecolor, 2 * borderThickness, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
+    framePainter->setPen(pen);
     framePainter->drawRect(centralArea);
 }

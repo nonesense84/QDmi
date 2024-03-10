@@ -100,5 +100,49 @@
         <file>icons/LmIndusi_on.svg</file>
         <file>icons/Lm60_on.svg</file>
         <file>icons/Lm60_off.svg</file>
+        <file>icons/LE_03.svg</file>
+        <file>icons/LE_05.svg</file>
+        <file>icons/LE_04.svg</file>
+        <file>icons/MO_18.svg</file>
+        <file>icons/MO_06.svg</file>
+        <file>icons/MO_14.svg</file>
+        <file>icons/MO_04.svg</file>
+        <file>icons/MO_16.svg</file>
+        <file>icons/MO_12.svg</file>
+        <file>icons/MO_IS.svg</file>
+        <file>icons/LE_01.svg</file>
+        <file>icons/MO_20.svg</file>
+        <file>icons/MO_15.svg</file>
+        <file>icons/MO_08.svg</file>
+        <file>icons/MO_05.svg</file>
+        <file>icons/MO_02.svg</file>
+        <file>icons/LE_10.svg</file>
+        <file>icons/LE_14.svg</file>
+        <file>icons/LE_09a.svg</file>
+        <file>icons/LE_08a.svg</file>
+        <file>icons/LE_13.svg</file>
+        <file>icons/LE_11.svg</file>
+        <file>icons/LE_15.svg</file>
+        <file>icons/LE_06.svg</file>
+        <file>icons/LE_07.svg</file>
+        <file>icons/LE_12.svg</file>
+        <file>icons/ST_04.svg</file>
+        <file>icons/ST_03.svg</file>
+        <file>icons/ST_02.svg</file>
+        <file>icons/MO_03.svg</file>
+        <file>icons/TC01.svg</file>
+        <file>icons/TC02.svg</file>
+        <file>icons/TC03.svg</file>
+        <file>icons/TC04.svg</file>
+        <file>icons/TC05.svg</file>
+        <file>icons/TC06.svg</file>
+        <file>icons/TC07.svg</file>
+        <file>icons/TC08.svg</file>
+        <file>icons/TC09.svg</file>
+        <file>icons/arrowLeft_dis.svg</file>
+        <file>icons/arrowLeft_ena.svg</file>
+        <file>icons/arrowRight_dis.svg</file>
+        <file>icons/arrowRight_ena.svg</file>
+        <file>icons/override.svg</file>
     </qresource>
 </RCC>

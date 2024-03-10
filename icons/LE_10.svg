@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="350"
+   height="302"
+   viewBox="0 0 350 302"
+   id="svg2"
+   version="1.1"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
+   sodipodi:docname="LE_10.svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="282.20804"
+     inkscape:cy="-67.305386"
+     inkscape:document-units="px"
+     inkscape:current-layer="text44"
+     showgrid="false"
+     inkscape:window-width="3440"
+     inkscape:window-height="1377"
+     inkscape:window-x="1072"
+     inkscape:window-y="275"
+     inkscape:window-maximized="1"
+     units="px"
+     inkscape:document-rotation="0"
+     showguides="false" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-910.3621)">
+    <path
+       style="fill:#000000"
+       d=""
+       id="path4220"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:#000000"
+       d=""
+       id="path4218"
+       inkscape:connector-curvature="0" />
+    <g
+       aria-label="2"
+       id="text37"
+       style="font-size:88.3578px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:FreeSans;fill:#c3c3c3;fill-opacity:1;stroke-width:2.20895"
+       transform="translate(396.23233,50.002542)">
+      <g
+         aria-label="3"
+         id="text44"
+         style="font-size:85.8979px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:FreeSans;fill:#c3c3c3;fill-opacity:1;stroke-width:4.7436">
+        <text
+           xml:space="preserve"
+           style="font-size:90.5789px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:FreeSans;fill:#c3c3c3;fill-opacity:1;stroke-width:10.7418"
+           x="-113.2381"
+           y="1024.2358"
+           id="text51-3"><tspan
+             sodipodi:role="line"
+             id="tspan49-4"
+             x="-113.2381"
+             y="1024.2358"
+             style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:FreeSans;-inkscape-font-specification:'FreeSans Bold';fill:#c3c3c3;fill-opacity:1;stroke-width:10.7418">1</tspan></text>
+        <rect
+           style="font-size:85.8979px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:FreeSans;fill:#c3c3c3;fill-opacity:1;stroke:none;stroke-width:3.879"
+           id="rect862-0"
+           width="138.6153"
+           height="20.606287"
+           x="-364.2323"
+           y="981.51068" />
+        <path
+           id="rect867-9"
+           style="font-size:85.8979px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:FreeSans;fill:#c3c3c3;fill-opacity:1;stroke:none;stroke-width:5.1583"
+           d="m -229.63427,955.35956 42.41071,36.161 v 0 l -42.41071,36.16094 z"
+           sodipodi:nodetypes="ccccc" />
+        <rect
+           style="fill:#c3c3c3;fill-opacity:1;stroke-width:0.396823"
+           id="rect31-7"
+           width="48"
+           height="55"
+           x="-117.23233"
+           y="1034.8595"
+           ry="0.048384733" />
+        <rect
+           style="fill:#c3c3c3;fill-opacity:1;stroke-width:0.396823"
+           id="rect31-0-1"
+           width="48"
+           height="55"
+           x="-198.23233"
+           y="1034.8595"
+           ry="0.048384733" />
+        <rect
+           style="fill:#c3c3c3;fill-opacity:1;stroke-width:0.396823"
+           id="rect31-0-7-1"
+           width="48"
+           height="55"
+           x="-286.23233"
+           y="1034.8595"
+           ry="0.048384733" />
+        <rect
+           style="fill:#c3c3c3;fill-opacity:1;stroke-width:0.396823"
+           id="rect31-0-7-4-2"
+           width="48"
+           height="55"
+           x="-367.23233"
+           y="1034.8595"
+           ry="0.048384733" />
+      </g>
+    </g>
+  </g>
+</svg>

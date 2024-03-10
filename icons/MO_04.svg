@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   width="72"
+   height="72"
+   id="svg14"
+   sodipodi:docname="MO_04.svg"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)">
+  <metadata
+     id="metadata18">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="3440"
+     inkscape:window-height="1377"
+     id="namedview16"
+     showgrid="false"
+     inkscape:zoom="14"
+     inkscape:cx="36"
+     inkscape:cy="36"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg14" />
+  <defs
+     id="defs6">
+    <desc
+       id="desc2"> print colours </desc>
+    <style
+       type="text/css"
+       id="style4">
+			rect.bg {fill:rgb(23,54,96); fill-opacity:1; stroke:none}
+			rect.lightgrey {fill:rgb(210,210,210); fill-opacity:1; stroke:none}
+			path.BGlinesBlack {fill:none; stroke:rgb(0,0,0); stroke-opacity:1; stroke-width:2}
+			path.BGlinesShadow {fill:none; stroke:rgb(10,80,146); stroke-opacity:1; stroke-width:2}
+			path.lightgrey {fill:rgb(210,210,210); fill-opacity:1; stroke:rgb(210,210,210); stoke-opacity:1}
+		</style>
+  </defs>
+  <rect
+     class="lightgrey"
+     x="-1.7763568e-15"
+     y="0"
+     width="72"
+     height="72"
+     id="rect11"
+     style="stroke-width:1.05882" />
+  <path
+     id="Signal"
+     d="m26,66 l 16,0 0,-4, -6,0 0,-4 2,0 a 6,6 0 0,0 6,-6 l 0,-40 a 6,6 0 0,0 -6,-6 l -10,0     a 6,6 0 0,0 -6,6 l 0,40 a 6,6 0 0,0 6,6 l 2,0 0,4 -4,0 z     m 5,-56 a 6,6 0 0,0 0,12 a 6,6 0 0,0 0,-12     m 0,16 a 6,6 0 0,0 0,12 a 6,6 0 0,0 0,-12     m 0,16 a 6,6 0 0,0 0,12 a 6,6 0 0,0 0,-12"
+     style="stroke:none; fill:rgb(191,0,2); fill-rule:evenodd" />
+</svg>

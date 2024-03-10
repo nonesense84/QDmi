@@ -10,6 +10,7 @@
 #include <QMouseEvent>
 #include <QDateTime>
 #include <QNetworkInterface>
+#include <QStandardItemModel>
 #include "era.h"
 #include "lzb.h"
 #include "sep.h"
@@ -24,23 +25,40 @@
 #endif
 
 #define P_ABE_DefaultWindow  0
-#define P_ABE_DataEntry  1
-#define P_DG_DefaultWindow  0
-#define P_DG_Settings  1
+#define P_ABE_DataEntry      1
+#define P_DG_DefaultWindow   0
+#define P_DG_Settings        1
 #define P_DG_System_Version  5
-#define P_DG_QDmi  6
-#define P_DG_Data_entry  7
-#define P_DG_Main_menu  8
-#define P_entry_TrainData  1
-#define P_entry_DriverId  3
-#define P_entry_ZusiIp  0
-#define P_entry_TrainNumber  4
-#define P_Keyboard_Numeric  0
-#define P_Keyboard_Alphanumeric  1
-#define P_Keyboard_YesNo  2
-#define P_EntryButton_YesNo  2
+#define P_DG_QDmi            6
+#define P_DG_Data_entry      7
+#define P_DG_Main_menu       8
+#define P_DG_Override_menu   9
+
+#define P_entry_ZusiIp       0
+#define P_entry_TrainData1   1
+#define P_entry_TrainData2   2
+#define P_Entry_Button_YesNo 3
+#define P_entry_DriverId     4
+#define P_entry_TrainNumber  5
+#define P_entry_Level        6
+
+#define P_Keyboard_Numeric          0
+#define P_Keyboard_Alphanumeric     1
+#define P_Keyboard_ValidYesNo       2
+#define P_Keyboard_brakingRegimePzb 3
+#define P_Keyboard_brakingRegimeLzb 4
+#define P_Keyboard_TrainCategory    5
+#define P_Keyboard_yesNo            6
+#define P_Keyboard_axleLoad         7
+#define P_Keyboard_loadingGauge     8
+#define P_Keyboard_level            9
+
 #define P_entry_complete  0
 #define P_entry_not_complete  1
+
+#define P_TrnSettingsAndPage_NonOfThem  0
+#define P_TrnSettingsAndPage_TrnSettings  1
+#define P_TrnSettingsAndPage_Page  2
 
 namespace Ui {
 class MainWindow;
@@ -50,8 +68,8 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-#define levelUndefined  10
-#define levelPzbLzbNtc  11
+//#define levelUndefined  10
+#define levelPzbLzbNtc  6
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -61,14 +79,15 @@ private slots:
     void setKeyboardType(quint8 type);
     void setKeyboardType(quint8 type, bool showDott);
     void TdeCompeteClicked();
-    void messaesOutOfViewHandling5to9(bool outOfView);
-    void messaesOutOfViewHandling8to9(bool outOfView);
+    void setEtcsTexs(QStringList timeStamps, QStringList messages);
+    void srollTextMessages(qint8 scroll);
     void openMainMenu();
+    void fieldF2Clicked();
     void fieldF3Clicked();
     void fieldF4Clicked();
     void openSettings();
-    void arrowUpClicked();
-    void arrowDownClicked();
+  //void arrowUpClicked();
+  //void arrowDownClicked();
     void connectTimers();
     void process();
     void connectPzbIcons();
@@ -76,19 +95,22 @@ private slots:
     void connectMtdPower();
     void connectTcpStuff();
     void gotTcpConnectionFeedback(QString feedback);
-    void setLevel(quint8 level);
+    void setEvcPresent(bool present);
+    void setLevel(quint16 level);
+    void swapTdePage(bool seccondPage);
     void openTrainDataEntry();
     void cabActivation(bool cabActivated, bool standstill);
     void openDriverIdEntry();
     void openTrainRunnimgNumberEntry();
+    void openLevelSelection();
     void settingsBtn1Clicked();
     void settingsBtn2Clicked();
     void settingsBtn3Clicked();
     void openSystemVersionInfo();
     void openQDmiSettings();
     void openNetworkSettings();
-    void disableTde();
-    void enableTde();
+    void enableTde(bool enable);
+    void anableOverride(bool enable);
     void closeQDmi();
     void settingsBtn8Clicked();
     void geoPositionClicked();
@@ -125,14 +147,17 @@ private:
     bool useDistEraForLzb;
     bool useHookForLzb;
     bool useTextFromPzb;
-    bool MessaesOutOffView5to9 = false;
-    bool MessaesOutOffView8to9 = false;
+  //bool MessaesOutOffView5to9 = false;
+  //bool MessaesOutOffView8to9 = false;
+    quint8 indexOffsetTextmessage = 0;
+    quint8 numTextmessage = 0;
     QPoint lKilickPos;
     QString dataString = "";
     quint8 maxEntryStrLength;
     quint8 actKeyboardType = 0;
     QString activeDataEntryItem = "";
-    uint8_t  actLevel = 0;
+    uint16_t  actLevel = 0;
+    bool evcPresent = false;
 
 protected:
   void resizeEvent ( QResizeEvent * event );
@@ -147,6 +172,7 @@ signals:
     void newZusiIp(QString ip);
     void newDriverId(QString number);
     void newTrainRunningNumber(QString number);
+    void newLevelSelection(QString level);
     void newTextMessagesSettings(quint8  setting);
     void naivationArrowClick(qint8 direction);
 };

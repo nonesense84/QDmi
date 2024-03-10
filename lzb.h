@@ -18,6 +18,8 @@ public slots:
     void setTextUsing(quint8 useAutomText);
     void setZusiAsDataSource(bool value);
     void setVAct(quint16 V);
+    void setSilent(bool silient);
+    void setBrakeFromEtcs(bool brake);
 
 private slots:
     void addOrRemoveMessage(quint8 message, bool add);
@@ -50,12 +52,13 @@ signals:
     void newIconBehav7(bool anabled, quint8 freq, bool inverse);
     void newIconBehavC9(bool anabled, quint8 freq, bool inverse);
     void newIconBehavG1(bool anabled, quint8 freq, bool inverse);
-    void newVTarget(quint16 vZiel, bool visible);
-    void newVPermit(quint16 vSoll, bool visible);
-    void newOverspeed(bool warning);
+    void newVTarget(quint16 vZiel, bool visible, bool fromEtcs);
+    void newVPermit(quint16 vSoll, bool visible, bool fromEtcs);
     void newIntervenation(bool intervenation);
     void newVMaxReducing(bool vMaxReducing);
-    void newTarDist(quint16 zielEntf, bool visible);
+    void newVOverspeed(quint16 V);
+    void newOverspeed(bool warning);
+    void newTarDist(quint16 zielEntf, bool visibleBar, bool visibleDigital, bool fromEtcs);
 
 private:
     #define Keine 0
@@ -69,6 +72,7 @@ private:
     #define Fuenfhundert 2
     #define Zwangsbremsung 3
     #define Stoerbetrieb 4
+    bool staySilent = false;
     bool useTxtMsgByLm = false;
     bool zusiIsDataSource = false;
     bool blauBlink = false;
@@ -83,6 +87,7 @@ private:
     bool hsAn = false;
     bool ueAusfall = false;
     bool pzb90 = false;
+    bool brakeFromEtcs = false;
     quint8 stoerschalter;
     quint8 zugart = 2;
     quint8 zustLmBlau;
@@ -96,6 +101,7 @@ private:
     quint16 vAct = 0;
     quint16 vPerm = 0;
     quint16 vDest = 0;
+    quint16 vOver = 0;
 };
 
 #endif // LZB_H

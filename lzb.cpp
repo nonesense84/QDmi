@@ -3,7 +3,12 @@
 
 lzb::lzb(){
 }
-
+void lzb::setSilent(bool silient){
+    staySilent = silient;
+}
+void lzb::setBrakeFromEtcs(bool brake){
+    brakeFromEtcs = brake;
+}
 void lzb::setTextUsing(quint8 useAutomText){
     if(useTxtMsgByLm != (useAutomText == 0)){
         //qDebug()  << db::numMessages;
@@ -29,8 +34,12 @@ void lzb::setZusiAsDataSource(bool value){
 }
 
 void lzb::setAnalogValues(QVector<quint8> values){
+    if(staySilent)return;
     if(values.length()>=7){
-        vPerm = static_cast<quint16>((values[4] << 8) + values[3]);
+        quint16 newVPerm = static_cast<quint16>((values[4] << 8) + values[3]);
+        emit newVMaxReducing(newVPerm < vPerm);
+        vPerm = newVPerm;
+        vOver = (static_cast<quint16>((values[4] << 8) + values[3])) + 9;
         quint16 newVDest = static_cast<quint16>((values[2] << 8) + values[1]);
         if(newVDest < vDest){
             geschwWechsel = true;
@@ -38,16 +47,18 @@ void lzb::setAnalogValues(QVector<quint8> values){
         }
         if(newVDest == vPerm) geschwWechsel = false;
         vDest = newVDest;
-        emit newVTarget(static_cast<quint16>((values[2] << 8) + values[1]), (values[0] & 0x0f) > 0);
-        emit newVPermit(static_cast<quint16>((values[4] << 8) + values[3]), (values[0] & 0x0f) > 0);
-        emit newTarDist(static_cast<quint16>((values[6] << 8) + values[5]), (values[0] & 0x0f) > 0);
+        quint16 distance = static_cast<quint16>((values[6] << 8) + values[5]);
+        emit newVTarget(static_cast<quint16>((values[2] << 8) + values[1]), (values[0] & 0x0f) > 0, false);
+        emit newVPermit(vPerm, (values[0] & 0x0f) > 0, false);
+        emit newVOverspeed(vOver);
+        emit newTarDist(distance, (values[0] & 0x0f) > 0, distance >= 4000, false);   
     }
 }
 
 void lzb::setVAct(quint16 V){
+    if(staySilent)return;
     vAct = V;
-    emit newOverspeed(overspeed || ((vAct > vPerm) &&  vPerm > 0));
-    emit newIntervenation(intervenation);
+  //emit newIntervenation(intervenation);   had to be removed during ETCS test. Keep in mind, that maybe still needed
 }
 
 void lzb::setStates(QVector<quint8> states){
@@ -63,11 +74,14 @@ void lzb::setStates(QVector<quint8> states){
     states[23] = states[23] * !pzb90;  // 75
     states[24] = states[24] * !pzb90;  // 65
     states[25] = states[25] * !pzb90;  // indusi
-    intervenation = ((states[12] > 1 && states[13] > 1) || states[ 6] >  0);
-    overspeed = states[ 8] >  1;
-    emit newOverspeed(overspeed || ((vAct > vPerm) &&  vPerm > 0));
-    emit newIntervenation(intervenation);
-    emit newVMaxReducing(states[ 8] >  0);
+    if(intervenation != ((states[12] > 1 && states[13] > 1) || states[ 6] >  0)){
+        intervenation = ((states[12] > 1 && states[13] > 1) || states[ 6] >  0);
+        emit newIntervenation(intervenation);
+    }
+    if(overspeed != (states[ 8] >  1)){
+        overspeed = states[ 8] >  1;
+        emit newOverspeed(overspeed);
+    }
     for(quint8 i = 0; i <= 25; i++){    // Remove all indicators, that have to be rmoved, to make space for new ones.
         if(states[i]  == 0){
             removeIndicator(i);
@@ -396,9 +410,9 @@ void lzb::removeIndicator(quint8 indId){
             break;
         }
     }
-    if(indId == 16){
+    if(indId == 16 && !brakeFromEtcs){
         emit newIconC9("", "");
-        emit newIconBehavC9(false, 0, false);
+      //emit newIconBehavC9(false, 0, false);
     }
     switch (i){
     case 0:

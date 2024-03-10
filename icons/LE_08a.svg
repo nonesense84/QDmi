@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="350"
+   height="302"
+   viewBox="0 0 350 302"
+   id="svg2"
+   version="1.1"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
+   sodipodi:docname="LE_08a.svg">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.1990511"
+     inkscape:cx="395.65922"
+     inkscape:cy="267.82374"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="3440"
+     inkscape:window-height="1377"
+     inkscape:window-x="1072"
+     inkscape:window-y="275"
+     inkscape:window-maximized="1"
+     units="px"
+     inkscape:document-rotation="0"
+     fit-margin-top="-24"
+     fit-margin-bottom="-24" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Ebene 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-910.3621)">
+    <path
+       style="fill:#000000"
+       d=""
+       id="path4220"
+       inkscape:connector-curvature="0" />
+    <path
+       style="fill:#000000"
+       d=""
+       id="path4218"
+       inkscape:connector-curvature="0" />
+    <g
+       style="font-style:normal;font-weight:normal;font-size:61.8224px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#c3c3c3;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="text4448"
+       transform="translate(5.71461,132.5)">
+      <path
+         d="m 41.767751,986.3544 v 16.0738 H 32.49439 v -45.06851 h 19.906815 q 7.047754,0 10.757099,3.5857 3.771166,3.5857 3.771166,10.38616 0,6.86229 -3.709344,10.94257 -3.709344,4.08028 -9.891585,4.08028 z m 0,-7.7278 h 8.655137 q 7.233221,0 7.233221,-6.73865 0,-3.46205 -1.792849,-5.13126 -1.731028,-1.6692 -5.440372,-1.6692 h -8.655137 z"
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:FreeSans;-inkscape-font-specification:'FreeSans Semi-Bold';fill:#c3c3c3;fill-opacity:1"
+         id="path4138" />
+      <path
+         d="m 105.18112,957.35969 v 7.7278 l -22.997937,29.61293 h 22.997937 v 7.72778 H 71.302439 v -7.72778 L 94.362197,965.08749 H 71.302439 v -7.7278 z"
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:FreeSans;-inkscape-font-specification:'FreeSans Semi-Bold';fill:#c3c3c3;fill-opacity:1"
+         id="path4140" />
+      <path
+         d="m 148.05012,989.44552 q 0,2.2256 -0.74187,4.32757 -0.74187,2.10196 -2.41107,4.1421 -1.60738,2.04014 -4.88397,3.27661 -3.27659,1.2364 -7.78962,1.2364 h -20.27775 v -45.06851 h 20.09228 q 4.20392,0 7.23322,1.23645 3.09112,1.23644 4.57486,3.21476 1.54556,1.9165 2.2256,3.77117 0.68005,1.85467 0.68005,3.64752 0,2.90565 -1.42191,5.00762 -1.42192,2.10196 -4.76033,4.26574 7.48051,4.38939 7.48051,10.94257 z M 121.2192,965.08749 v 10.2007 h 10.07705 q 6.55317,0 6.55317,-5.06944 0,-5.13126 -6.55317,-5.13126 z m 0,17.9285 v 11.68443 h 11.06621 q 6.86229,0 6.86229,-5.8113 0,-5.87313 -6.86229,-5.87313 z"
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:FreeSans;-inkscape-font-specification:'FreeSans Semi-Bold';fill:#c3c3c3;fill-opacity:1"
+         id="path4142" />
+      <path
+         d="m 180.47405,958.28702 h 4.1421 l -12.73542,45.00668 h -4.1421 z"
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:FreeSans;-inkscape-font-specification:'FreeSans Semi-Bold';fill:#c3c3c3;fill-opacity:1"
+         id="path4144" />
+      <path
+         d="m 216.12626,957.35969 v 37.34073 h 21.57602 v 7.72778 H 206.8529 v -45.06851 z"
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:FreeSans;-inkscape-font-specification:'FreeSans Semi-Bold';fill:#c3c3c3;fill-opacity:1"
+         id="path4146" />
+      <path
+         d="m 275.91722,957.35969 v 7.7278 l -22.99794,29.61293 h 22.99794 v 7.72778 h -33.87868 v -7.72778 l 23.05976,-29.61293 h -23.05976 v -7.7278 z"
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:FreeSans;-inkscape-font-specification:'FreeSans Semi-Bold';fill:#c3c3c3;fill-opacity:1"
+         id="path4148" />
+      <path
+         d="m 318.78622,989.44552 q 0,2.2256 -0.74187,4.32757 -0.74187,2.10196 -2.41107,4.1421 -1.60738,2.04014 -4.88397,3.27661 -3.27659,1.2364 -7.78962,1.2364 h -20.27775 v -45.06851 h 20.09228 q 4.20392,0 7.23322,1.23645 3.09112,1.23644 4.57486,3.21476 1.54556,1.9165 2.2256,3.77117 0.68005,1.85467 0.68005,3.64752 0,2.90565 -1.42191,5.00762 -1.42192,2.10196 -4.76033,4.26574 7.48051,4.38939 7.48051,10.94257 z M 291.9553,965.08749 v 10.2007 h 10.07705 q 6.55317,0 6.55317,-5.06944 0,-5.13126 -6.55317,-5.13126 z m 0,17.9285 v 11.68443 h 11.06621 q 6.86228,0 6.86228,-5.8113 0,-5.87313 -6.86228,-5.87313 z"
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:FreeSans;-inkscape-font-specification:'FreeSans Semi-Bold';fill:#c3c3c3;fill-opacity:1"
+         id="path4150" />
+    </g>
+    <rect
+       style="font-size:85.8979px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:FreeSans;fill:#c3c3c3;fill-opacity:1;stroke:none;stroke-width:3.879"
+       id="rect862-0"
+       width="138.6153"
+       height="20.606287"
+       x="84.000328"
+       y="1031.5133" />
+    <path
+       id="rect867-9"
+       style="font-size:85.8979px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:FreeSans;fill:#c3c3c3;fill-opacity:1;stroke:none;stroke-width:5.1583"
+       d="m 218.59835,1005.3621 42.41071,36.161 v 0 l -42.41071,36.1609 z"
+       sodipodi:nodetypes="ccccc" />
+  </g>
+</svg>

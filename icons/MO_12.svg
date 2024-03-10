@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   width="72"
+   height="72"
+   id="svg16"
+   sodipodi:docname="MO_12.svg"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)">
+  <metadata
+     id="metadata20">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1718"
+     inkscape:window-height="1368"
+     id="namedview18"
+     showgrid="false"
+     inkscape:zoom="7"
+     inkscape:cx="78.679143"
+     inkscape:cy="70.743352"
+     inkscape:window-x="1713"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="cab" />
+  <defs
+     id="defs6">
+    <desc
+       id="desc2"> print colours </desc>
+    <style
+       type="text/css"
+       id="style4">
+			rect.bg {fill:rgb(23,54,96); fill-opacity:1; stroke:none}
+			path.BGlinesBlack {fill:none; stroke:rgb(0,0,0); stroke-opacity:1; stroke-width:2}
+			path.BGlinesShadow {fill:none; stroke:rgb(10,80,146); stroke-opacity:1; stroke-width:2}
+			path.lightgrey {fill:rgb(210,210,210); fill-opacity:1; stroke:rgb(210,210,210); stoke-opacity:1}
+		</style>
+  </defs>
+  <g
+     id="cab">
+    <path
+       class="lightgrey"
+       id="windowWheel"
+       d="m 5,57 a 7,7 0 0,0 14,0 a 7,7 0 0,0 -14,0 m 2,-38 l 0,14 14,0 0,-4 -10,-10 z"
+       style="stroke:none" />
+    <path
+       class="lightgrey"
+       id="line"
+       d="m 5,55 h 18 l 6,-6 V 27 L 16.455334,14.455334 13,11 H 5"
+       style="fill:none;stroke-width:6"
+       sodipodi:nodetypes="ccccccc" />
+  </g>
+  <use
+     id="cab2"
+     xlink:href="#cab"
+     transform="matrix(-1,0,0,1,72,0)" />
+  <path
+     class="lightgrey"
+     id="coupler"
+     d="m 31,42 l 10,0 0,6 -10,0 z"
+     style="stroke:none" />
+</svg>

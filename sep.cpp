@@ -44,7 +44,7 @@ void sep::readingPendingSep(){
             for(int i = 0; i < 14; i = i + 1){
                 pzbLmsToDecoder[i*2 +1] = lowNib(datagram[pzbOffset + i]);
                 pzbLmsToDecoder[i*2  ] =   upNib(datagram[pzbOffset + i]);
-                // qDebug() << pzbLmsToDecoder;
+                //qDebug() << pzbLmsToDecoder;
             }
             emit newLzbIndicators(pzbLmsToDecoder);
             // ==================== Read LZB values ====================

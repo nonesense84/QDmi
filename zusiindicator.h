@@ -8,8 +8,8 @@
 #include <era.h>
 #include "db.h"
 #define vMAuffordZDE  50    // Maximum speed, till "Zugdaten eingeben" or 55/70/85 is blinking
-#define levelUndefined  10
-#define levelPzbLzbNtc  11
+//#define levelUndefined  10
+#define levelPzbLzbNtc  6
 class zusiIndicator : public QObject
 {
     Q_OBJECT
@@ -35,6 +35,7 @@ private:
     bool afbAn = false;
     bool ersatzauftrag = false, lzbHaltUeberfahren = false, grunddatenWirksam = false, ersatzdatenWirksam = false;
     bool lzbVorhanden;
+    QString simTime;
     QVector<quint8> lmsToDecoderOld;
     QTimer *lmElBlinkTestTimer;
     QVector<quint8> lzbValuesToDecoder;
@@ -53,9 +54,9 @@ public:
 
 signals:
     void newLzbIndicators(QVector<quint8> lmsToDecoder);
-    void newTextMessage(QString text, QColor forColor, QColor bgColor, quint8 id);
+    void newLzbTextMessage(QString text, QColor forColor, QColor bgColor, quint8 id);
     void removeMessage(quint8 id);
-    void newTechnicalMessage(QString text, QColor forColor, QColor bgColor, quint8 id);
+    void newTechnicalMessage(QStringList timeStamps, QStringList message);
     void removeTechnicalMessage(quint8 id);
     void newLzbValues(QVector<quint8> lmsToDecoder);
     void newSpeed(qreal speed);
@@ -63,9 +64,9 @@ signals:
     void newAfbSoll(quint16 vSoll, bool visible);
     void newFzgVmaxTacho(quint16 speed);
     void lzbAvailable(bool available);
-    void newLevelInforamtion(quint8 level);
-    void startDriving();
-    void stopDriving();
+    void newLevelInforamtion(quint16 level);
+    void speedGt0(bool);
+    void speedGt40(bool);
 
 public slots:
     void setMelderbild(uint8_t value);
@@ -120,6 +121,7 @@ public slots:
     void setAfbAn(bool value);
     void setFzgVMax(uint16_t value);
     void setZugbeeinflussungssystem(QString value);
+    void setSimTime(QString time);
     void makeLzbLmDatagram();
     void setDefaults();
     //====

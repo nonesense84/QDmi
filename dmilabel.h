@@ -30,6 +30,7 @@ public slots:
     void setIcon(QString filenameActive, QString filenameInactive);
     void setCustomFontFactor(qreal factor);
     void setCustomFontFactor(qreal factor, Qt::Alignment customAlignment);
+    void setCustomFontFactor(qreal factor, Qt::Alignment customAlignment, quint8 style);
     void setText(QString text);
     void setText(quint16 text);
     void setText(QString text, QColor textColor, QColor textColorDisabled, quint8 boldOrThin);
@@ -37,16 +38,18 @@ public slots:
     void setTextFieldUsing(quint8 numFields);
     void setTextFieldUsing(quint8 numFields, quint8 customAlignment);
     void setSegmentDigitToUse(quint8 position);
-    void setSegmentText(quint16 value, bool textVisible);
-    void addTextMessage(QString text, QColor textColor, QColor bgColor, quint8 msgId);
+    void setSegmentText(quint16 value, bool textVisible, bool fromEtcs);
+    void addTextLzbMessage(QString text, QColor textColor, QColor bgColor, quint8 msgId);
     void removeTextMessage(quint8 msgId);
     void shiftTextMessageOffset(qint8 shift);
+    void setTextMessageOffset(qint8 offset);
     void setWorking(bool working, quint8 blinking, bool inverse);
     void setDpi(qreal dpi);
-    void setTargetDistance(quint16 distance, bool visible);
+    void setTargetDistance(quint16 distance, bool barVisible, bool digitalVisible, bool fromEtcs);
     void setIsDistanceScale();
     void setEraUse(bool useEra);
     void setUnclosedFrame(bool openL, bool openR, bool openU, bool openD);
+    void setAcklowedgeFrame(bool active);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -60,12 +63,15 @@ signals:
     void messaesOutOfView(bool outOfView);
 
 private:
+    QMediaPlayer *click1 =nullptr;          // workaround: QSound::play crash on some android devices
     QTimer *attenuationTimer = new QTimer();
     bool fileNameIsSet;
     bool isTextField = false;
     bool isSegment = false;
     bool isTargetDistance = false;
-    bool targetDistanceVisible = false;
+    bool targetDistanceBarVisible = false;
+    bool targetDistanceDigitalVisible = false;
+    bool targetDistanceFromEtcs = false;
     bool useEraStyle = true;
     bool borderLClosed = true;
     bool borderRClosed = true;
@@ -114,8 +120,10 @@ private:
     bool isInvert = false;
     bool blinkerSlow = false;
     bool blinkerFast = false;
+    bool blinkerSuperFast = false;
     bool isButton = false;
     bool isDataEntryButton = false;
+    bool acklowedgeFrameActive = false;
     //bool alignLeft = false;
     //bool alignRight = false;
     bool hasCustomAlignment = false;
@@ -123,6 +131,7 @@ private:
     void paintText(QPainter *iconPainter, QRect centralArea);
     void paintTextMessages(QPainter *iconPainter, QRect centralArea);
     void paintFrame(QPainter *framePainter, QRect centralArea, QColor colorLefUp, QColor colorRightDown, int offset);
+    void paintAckFrame(QPainter *framePainter, QRect centralArea, QColor framecolor);
     void paintIcon(QPainter *iconPainter, QRect centralArea);
     void paintSegment(QPainter *iconPainter, QRect centralArea);
     void paintDistance(QPainter *iconPainter, QRect centralArea);

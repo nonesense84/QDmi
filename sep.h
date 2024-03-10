@@ -30,7 +30,7 @@ signals:
     void newSimTime(QString simtime);
     void newTrainnumber(QString trainNumber);
     void newGeoPos(qint32 geoPos);
-    void newLevelInforamtion(quint8 level);
+    void newLevelInforamtion(quint16 level);
 
 private:
     QUdpSocket *udpSocketSep;

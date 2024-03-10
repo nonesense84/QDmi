@@ -6,6 +6,7 @@ zusi3Tcp::zusi3Tcp(){}
 void zusi3Tcp::process(){
     client = new QTcpSocket();
     myIndicators = new zusiIndicator();
+    myEtcs = new zusi3etcs();
     myPower = new zusiPower();
     mtdLmsToDecoder.resize(13);
     connect(client,SIGNAL(readyRead()),this,SLOT(clientReadReady()));
@@ -26,12 +27,13 @@ void zusi3Tcp::setAutoReconnect(quint8 reconnect){
    reconnectOnes = false;
 }
 void zusi3Tcp::setIpadress(QString address){
+    QDateTime date = QDateTime::currentDateTime();
+    QString formattedTime = date.toString("hh:mm");
     if(address.isEmpty()) emit sendTcpConnectionFeedback("-1");
     QStringList slist = address.split(".");
     int s = slist.size();
     if(s>4){
-        emit newTechnicalMessage(" IP hat zu viele Elemente", era::grey, era::darkBlue, 9);
-        QTimer::singleShot(2500,this,SLOT(remooveTechMessage9()));
+        emit newTechnicalMessage({formattedTime}, {"IP hat zu viele Elemente"});
          emit sendTcpConnectionFeedback("-1");
         return;
     }
@@ -44,15 +46,13 @@ void zusi3Tcp::setIpadress(QString address){
         }
         int val = slist[i].toInt(&ok);
         if(!ok || val<0 || val>255){
-            emit newTechnicalMessage(" Ungültige Werte in IP", era::grey, era::darkBlue, 9);
-            QTimer::singleShot(2500,this,SLOT(remooveTechMessage9()));
+            emit newTechnicalMessage({formattedTime}, {"Ungültige Werte in IP"});
             emit sendTcpConnectionFeedback("-1");
             return;
         }
     }
     if(s<4 || emptyGroup){
-        emit newTechnicalMessage(" IP hat zu wenig Elemente", era::grey, era::darkBlue, 9);
-        QTimer::singleShot(2500,this,SLOT(remooveTechMessage9()));
+        emit newTechnicalMessage({formattedTime}, {"IP hat zu wenig Elemente"});
         emit sendTcpConnectionFeedback("-1");
         return;
     }
@@ -141,47 +141,34 @@ void zusi3Tcp::subscribeZusiData(){
     client->write(abfrageArr);
     emit sendTcpConnectionFeedback(ipAddress);
 }
-
-
 void zusi3Tcp::setDriverId(QString driverID){
+    if(client->state() != QAbstractSocket::ConnectedState)return;
     QVector<unsigned char> traindata;
     addKnotenAnfang(&traindata, 0x02      );  // <Kn>  Client-Anwendung 02
     addKnotenAnfang(&traindata, 0x010A    );  // <Kn>  Befehl INPUT
     addKnotenAnfang(&traindata, 0x02      );  // <Kn>  Zugbeeinflussung einstellen
     addKnotenAnfang(&traindata, 0x02      );  // <Kn>  System aus der Indusi-Familie
     addAtribut(&traindata, 0x02, driverID );  // Tf-Nummer
-    addKnotenEnde(&traindata);
-    addKnotenEnde(&traindata);
-    addKnotenEnde(&traindata);
-    addKnotenEnde(&traindata);
-
+    for(quint8 i= 0; i<5 ; i++)addKnotenEnde(&traindata); // 4 Knotenende
     QByteArray traindataArr;
-    for(int i = 0; i < traindata.length(); i++){
-        traindataArr.append(static_cast<char>(traindata[i]));
-    }
+    for(int i = 0; i < traindata.length(); i++)traindataArr.append(static_cast<char>(traindata[i]));
     client->write(traindataArr);
 }
-
 void zusi3Tcp::setTrainRunningNumber(QString trn){
+    if(client->state() != QAbstractSocket::ConnectedState)return;
     QVector<unsigned char> traindata;
     addKnotenAnfang(&traindata, 0x02      );  // <Kn>  Client-Anwendung 02
     addKnotenAnfang(&traindata, 0x010A    );  // <Kn>  Befehl INPUT
     addKnotenAnfang(&traindata, 0x02      );  // <Kn>  Zugbeeinflussung einstellen
     addKnotenAnfang(&traindata, 0x02      );  // <Kn>  System aus der Indusi-Familie
     addAtribut(&traindata,      0x03, trn );  // Zugnummer
-    addKnotenEnde(&traindata);
-    addKnotenEnde(&traindata);
-    addKnotenEnde(&traindata);
-    addKnotenEnde(&traindata);
-
+    for(quint8 i= 0; i<5 ; i++)addKnotenEnde(&traindata); // 4 Knotenende
     QByteArray traindataArr;
-    for(int i = 0; i < traindata.length(); i++){
-        traindataArr.append(static_cast<char>(traindata[i]));
-    }
+    for(int i = 0; i < traindata.length(); i++)traindataArr.append(static_cast<char>(traindata[i]));
     client->write(traindataArr);
 }
-
-void zusi3Tcp::setTrainData(quint16 BRA, quint16 BRH, quint16 ZL, quint16 VMZ, bool validated){
+void zusi3Tcp::setTrainDataLzb(quint16 BRA, quint16 BRH, quint16 ZL, quint16 VMZ, bool validated){
+    if(client->state() != QAbstractSocket::ConnectedState)return;
     QVector<unsigned char> traindata;
     addKnotenAnfang(&traindata, 0x02      );  // <Kn>  Client-Anwendung 02
     addKnotenAnfang(&traindata, 0x010A    );  // <Kn>  Befehl INPUT
@@ -194,18 +181,137 @@ void zusi3Tcp::setTrainData(quint16 BRA, quint16 BRH, quint16 ZL, quint16 VMZ, b
     addAtribut(&traindata, 0x04, VMZ      );  // VMZ-Wert (Höchstgeschwindigkeit) in km/h
     addAtribut(&traindata, 0x05, validated);  // Zugehörige Zugart (0:Automatisch | 1: Noch_unbestimmt | 2:U | 3:M | 4:O | 5:S-Bahn)
     addAtribut(&traindata, 0x06, 0        );  // Modus (0:undefiniert | 5:Ersatzzugdaten | 6:Normalbetrieb)
-    addKnotenEnde(&traindata);
-    addKnotenEnde(&traindata);
-    addKnotenEnde(&traindata);
-    addKnotenEnde(&traindata);
-    addKnotenEnde(&traindata);
-
+    for(quint8 i= 0; i<5 ; i++)addKnotenEnde(&traindata); // 5 Knotenende
     QByteArray traindataArr;
-    for(int i = 0; i < traindata.length(); i++){
-        traindataArr.append(static_cast<char>(traindata[i]));
-    }
+    for(int i = 0; i < traindata.length(); i++)traindataArr.append(static_cast<char>(traindata[i]));
     client->write(traindataArr);
 }
+void zusi3Tcp::newTraindataEtcs(quint16 BRH, QString TCT, quint16 ZL, quint16 VMZ, QString AXL, QString AIT, QString LDG, bool validated){
+    if(client->state() != QAbstractSocket::ConnectedState)return;
+    QVector<unsigned char> traindata;
+    addKnotenAnfang(&traindata, 0x02      );  // <Kn>  Client-Anwendung 02
+    addKnotenAnfang(&traindata, 0x010A    );  // <Kn>  Befehl INPUT
+    addKnotenAnfang(&traindata, 0x02      );  // <Kn>  Zugbeeinflussung einstellen
+    addKnotenAnfang(&traindata, 0x04      );  // <Kn>  System aus der ETCS-Familie - Einstellungen und Interaktionen
+    addKnotenAnfang(&traindata, 0x03      );  // <Kn>  Zugdaten
+    addAtribut(&traindata, 0x01, BRH      );  // BRH-Wert (Bremshundertstel)
+    if(TCT == "PASS1") addAtribut(&traindata, 0x02,  1);// Zugkategorie
+    if(TCT == "PASS2") addAtribut(&traindata, 0x02,  2);// FIXME: I'ts unknown, which categorys are supported and how the are associated
+    if(TCT == "PASS3") addAtribut(&traindata, 0x02,  3);
+    if(TCT == "FP1"  ) addAtribut(&traindata, 0x02,  4);
+    if(TCT == "FP2"  ) addAtribut(&traindata, 0x02,  5);
+    if(TCT == "FP3"  ) addAtribut(&traindata, 0x02,  6);
+    if(TCT == "FP4"  ) addAtribut(&traindata, 0x02,  7);
+    if(TCT == "FG1"  ) addAtribut(&traindata, 0x02,  8);
+    if(TCT == "FG2"  ) addAtribut(&traindata, 0x02,  9);
+    if(TCT == "FG3"  ) addAtribut(&traindata, 0x02, 10);
+    if(TCT == "FG4"  ) addAtribut(&traindata, 0x02, 11);
+    if(TCT == "TILT1") addAtribut(&traindata, 0x02, 12);
+    addAtribut(&traindata, 0x03, ZL       );  // Zuglänge in m
+    addAtribut(&traindata, 0x04, VMZ      );  // Höchstgeschwindigkeit in km/h
+    if(TCT == "A"   ) addAtribut(&traindata, 0x02,  1);// Achslast in kg
+    if(TCT == "B1"  ) addAtribut(&traindata, 0x02,  2);// FIXME: I'ts unknown, which categorys are supported and how the are associated
+    if(TCT == "B2"  ) addAtribut(&traindata, 0x02,  3);
+    if(TCT == "C2"  ) addAtribut(&traindata, 0x02,  4);
+    if(TCT == "C3"  ) addAtribut(&traindata, 0x02,  5);
+    if(TCT == "C4"  ) addAtribut(&traindata, 0x02,  6);
+    if(TCT == "D2"  ) addAtribut(&traindata, 0x02,  7);
+    if(TCT == "D3"  ) addAtribut(&traindata, 0x02,  8);
+    if(TCT == "D4"  ) addAtribut(&traindata, 0x02,  9);
+    if(TCT == "D4XL") addAtribut(&traindata, 0x02, 10);
+    if(TCT == "E4"  ) addAtribut(&traindata, 0x02, 11);
+    if(TCT == "E5"  ) addAtribut(&traindata, 0x02, 12);
+    for(quint8 i= 0; i<5 ; i++)addKnotenEnde(&traindata); // 5 Knotenende
+    QByteArray traindataArr;
+    for(int i = 0; i < traindata.length(); i++)traindataArr.append(static_cast<char>(traindata[i]));
+    client->write(traindataArr);
+    myEtcs->setAirTight(AIT);       // WORKAROUND: Since we do not get that value from Zusi, we mirror this value directly from data entry to validation fields
+    myEtcs->setLoadingGauge(LDG);   // WORKAROUND: Since we do not get that value from Zusi, we mirror this value directly from data entry to validation fields
+}
+void zusi3Tcp::sendEtcsAck(){           // ETCS-Quittierschalter
+    sendKeyboardCommand(0x0F, 0x7F, 0x01);  // Tastaturzuordnung Zugbeeinflussung, Tastaturkommando ETCSQuittieren_Down, Tastaturaktion Down
+    sendKeyboardCommand(0x0F, 0x08, 0x02);  // Tastaturzuordnung Zugbeeinflussung, Tastaturkommando ETCSQuittieren_Up, Tastaturaktion Up
+}
+
+void zusi3Tcp::sendEtcsOverride(){      // Override Auslösung durch Client
+    sendEtcsSettingsByte(0x09, 0x01);   // 1: Override angefordert
+  //sendEtcsSettingsByte(0x09, 0x02);   // 2: Grundstellung
+}
+
+void zusi3Tcp::sendEtcsStart(){         // Start (nur Client -> Zusi)
+    sendEtcsSettingsByte(0x0A, 0x01);   // 1: Startkommando
+    sendEtcsSettingsByte(0x0A, 0x02);   // 2: Grundstellung
+}
+
+void zusi3Tcp::sendEtcsLevel(QString level){// Level einstellen/anfordern (nur Client -> Zusi)
+    // ETCS-Level (STM, 0, 1, usw.): 0: undf, 1: Stm, 2: L0, 3: L1, 4: L2, 5: L3
+    if(level == "PZB / LZB"){
+        sendEtcsSettingsWord(0x0B, 1);
+        sendEtcsSettingsWord(0x0C, 0);
+    }
+    if(level == "Level 0")     sendEtcsSettingsWord(0x0B, 2);
+    if(level == "Level 1")     sendEtcsSettingsWord(0x0B, 3);
+    if(level == "Level 2")     sendEtcsSettingsWord(0x0B, 4);
+}
+
+void zusi3Tcp::sendEtcsIndexStm(quint16 index){ // Wenn STM ausgewählt: Index desausgewählten STM-Systems
+    sendEtcsSettingsWord(0x0C, index);
+}
+
+void zusi3Tcp::sendEtcsMode(quint16 mode){ //Modus einstellen/anfordern (nur Client -> Zusi)
+    sendEtcsSettingsWord(0x0D, mode); // 00: undef, 01: FS, 02: OS, 03: SR, 04: SH, 05: UN, 06: SL, 07: SB, 08: TR, 09: PT, 10: SF, 11: IS, 12: NP, 13: NL, 14: SE, 15: SN, 16: RV, 17: LS, 18: PS
+}
+
+void zusi3Tcp::sendEtcsTafMode(quint16 tafMode){
+    sendEtcsSettingsWord(0x0E, tafMode); // 1: TAF quittiert, 2: Grundstellung, 3: TAF abgelehnt
+}
+
+void zusi3Tcp::sendEtcsTestrun(quint8 testrun){ // Funktionspruefung starten (nur Client -> Zusi)
+    sendEtcsSettingsByte(0x11, testrun); //1: Zusi soll testrun starten, 2: Testrun im Display als OK quittiert, 3: Testrun im Display als nicht i.O. quittiert
+}
+
+void zusi3Tcp::sendKeyboardCommand(quint16 mapping, quint8  command, quint16 action){
+    if(client->state() != QAbstractSocket::ConnectedState)return;
+    QVector<unsigned char> genericMessageVector;
+    addKnotenAnfang(&genericMessageVector, 0x02     );  // <Kn>  Client-Anwendung 02
+    addKnotenAnfang(&genericMessageVector, 0x010A   );  // <Kn>  Befehl INPUT
+    addKnotenAnfang(&genericMessageVector, 0x01     );  // <Kn>  Tastatureingaben
+    addAtribut( &genericMessageVector, 0x01, mapping);  // Tastaturzuordnung
+    addAtribut( &genericMessageVector, 0x02, command);  // Tastaturkommando
+    addAtribut( &genericMessageVector, 0x03, action);  // Tastaturaktion
+    for(quint8 i= 0; i<3 ; i++)addKnotenEnde(&genericMessageVector); // 3 </Kn> Knotenende
+    QByteArray genericMessageArr;
+    for(int i = 0; i < genericMessageVector.length(); i++)genericMessageArr.append(static_cast<char>(genericMessageVector[i]));
+    client->write(genericMessageArr);
+}
+
+void zusi3Tcp::sendEtcsSettingsByte(quint8 ID, quint8  value){
+    if(client->state() != QAbstractSocket::ConnectedState)return;
+    QVector<unsigned char> genericMessageVector;
+    addKnotenAnfang(&genericMessageVector, 0x02     );  // <Kn>  Client-Anwendung 02
+    addKnotenAnfang(&genericMessageVector, 0x010A   );  // <Kn>  Befehl INPUT
+    addKnotenAnfang(&genericMessageVector, 0x02     );  // <Kn>  Zugbeeinflussung einstellen
+    addKnotenAnfang(&genericMessageVector, 0x04     );  // <Kn>  System aus der ETCS-Familie - Einstellungen und Interaktionen
+    addByteAtribut( &genericMessageVector, ID, value);
+    for(quint8 i= 0; i<4 ; i++)addKnotenEnde(&genericMessageVector); // 4 </Kn> Knotenende
+    QByteArray genericMessageArr;
+    for(int i = 0; i < genericMessageVector.length(); i++)genericMessageArr.append(static_cast<char>(genericMessageVector[i]));
+    client->write(genericMessageArr);
+}
+
+void zusi3Tcp::sendEtcsSettingsWord(quint8 ID, quint16 value){
+    QVector<unsigned char> genericMessageVector;
+    addKnotenAnfang(&genericMessageVector, 0x02     );  // <Kn>  Client-Anwendung 02
+    addKnotenAnfang(&genericMessageVector, 0x010A   );  // <Kn>  Befehl INPUT
+    addKnotenAnfang(&genericMessageVector, 0x02     );  // <Kn>  Zugbeeinflussung einstellen
+    addKnotenAnfang(&genericMessageVector, 0x04     );  // <Kn>  System aus der ETCS-Familie - Einstellungen und Interaktionen
+    addAtribut(     &genericMessageVector, ID, value);
+    for(quint8 i= 0; i<4 ; i++)addKnotenEnde(&genericMessageVector); // 4 </Kn> Knotenende
+    QByteArray genericMessageArr;
+    for(int i = 0; i < genericMessageVector.length(); i++)genericMessageArr.append(static_cast<char>(genericMessageVector[i]));
+    client->write(genericMessageArr);
+}
+
 void zusi3Tcp::addKnotenAnfang(QVector<unsigned char> *vector, quint16 knoten){
     unsigned char knotenHb = static_cast<unsigned char>(knoten >> 8);
     unsigned char knotenLb = static_cast<unsigned char>(knoten & 0x00ff);
@@ -216,7 +322,12 @@ void zusi3Tcp::addKnotenAnfang(QVector<unsigned char> *vector, quint16 knoten){
 void zusi3Tcp::addKnotenEnde(QVector<unsigned char> *vector){
     vector->append({0xFF, 0xFF, 0xFF, 0xFF});
 }
-
+void zusi3Tcp::addByteAtribut(QVector<unsigned char> *vector, unsigned char id, quint8 atribut){
+    vector->append({0x03, 0x00, 0x00, 0x00});
+    vector->append(id);
+    vector->append(0x00);
+    vector->append(atribut);
+}
 void zusi3Tcp::addAtribut(QVector<unsigned char> *vector, unsigned char id, quint16 atribut){
     unsigned char atributHb = static_cast<unsigned char>(atribut >> 8);
     unsigned char atributLb = static_cast<unsigned char>(atribut & 0x00ff);
@@ -238,7 +349,6 @@ void zusi3Tcp::addAtribut(QVector<unsigned char> *vector, unsigned char id, QStr
         vector->append(atribut.at(i).cell());
     }
 }
-
 void zusi3Tcp::addTextAtribut(QVector<unsigned char> *vector, quint16 id, QString text){
     quint32 len = static_cast<quint32>(text.length()) + 2;
     vector->append(static_cast< unsigned char>( len & 0x000000ff));
@@ -257,24 +367,22 @@ void zusi3Tcp::addAtribut(QVector<unsigned char> *vector, unsigned char atribut)
     vector->append(0x00);
 }
 void zusi3Tcp::checkClientConnection(QAbstractSocket::SocketState state){
+    QDateTime date = QDateTime::currentDateTime();
+    QString formattedTime = date.toString("hh:mm");
     switch(state){
     case QAbstractSocket::UnconnectedState:
-        removeTechnicalMessage(11);
-        emit newTechnicalMessage(" Verbindungsaufbau gescheitert", era::grey, era::darkBlue, 10);
+        emit newTechnicalMessage({formattedTime}, {"Verbindungsaufbau gescheitert"});
         emit sendDataSourceIsZusi(false);
-        QTimer::singleShot(4000,this,SLOT(remooveTechMessage10()));
         if(autoReconnect || reconnectOnes)QTimer::singleShot(5000, this, SLOT(connectToZusi()));
         break;
     case QAbstractSocket::HostLookupState:
-        removeTechnicalMessage(10);
-        emit newTechnicalMessage(" Verbindungsaufbau zu Zusi3", era::grey, era::darkBlue, 11);
+        emit newTechnicalMessage({formattedTime}, {"Verbindungsaufbau zu Zusi3"});
         break;
     case QAbstractSocket::ConnectingState:break;
     case QAbstractSocket::ConnectedState:
-        removeTechnicalMessage(11);
-        emit newTechnicalMessage(" Mit Zusi3 Verbunden", era::grey, era::darkBlue, 13);
+        emit newTechnicalMessage({formattedTime}, {"Mit Zusi3 Verbunden"});//myEtcs->setTextMessageByString("Mit Zusi3 Verbunden");
         emit sendDataSourceIsZusi(true);
-        QTimer::singleShot(2500,this,SLOT(remooveTechMessage13()));
+        QTimer::singleShot(2500,this,SLOT(removeTechniccalMessages()));
         reconnectOnes = false;
         break;
     case QAbstractSocket::BoundState:break;
@@ -286,15 +394,6 @@ void zusi3Tcp::checkClientConnection(QAbstractSocket::SocketState state){
     qDebug() << "handleConnectionError";
     qDebug() << socketError;
 }*/
-void zusi3Tcp::remooveTechMessage9(){   // This function can be used as SLOT in a timer to remove the message
-    removeTechnicalMessage(9);
-}
-void zusi3Tcp::remooveTechMessage10(){   // This function can be used as SLOT in a timer to remove the message
-    removeTechnicalMessage(10);
-}
-void zusi3Tcp::remooveTechMessage13(){   // This function can be used as SLOT in a timer to remove the message
-    removeTechnicalMessage(13);
-}
 
 void zusi3Tcp::clientReadReady(){
     // This function is used to isolate a zusi telegram.
@@ -356,6 +455,7 @@ uint16_t zusi3Tcp::readIdAtPos(int pos){
 void zusi3Tcp::cutZusiTelegram(){
     int packetLength = 0;
     nodeIds[0] = nodeIds[1] = nodeIds[2] = nodeIds[3] = nodeIds[4] = nodeIds[5] = atributeId = 0;
+    plainningCounter = 0;
     for(int i=0; i <= compZusiPacket.size()-3;i++){
         packetLength = readIntegerAtPos(i);
         switch (packetLength){
@@ -368,7 +468,7 @@ void zusi3Tcp::cutZusiTelegram(){
             break;
         case -1: //Kennzeichnung des Knoten-Endes
             if(lastWasNewNode && nodeIds[0] == 0x0002 && nodeIds[1] == 0x000A){
-                zusiDecoderFahrpult();
+                //zusiDecoderFahrpult();
             }
             else{
                 zusiDecoderSecondaryInfos();
@@ -405,6 +505,7 @@ void zusi3Tcp::cutZusiTelegram(){
             i = i + packetLength + 3;
         }
     }
+    if(dataContainsEtcs)myEtcs->doStuffAfterFinishOfZusiTelegram();dataContainsEtcs = false;
     myIndicators->makeLzbLmDatagram();
     transmitMtdIndicators();
 }
@@ -418,6 +519,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                 emit newSpeed(VIst);
                 myIndicators->setVIst(VIst);
                 myPower->setVIst(VIst);
+                myEtcs->setSpeed(VIst);
                 if(VIst > 0) trainHasBenMovedSinceLastNewTrainNumber = true;
             }
             return;
@@ -474,20 +576,18 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                     case 0x0003: emit newZl(useData2Byte.Word);return;                                      // ZL-Wert (Zuglänge) in m
                     case 0x0004: emit newVmz(useData2Byte.Word);return;                                     // VMZ-Wert (Höchstgeschwindigkeit)in km/h
                     case 0x0005: return;                                                                    // Zugehörige Zugart. Werte der Ersatzzugdaten
-                    case 0x0006:                                                                            // Modus (Grunddaten / Ersatzzugdaten / Normalbetrieb)
-                        myIndicators->setGrunddatenWirksam(useData2Byte.byte[0] == 4, VIst <= 50);
-                        myIndicators->setErsatzdatenWirksam(useData2Byte.byte[0] == 5, VIst <= 50);
-                        return;
+                    case 0x0006: myIndicators->setGrunddatenWirksam(useData2Byte.byte[0] == 4, VIst <= 50); // Modus (Grunddaten / Ersatzzugdaten / Normalbetrieb)
+                                 myIndicators->setErsatzdatenWirksam(useData2Byte.byte[0] == 5, VIst <= 50);
+                                 return;
                     }
                     return;
               //case 0x0007: return;                                                                        // Hauptschalter qDebug() << "Indusi-HS: " + QString::number(useData2Byte.byte[0]);
                 case 0x0008: myIndicators->setIndusiStoerschalter(useData2Byte.byte[0]);return;             // Indusi Störschalter qDebug() << "Indusi-SS: " + QString::number(useData2Byte.byte[0]);
                 case 0x0009: myIndicators->setLzbStoerschalter(useData2Byte.byte[0]);return;                // LZB Störschalter
-                case 0x000A:myIndicators->setPlzbLuftabsperrhahn(useData2Byte.byte[0]);return;              // Indusi-LuftabsperrhahnqDebug() << "Indusi-LH: " + QString::number(useData2Byte.byte[0]);
-                case 0x000B:                                                                                // Klartextmeldungen
-                    zusiTextMessagesPossible = useData2Byte.byte[0];
-                    myIndicators->setKlartextmeldungen(zusiTextMessagesPossible, forceTextmessages);
-                    return;
+                case 0x000A: myIndicators->setPlzbLuftabsperrhahn(useData2Byte.byte[0]);return;              // Indusi-LuftabsperrhahnqDebug() << "Indusi-LH: " + QString::number(useData2Byte.byte[0]);
+                case 0x000B: zusiTextMessagesPossible = useData2Byte.byte[0];                                // Klartextmeldungen
+                             myIndicators->setKlartextmeldungen(zusiTextMessagesPossible, forceTextmessages);
+                             return;
                 case 0x0011: myIndicators->setSystemstatusLzb(useData2Byte.byte[0]); return;                // Systemstatus LZB:// 3 = Aktiv
                 case 0x000D: myIndicators->setSystemstatusPzb(useData2Byte.byte[0]); return;                // Systemstatus Indusi:// 3 = Aktiv
                 }
@@ -544,6 +644,118 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                 case 0x0023: myIndicators->setZielweg(ceil(useData4Byte.Single - 0.5));return;              // Zielweg in m (Wert<0 → dunkel)
                 }
                 return;
+            case 0x0004:        // 11.3.3.3.4.9 System aus der ETCS-Familie - Einstellungen und Interaktionen
+                dataContainsEtcs = true;
+                switch(nodeIds[4]) {
+                case 0x0001: myEtcs->setTdeState(useData2Byte.byte[0]);return;// Zustand
+                case 0x0002:// verfügbares STM-System (nur Zusi → Client)
+                    switch (nodeIds[5]){
+                    case 0x0001: myEtcs->addNtcToListIndex(useData2Byte.Word);return;   // Index des STM-Systems, von 1 beginnend gemäß Reihenfolge in der ftd-Datei
+                    case 0x0002: myEtcs->addNtcToListName(useDataComplex);return;       // Name des STM-Systems als Text
+                    }
+                    return;
+                case 0x0003:                                                // Zugdaten
+                    switch (nodeIds[5]){
+                    case 0x0001: myEtcs->setBrakingPercentage(useData2Byte.Word);return;    // Bremshundertstel in %
+                    case 0x0002: myEtcs->setTrainCategory(useData2Byte.Word);return;        // Zugkategorie
+                    case 0x0003: myEtcs->setTrainLength(useData2Byte.Word);return;
+                    case 0x0004: myEtcs->setMaxSpeed(useData2Byte.Word);return;
+                    case 0x0005: myEtcs->setAxleLoad(useData2Byte.Word);return;
+                    case 0x0006: myEtcs->setTrainNumber(useDataComplex);return;
+                    case 0x0007: myEtcs->setDriverId(useDataComplex);return;
+                    case 0x0008: myEtcs->setRbcNumber(useData4Byte.Cardinal);return;
+                    case 0x0009: myEtcs->setRbcTelNumber(useDataComplex);return;
+                    case 0x000A: myEtcs->setRbcId(useData4Byte.Cardinal);return;
+                    case 0x000B: myEtcs->setRbcCountry(useData4Byte.Cardinal);return;
+                    case 0x000C: myEtcs->setRadioNetworkId(useData4Byte.Cardinal);return;
+                    case 0x000D: myEtcs->setRadioNetworkIdIsFix(useData2Byte.byte[0]);return;
+                    }
+                case 0x0004:                                                                    // Spec
+                    switch (nodeIds[5]){
+                    case 0x0001: myEtcs->setAdhesionValue(useData2Byte.byte[0]);return;         // Reibwert vermindert
+                    }
+                case 0x0005: myEtcs->setEtcsPassiveSwitch(useData2Byte.byte[0]);return;         // ETCS-Passivschalter
+                case 0x0006: myEtcs->setEtcsFaultySwitch(useData2Byte.byte[0]);return;          // ETCS-Störschalter (CEA)
+                case 0x0007: myEtcs->setAirShutOff(useData2Byte.byte[0]);return;                // Luftabsperrhahn
+                case 0x0008: myEtcs->setEtcsAcknowledger(useData2Byte.byte[0]);return;          // ETCS-Quittierschalter
+                case 0x0009: myEtcs->setOverrideRequested(useData2Byte.byte[0]);return;         // Override Anforderung, Auslösung durch Client
+                case 0x000F: myEtcs->setTrainRestart(useData2Byte.byte[0]);return;              // Zugneustart
+                case 0x0012: myEtcs->setMaxBaseline(useData2Byte.byte[0]);return;               // Maximal verfügbare Baseline des EVC
+                case 0x0013: myEtcs->setVehicleHasEtcsCB(useData2Byte.byte[0]);return;          // Fahrzeug hat einen ETCS-LSS
+                case 0x0014: myEtcs->setVehicleHasEtcsPS(useData2Byte.byte[0]);return;          // Fahrzeug hat einen Passivschalter
+                case 0x0015: myEtcs->setVehicleHasEtcsRSW(useData2Byte.byte[0]);return;         // Fahrzeug hat einen ETCS-Reset-Schalter
+                case 0x0016: myEtcs->setVehicleHasEtcsRSK(useData2Byte.byte[0]);return;         // Fahrzeug hat einen ETCS-Reset-Softkey
+                case 0x0017: myEtcs->setEtcsCBState(useData2Byte.byte[0]);return;               // ETCS-LSS
+                case 0x0019: myEtcs->setEvcTyte(useDataComplex);return;                         // Bauart Zugbeeinflussungssystem als Text
+                }
+            case 0x0005:                                                                        // 11.3.3.3.4.9 System aus der ETCS-Familie – Betriebsdaten
+                dataContainsEtcs = true;
+                switch(nodeIds[4]) {
+                case 0x0001:
+                    myEtcs->setActiveLevel(useData2Byte.Word);return;                  // Aktiver Level 0: ETCS Level undefiniert 1: ETCS Level STM 2: ETCS Level 0 3: ETCS Level 1 4: ETCS Level 2 5: ETCS Level 3
+                case 0x0002: myEtcs->setActiveMode(useData2Byte.Word);return;                   // Aktiver ETCS-Modus 00: undefiniert 01: FS 02: OS 03: SR 04: SH 05: UN 06: SL 07: SB 08: TR 09: PT 10: SF 11: IS 12: NP 13: NL 14: SE 15: SN 16: RV 17: LS 18: PS
+                case 0x0003: myEtcs->setReasonOfEmrBreakEnum(useData2Byte.Word);return;         // Grund der Zwangs- oder Betriebszwangsbremsung 0: Keine Zwangsbremsung 6: v-Max-Überwachung 7: Funktionsprüfung 10: Rechnerausfall 11: ETCS-Nothalt überfahren 15: ETCS-Halt überfahren 16: ETCS: Stillstands-/Rücklaufüberwachung ausgelöst 17: ETCS: nicht quittiert 18: ETCS: Funkausfall 19: ETCS: Balisenstörung 20: ETCS: manueller Levelwechsel 27: Allgemeine Störung 28: Stromversorgung fehlt
+                case 0x0004: myEtcs->setReasonOfEmrBreakText(useDataComplex);return;            // Grund der Zwangs- oder Betriebszwangsbremsung als Text
+                case 0x0005:                                                                    // STM-Info
+                    switch(nodeIds[5]) {
+                    case 0x0001: myEtcs->setIndexOfActiveStm(useData2Byte.Word);return;         // Index des aktiven STM-System, von 1 beginnend gemäß Reihenfolge in der ftd-Datei
+                    }
+                case 0x0006:                                                                    // Angekündigter oder neu aktivierter Level
+                    switch(nodeIds[5]) {
+                    case 0x0001:myEtcs->setNextLevel(useData2Byte.Word, 0xff);return;           // Neuer Level gemäß Paket 00 01
+                    case 0x0002:myEtcs->setNextLevel(0xffff, useData2Byte.byte[0]);return;      // Quittierung
+                    }
+                case 0x0007:                                                                    // Angekündigter Modus
+                    switch(nodeIds[5]) {
+                    case 0x0001: myEtcs->setNextMode(useData2Byte.Word, 0xff);return;           // Neuer Modus gemäß Paket 00 02
+                    case 0x0002: myEtcs->setNextMode(0xffff, useData2Byte.byte[0]);return;      //  Quittierung Modus 1: noch keine Quittierung nötig 2: Quittierung nötig, aber noch nicht alle Voraussetzungen gegeben 3: Quittierung nötig 4: quittiert 5: wirksam
+                    }
+                case 0x0008:                                                                    // Funkstatus
+                    switch(nodeIds[5]) {
+                    case 0x0001:myEtcs->setRadioState(useData2Byte.byte[0]);return;             // Zustand
+                    }
+                case 0x0009: myEtcs->setTargetSpeed(useData4Byte.Single);return;                // Zielgeschwindigkeit in m/s (Wert<0 → dunkel)
+                case 0x000A: myEtcs->setTargetDistance(useData4Byte.Single);return;             // Zielweg in m (Wert<0 → dunkel)
+                case 0x000B: myEtcs->setBrakeApplicationPointDistance(useData4Byte.Single);return;// Abstand Bremseinsatzpunkt in m
+                case 0x000C: myEtcs->setReleaseSpeed(useData4Byte.Single);return;               // Entlassungsgeschwindigkeit in m/s
+                case 0x000D: myEtcs->setPermittedSpeed(useData4Byte.Single);return;             // Sollgeschwindigkeit in m/s
+                case 0x000E: myEtcs->setAlertSpeed(useData4Byte.Single);return;                 // Warngeschwindigkeit in m/s
+                case 0x000F: myEtcs->setServBreakSpeed(useData4Byte.Single);return;             // Bremsgeschwindigkeit in m/s
+                case 0x0010: myEtcs->setEmergencyBreakSpeed(useData4Byte.Single);return;        // Zwangsbremsgeschwindigkeit in m/s
+                case 0x0011: myEtcs->setPermittedSpeedReducing(useData2Byte.byte[0]);return;    // Bremskurve läuft ab 0: nein 1: ja
+                case 0x0012:                                                                    // Vorschaupunkt
+                    switch(nodeIds[5]) {
+                        case 0x0001: myEtcs->addPlanningInfoOrigin(useData2Byte.Word, plainningCounter);            // Herkunft
+                                     plainningCounter++;
+                                     return;
+                        case 0x0002: myEtcs->addPlanningInfoSpeed(useData4Byte.Single, plainningCounter);return;    // Geschwindigkeit in m/s (-1 bedeutet ETCS-Ende)
+                        case 0x0003: myEtcs->addPlanningInfoDistance(useData4Byte.Single, plainningCounter);return; // Abstand in m
+                        case 0x0004: myEtcs->addPlanningGradient(useData4Byte.Single, plainningCounter);return;     // Höhenwert in m
+                        case 0x0005: myEtcs->addPlanningParameter(useData2Byte.Word, plainningCounter);return;      // Parameter
+                    }
+                case 0x0013: myEtcs->setTrackAheadFreeRequestState(useData2Byte.byte[0]);return;// TAF-Status: 0: kein TAF aktiv 1: TAF wird nötig 2: TAF angefordert 3: TAF quittiert 4: TAF abgelehnt
+                case 0x0014: myEtcs->setOverrideActive(useData2Byte.byte[0]);return;            // Override aktiv (nur Zusi → Client) 1: Override aktiv
+                case 0x0015: myEtcs->setEmergencyStop(useData2Byte.byte[0]);return;             // Nothalt-Status 0: kein Nothalt 1: bedingter Nothalt aktiv 2: unbedingter Nothalt aktiv
+                case 0x0016: myEtcs->setReasonServBrake(useData2Byte.Word);return;              // Betriebszwangsbremsung Wert siehe 00 03
+                case 0x0017:                                                                    // ETCS-EL-Auftrag
+                    switch(nodeIds[5]) {
+                        case 0x0001: myEtcs->setElOrder(useData2Byte.byte[0]);return;
+                    }
+                case 0x0018:                                                                    // ETCS-Funktionsprüfung läuft
+                    switch(nodeIds[5]) {
+                    case 0x0001: myEtcs->setEtcsTestRunnState(useData2Byte.byte[0]);return;     // Zustand
+                    }
+                case 0x0019:                                                                    // Bootvorgang ETCS-Gerät läuft
+                    switch(nodeIds[5]) {
+                        case 0x0001: myEtcs->setEvcBootupState(useData2Byte.byte[0]);return;    // Zustand
+                    }
+
+                case 0x001A:
+                    switch(nodeIds[5]) {                                                        // ETCS-Textmeldung, es folgt entweder Attribut 1 oder 2
+                    case 0x0001: myEtcs->setTextMessageByEnum(useData2Byte.Word);return;        // Grund einer Zwangsbremsung gemaess 00 02 → 00 0A → 00 65 →00 05 → 00 03
+                    case 0x0002: myEtcs->setTextMessageByString(useDataComplex);return;         // Freier Meldungstext
+                    }
+                }
             case 0x0007:        // 11.3.3.3.4.10 ZUB
                 switch(nodeIds[4]) {
                 case 0x0001: myIndicators->setLmGnt(useData2Byte.Word);return;                              // Status Melder GNT
@@ -634,7 +846,10 @@ void zusi3Tcp::zusiDecoderFahrpult(){
       //case 0x0020: return;  // Hohe Abbrems
         case 0x001b: myIndicators->setLmSchleudern(useData4Byte.Single > 0);return;// LM Schleudern
         case 0x001c: myIndicators->setLmGleiten(useData4Byte.Single > 0);return;// LM Gleiten
-        case 0x0023: emit newSimTime(QTime::fromMSecsSinceStartOfDay(useData4Byte.Single * 86400000).toString());return;
+        case 0x0023: emit newSimTime(QTime::fromMSecsSinceStartOfDay(useData4Byte.Single * 86400000).toString());
+                     myIndicators->setSimTime(QTime::fromMSecsSinceStartOfDay(useData4Byte.Single * 86400000).toString("hh:mm"));
+                     myEtcs->setSimTime(QTime::fromMSecsSinceStartOfDay(useData4Byte.Single * 86400000).toString("hh:mm"));
+                     return;
         case 0x0036: myIndicators->setAfbAn(useData4Byte.Single > 0);return;
         case 0x0055:   //             Stromabnehmer
             stromabnehmerLok = static_cast<quint8>(useData4Byte.Single);
@@ -715,6 +930,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
         case 0x0005: // 1: Zug neu übernommen
             if(useData2Byte.byte[0] > 0){
                 emit changedTrain();
+                myEtcs = new zusi3etcs();
                 reconnect();
             }
             return;
@@ -731,13 +947,11 @@ void zusi3Tcp::zusiDecoderSecondaryInfos(){
         case 0x0001:{
             QStringList zusiVersion = QString(useDataComplex).split(".");
             QString minReqZusiVersion = " Mindestens Zusi " + QString::number(zusiMajor) + "." + QString::number(zusiMinor) + "." + QString::number(zusiPatch) + " erforderlich!";
-            if(zusiVersion[0].toInt() != zusiMajor){
-                emit newTechnicalMessage(minReqZusiVersion, era::grey, era::darkBlue, 14);
-                return;
+            if(zusiVersion[0].toInt() != zusiMajor){emit newTechnicalMessage({"a-:--"}, {minReqZusiVersion});return;}
+            if(zusiVersion[1].toInt() <  zusiMinor){emit newTechnicalMessage({"b-:--"}, {minReqZusiVersion});return;}
+            if(zusiVersion[1].toInt() == zusiMinor){
+                if(zusiVersion[2].toInt() <  zusiPatch){emit newTechnicalMessage({"c-:--"}, {minReqZusiVersion});return;}
             }
-            if(zusiVersion[1].toInt() <  zusiMinor){emit newTechnicalMessage(minReqZusiVersion, era::grey, era::darkBlue, 14);return;}
-            if(zusiVersion[2].toInt() >  zusiMinor) return;
-            if(zusiVersion[3].toInt() <  zusiPatch){emit newTechnicalMessage(minReqZusiVersion, era::grey, era::darkBlue, 14);return;}
             return;
         }
         case 0x0002: return; //qDebug() << "Zusi-Verbindungsinfo: " + QString(useDataComplex);
@@ -808,8 +1022,8 @@ void zusi3Tcp::resetVehicleBlocking(){
     istVMaxErstesFahrzeug = true;
 }
 void zusi3Tcp::setTractionType(){
-    qDebug() << "Antriebstyp: " + QString::number(tractionType);
-    qDebug() << "Stromtyp:    " + QString::number(currentType);
+  //qDebug() << "Antriebstyp: " + QString::number(tractionType);
+  //qDebug() << "Stromtyp:    " + QString::number(currentType);
     if((tractionType == 6 || tractionType == 7) && (currentType == 2 || currentType == 3 || currentType == 4 || currentType == 6)){
         setMtdIndicator(1, 12);
     }
@@ -831,7 +1045,10 @@ void zusi3Tcp::setUseManometer(bool use){
         reconnect();
     }
 }
-
+void zusi3Tcp::removeTechniccalMessages(){
+    //myEtcs->setTextMessageByString("");
+    emit newTechnicalMessage({""}, {""});
+}
 void zusi3Tcp::setTextUsing(quint8 useAutomText){
     if(forceTextmessages != useAutomText){  // 0: Allways, 1: Automatic, 2: Never
         forceTextmessages = useAutomText;

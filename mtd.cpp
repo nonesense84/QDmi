@@ -3,7 +3,6 @@
 mtd::mtd(){}
 
 void mtd::initialize(){
-    emit newIconG1(indicatorFiles[0][0],indicatorFiles[0][1]);  //indSifaOff
     //emit newIconG2(indicatorFiles[1][0],indicatorFiles[1][1]);  // indDors indDorsBlink
     //emit newIconG3(indicatorFiles[2][0],indicatorFiles[2][1]);  // indPantoUp indPantoDown
     emit newIconG4(indicatorFiles[3][0],indicatorFiles[3][1]);  // indMainSwitch
@@ -55,22 +54,27 @@ void mtd::setStates(QVector<quint8> states){
         emit newIconG2(indicatorFiles[1][1],indicatorFiles[1][1]);  // no doors
         emit newIconBehavG2(false, 0, false);
     }
-    if(indSifaOpto){      // akt    fr  invers
-        emit newIconBehavE3(true, 0, false);
-        emit newIconE3(indicatorFiles[5][0],indicatorFiles[5][1]);
+    if(!indSifaOff){
+        if(indSifaOpto){      // akt    fr  invers
+            emit newIconBehavE2(true, 0, false);
+            emit newIconE2(indicatorFiles[5][0],indicatorFiles[5][1]);
+        }
+        if(indSifaAudio){
+            emit newIconBehavE2(true, 0, false);
+            emit newIconE2(indicatorFiles[6][0],indicatorFiles[6][1]);
+        }
+        if(indSifaBrake){
+            emit newIconBehavE2(true, 0, false);
+            emit newIconE2(indicatorFiles[7][0],indicatorFiles[7][1]);
+        }
+        if(!indSifaOpto && !indSifaAudio && !indSifaBrake){
+            emit newIconBehavE2(false, 0, false);
+        }
     }
-    if(indSifaAudio){
-        emit newIconBehavE3(true, 0, false);
-        emit newIconE3(indicatorFiles[6][0],indicatorFiles[6][1]);
+    else{
+        emit newIconE2(indicatorFiles[0][0],indicatorFiles[0][1]);  //indSifaOff
+        emit newIconBehavE2(indSifaOff, 0, false);
     }
-    if(indSifaBrake){
-        emit newIconBehavE3(true, 0, false);
-        emit newIconE3(indicatorFiles[7][0],indicatorFiles[7][1]);
-    }
-    if(!indSifaOpto && !indSifaAudio && !indSifaBrake){
-        emit newIconBehavE3(false, 0, false);
-    }
-    emit newIconBehavG6(indSifaOff, 0, false);
     if(tractionType == 1){
         if((InfPanto & 0x0f) > 0){  // One or more pantographs are up or rising
             if((InfPanto & 0xf0) > 0){

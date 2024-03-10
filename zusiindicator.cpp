@@ -39,7 +39,7 @@ void zusiIndicator::setZustandZugsicherung(uint16_t value){
     zustandZugsicherung = value;
     if(ktp){
         if(value == 4 &&  vIst <= vMAuffordZDE && !indusiStoerschalter){
-            emit newTextMessage(db::messages[46], db::textFontColors[46], db::textBgColors[46], 46); // Zugdaten eingeben
+            emit newLzbTextMessage(db::messages[46], db::textFontColors[46], db::textBgColors[46], 46); // Zugdaten eingeben
         }
         else{
             emit removeMessage(46); // Zugdaten eingeben
@@ -49,15 +49,20 @@ void zusiIndicator::setZustandZugsicherung(uint16_t value){
 }
 void zusiIndicator::setGrundZwangsbrmnsung(uint16_t value){//qDebug() << "ZB wegen ID: " + QString::number(value);
     if(lzbZustand == 3)value = 9;   //Workaround: Zusi does not set "Bremsgrund LZB-Halt überfahren (->9)". But luckily then "LzbZustand" is 3
-    //qDebug() << "GrundZwangsbrmnsung:      " + QString::number(value);
+  //qDebug() << "GrundZwangsbrmnsung:      " + QString::number(value);
     ZwangsbremsungAktiv = value > 0;
     if(ktp == false) value = 0;
     if(grundZwangsbrmnsung != value){
+        if(grundZwangsbrmnsung > 0){
+            emit removeMessage(lastLimitMessage);
+            lastLimitMessage = 0;
+        }
         grundZwangsbrmnsung = value;
         switch (value){
         case 0:
                 emit removeMessage(0);
                 emit removeMessage(1);
+                emit removeMessage(5);
                 emit removeMessage(38);
                 emit removeMessage(64);
                 emit removeMessage(65);
@@ -75,54 +80,56 @@ void zusiIndicator::setGrundZwangsbrmnsung(uint16_t value){//qDebug() << "ZB weg
                 emit removeTechnicalMessage(125);
                 emit removeTechnicalMessage(126);
                 break;
-        case 1: emit newTextMessage(db::messages[0 ], db::textFontColors[0 ], db::textBgColors[0 ], 0);
-                emit newTextMessage(db::messages[65], db::textFontColors[65], db::textBgColors[65], 65);
+        case 1: emit newLzbTextMessage(db::messages[0 ], db::textFontColors[0 ], db::textBgColors[0 ], 0);
+                emit newLzbTextMessage(db::messages[65], db::textFontColors[65], db::textBgColors[65], 65);
                 break;  //Wachsam nicht betätigt
-        case 2: emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
-                emit newTechnicalMessage("1000 Hz-Prüfung", era::grey, era::darkBlue, 102);
+        case 2: emit newLzbTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
+                emit newLzbTextMessage(db::messages[5], db::textFontColors[5], db::textBgColors[5], 5);
+                emit newTechnicalMessage({simTime}, {"1000 Hz-Prüfung"});
                 break;  //1000 Hz-Prüfung
-        case 3: emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
-                emit newTechnicalMessage("500 Hz-Prüfung", era::grey, era::darkBlue, 103);
+        case 3: emit newLzbTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
+                emit newLzbTextMessage(db::messages[5], db::textFontColors[5], db::textBgColors[5], 5);
+                emit newTechnicalMessage({simTime}, {"500 Hz-Prüfung"});
                 break;  //500 Hz-Prüfung
-        case 4: emit newTextMessage(db::messages[0 ], db::textFontColors[0 ], db::textBgColors[0 ], 0);
-                emit newTextMessage(db::messages[65], db::textFontColors[65], db::textBgColors[65], 65);
+        case 4: emit newLzbTextMessage(db::messages[0 ], db::textFontColors[0 ], db::textBgColors[0 ], 0);
+                emit newLzbTextMessage(db::messages[65], db::textFontColors[65], db::textBgColors[65], 65);
                 break;  //2000 Hz-Prüfung
-        case 5: emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
-                emit newTechnicalMessage("Kein Halt nach Befr aus ZB", era::grey, era::darkBlue, 105);
+        case 5: emit newLzbTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
+                emit newTechnicalMessage({simTime}, {"Kein Halt nach Befr aus ZB"});
                 break;  //Kein Halt nach Befreiung aus Zwangsbremsung
-        case 6: emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
-                emit newTechnicalMessage("Fahrzeug-v-Max überschritten", era::grey, era::darkBlue, 106);
+        case 6: emit newLzbTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
+                emit newTechnicalMessage({simTime}, {"Fahrzeug-v-Max überschritten"});
                 break; //Fahrzeug-v-Max überschritten
-        case 7: emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
-                emit newTechnicalMessage("Funktionsprüfung", era::grey, era::darkBlue, 107);
+        case 7: emit newLzbTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
+                emit newTechnicalMessage({simTime}, {"Funktionsprüfung"});
                 break;//Funktionsprüfung
-        case 8: emit newTextMessage(db::messages[0 ], db::textFontColors[0 ], db::textBgColors[0 ], 0);
-                emit newTextMessage(db::messages[64], db::textFontColors[64], db::textBgColors[64], 64);
+        case 8: emit newLzbTextMessage(db::messages[0 ], db::textFontColors[0 ], db::textBgColors[0 ], 0);
+                emit newLzbTextMessage(db::messages[64], db::textFontColors[64], db::textBgColors[64], 64);
                 break;//500Hz nach Befreiung
-        case 9: emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
-                emit newTextMessage(db::messages[1], db::textFontColors[1], db::textBgColors[1], 1);
-                if(vIst <= 1)emit newTextMessage(db::messages[38], db::textFontColors[38], db::textBgColors[38], 38);
+        case 9: emit newLzbTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
+                emit newLzbTextMessage(db::messages[1], db::textFontColors[1], db::textBgColors[1], 1);
+                if(vIst <= 1)emit newLzbTextMessage(db::messages[38], db::textFontColors[38], db::textBgColors[38], 38);
                 break;//LZB-Halt überfahren
-        case 10: emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
-                 emit newTechnicalMessage("LZB-Rechnerausfall", era::grey, era::darkBlue, 110);
+        case 10: emit newLzbTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
+                 emit newTechnicalMessage({simTime}, {"LZB-Rechnerausfall"});
                  break;//LZB-Rechnerausfall
-        case 11: //emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
-                 //emit newTextMessage(db::messages[3], db::textFontColors[0], db::textBgColors[0], 0);
+        case 11: //emit newLzbTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
+                 //emit newLzbTextMessage(db::messages[3], db::textFontColors[0], db::textBgColors[0], 0);
                  break;//LZB-Nothalt überfahren   ...Comented, because to be handled in nothalt routine
-        case 12: emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
-                 emit newTechnicalMessage("Ü-Ausfall in verd. Aufn.", era::grey, era::darkBlue, 112);
+        case 12: emit newLzbTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
+                 emit newTechnicalMessage({simTime}, {"Ü-Ausfall in verd. Aufn."});
                  break;//Übertragungsausfall in verdeckter Aufnahme
-        case 13: emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
-                 emit newTechnicalMessage("LZB-Rechnerausfall", era::grey, era::darkBlue, 113);
+        case 13: emit newLzbTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
+                 emit newTechnicalMessage({simTime}, {"LZB-Rechnerausfall"});
                  break;//LZB-Rechnerausfall
-        case 14: emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
-                 emit newTechnicalMessage("Richtungsschalter verlegt", era::grey, era::darkBlue, 114);
+        case 14: emit newLzbTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
+                 emit newTechnicalMessage({simTime}, {"Richtungsschalter verlegt"});
                  break;//Richtungsschalter verlegt
-        case 25: emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
-                 emit newTechnicalMessage("LZB-Rückrollüberwachung", era::grey, era::darkBlue, 125);
+        case 25: emit newLzbTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
+                 emit newTechnicalMessage({simTime}, {"LZB-Rückrollüberwachung"});
                  break;//LZB-Rückrollüberwachung
-        case 26: emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
-                 emit newTechnicalMessage("LZB Überschr. 200m n. Bef40", era::grey, era::darkBlue, 126);
+        case 26: emit newLzbTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
+                 emit newTechnicalMessage({simTime}, {"LZB Überschr. 200m n. Bef40"});
                  break;//LZB Überschreitung 200 m nach Befehl 40
         }
     }
@@ -184,7 +191,7 @@ void zusiIndicator::setGrunddatenWirksam(bool valid, bool visible){
     grunddatenWirksam = valid;
     if(ktp){
         if(valid && visible){
-            emit newTextMessage(db::messages[59], db::textFontColors[59], db::textBgColors[59], 59);
+            emit newLzbTextMessage(db::messages[59], db::textFontColors[59], db::textBgColors[59], 59);
         }
         else{
             if(!valid || !visible)emit removeMessage(59);
@@ -195,7 +202,7 @@ void zusiIndicator::setErsatzdatenWirksam(bool valid, bool visible){
     if(systemstatusPzb < 3) valid = false; //Workaround: Zusi sets "ersatzdaten wirksam" when the system is actually powerd off
     ersatzdatenWirksam = valid;
     if(!valid || !visible)emit removeMessage(69);
-    if(valid && visible)emit newTextMessage(db::messages[69], db::textFontColors[69], db::textBgColors[69], 69);
+    if(valid && visible)emit newLzbTextMessage(db::messages[69], db::textFontColors[69], db::textBgColors[69], 69);
 }
 void zusiIndicator::setLm500Hz(uint8_t value){
     lm500Hz = value;
@@ -218,7 +225,7 @@ void zusiIndicator::setLzbZustand(uint8_t value){
             setGrundZwangsbrmnsung(9);   //Workaround: Zusi does not set "Bremsgrund LZB-Halt überfahren (->9)". But luckily then "LzbZustand" is 3
             lmH = 1;
         }
-        if(value == 6 && ktp)emit newTextMessage(db::messages[37], db::textFontColors[37], db::textBgColors[37], 37);
+        if(value == 6 && ktp)emit newLzbTextMessage(db::messages[37], db::textFontColors[37], db::textBgColors[37], 37);
     }
     lzbZustand = value;//qDebug() << "LZB-Zustand  " + QString::number(value);
 }
@@ -233,14 +240,14 @@ void zusiIndicator::setEndeverfahren(uint8_t value){
         }
         if(value == 1 && lmUe >  0){
             emit removeMessage(61); //Workaround: "Bremseinsatzpunkt erwarten" is often displayed at the same time and is unimportand
-            if(ktp)emit newTextMessage(db::messages[28], db::textFontColors[28], db::textBgColors[28], 28);
-            if(ktp)emit newTextMessage(db::messages[45], db::textFontColors[45], db::textBgColors[45], 45);
+            if(ktp)emit newLzbTextMessage(db::messages[28], db::textFontColors[28], db::textBgColors[28], 28);
+            if(ktp)emit newLzbTextMessage(db::messages[45], db::textFontColors[45], db::textBgColors[45], 45);
             if(!ktp)lmEnde = 5;
         }
         if(value == 2 && lmUe >  0){
             emit removeMessage(45);
-            if(ktp)emit newTextMessage(db::messages[28], db::textFontColors[28], db::textBgColors[28], 28);
-            if(ktp)emit newTextMessage(db::messages[57], db::textFontColors[57], db::textBgColors[57], 57);
+            if(ktp)emit newLzbTextMessage(db::messages[28], db::textFontColors[28], db::textBgColors[28], 28);
+            if(ktp)emit newLzbTextMessage(db::messages[57], db::textFontColors[57], db::textBgColors[57], 57);
             if(!ktp)lmEnde = 1;
         }
     }
@@ -256,7 +263,7 @@ void zusiIndicator::setErsatzauftrag(uint8_t value){
             lmE40 = 0;
         }
         if(value >= 1){
-            if(ktp)emit newTextMessage(db::messages[30], db::textFontColors[30], db::textBgColors[28], 30);
+            if(ktp)emit newLzbTextMessage(db::messages[30], db::textFontColors[30], db::textBgColors[28], 30);
             ersatzauftrag = 1;
             lmE40 = 1;
         }
@@ -271,12 +278,12 @@ void zusiIndicator::setFalschfahrauftrag(uint8_t value){
             lmE40 = 0;
         }
         if(value == 1){
-            if(ktp)emit newTextMessage(db::messages[31], db::textFontColors[31], db::textBgColors[28], 31);
-            if(ktp)emit newTextMessage(db::messages[44], db::textFontColors[44], db::textBgColors[45], 44);
+            if(ktp)emit newLzbTextMessage(db::messages[31], db::textFontColors[31], db::textBgColors[28], 31);
+            if(ktp)emit newLzbTextMessage(db::messages[44], db::textFontColors[44], db::textBgColors[45], 44);
             lmE40 = 5;
         }
         if(value == 2){
-            if(ktp)emit newTextMessage(db::messages[31], db::textFontColors[31], db::textBgColors[31], 31);
+            if(ktp)emit newLzbTextMessage(db::messages[31], db::textFontColors[31], db::textBgColors[31], 31);
             emit removeMessage(44);
             lmE40 = 5;
         }
@@ -293,13 +300,13 @@ void zusiIndicator::setVorsichtsauftrag(uint8_t value){
             lmV40 = 0;
         }
         if(value == 1){//Vorsichtauftrag eingeleitet
-            if(ktp)emit newTextMessage(db::messages[29], db::textFontColors[29], db::textBgColors[29], 29);
-            if(ktp)emit newTextMessage(db::messages[45], db::textFontColors[45], db::textBgColors[45], 45);
+            if(ktp)emit newLzbTextMessage(db::messages[29], db::textFontColors[29], db::textBgColors[29], 29);
+            if(ktp)emit newLzbTextMessage(db::messages[45], db::textFontColors[45], db::textBgColors[45], 45);
             lmV40 = 5;
         }
         if(value >= 2){//Vorsichtauftrag quittiert/Dunkelschaltung oder Fahrt auf Sicht (V40-Melder Dau-erlicht)
             emit removeMessage(45);
-            if(ktp)emit newTextMessage(db::messages[29], db::textFontColors[29], db::textBgColors[29], 29);
+            if(ktp)emit newLzbTextMessage(db::messages[29], db::textFontColors[29], db::textBgColors[29], 29);
             lmV40 = 1;
         }
         vorsichtauftrag = value;
@@ -307,7 +314,7 @@ void zusiIndicator::setVorsichtsauftrag(uint8_t value){
 }
 void zusiIndicator::setLzbNothalt(uint8_t value){
     if(lzbNothalt != value){
-        if(value >  0 && ktp)emit newTextMessage(db::messages[2], db::textFontColors[2], db::textBgColors[59], 2);
+        if(value >  0 && ktp)emit newLzbTextMessage(db::messages[2], db::textFontColors[2], db::textBgColors[59], 2);
         if(value == 0){
             emit removeMessage(2);
             emit removeMessage(1);
@@ -315,22 +322,22 @@ void zusiIndicator::setLzbNothalt(uint8_t value){
             lmH = 0;
         }
         if(value == 1){//Nothalt empfangen
-            if(ktp)emit newTextMessage(db::messages[2], db::textFontColors[2], db::textBgColors[2], 2);
+            if(ktp)emit newLzbTextMessage(db::messages[2], db::textFontColors[2], db::textBgColors[2], 2);
             lmH = 5;
         }
         if(value == 2){//Nothalt überfahren
             emit removeMessage(2);
-            if(ktp)emit newTextMessage(db::messages[3], db::textFontColors[3], db::textBgColors[3], 3);
-            if(ktp)emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
-            if(vIst == 0 && ktp)emit newTextMessage(db::messages[38], db::textFontColors[38], db::textBgColors[38], 38);
+            if(ktp)emit newLzbTextMessage(db::messages[3], db::textFontColors[3], db::textBgColors[3], 3);
+            if(ktp)emit newLzbTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
+            if(vIst == 0 && ktp)emit newLzbTextMessage(db::messages[38], db::textFontColors[38], db::textBgColors[38], 38);
             lmH = 5;
         }
         if(value == 3){//Nothalt aufgehoben
             emit removeMessage(2);
             emit removeMessage(3);
-            if(ktp)emit newTextMessage(db::messages[1], db::textFontColors[1], db::textBgColors[1], 1);
-            if(ktp)emit newTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
-            if(ktp)emit newTextMessage(db::messages[38], db::textFontColors[38], db::textBgColors[38], 38);
+            if(ktp)emit newLzbTextMessage(db::messages[1], db::textFontColors[1], db::textBgColors[1], 1);
+            if(ktp)emit newLzbTextMessage(db::messages[0], db::textFontColors[0], db::textBgColors[0], 0);
+            if(ktp)emit newLzbTextMessage(db::messages[38], db::textFontColors[38], db::textBgColors[38], 38);
             lmH = 1;
         }    
         lzbNothalt = value;
@@ -348,20 +355,20 @@ void zusiIndicator::setLzbElAuftrag(uint8_t value){
         }
         if(value == 1){//Hauptschalter aus (EL zeigt Dauerlicht)
             emit removeMessage(40);
-            if(ktp)emit newTextMessage(db::messages[42], db::textFontColors[42], db::textBgColors[42], 42);
+            if(ktp)emit newLzbTextMessage(db::messages[42], db::textFontColors[42], db::textBgColors[42], 42);
             lmEl = 1;
         }
         if(value == 2){//Stromabnehmer senken (EL blinkt)
             emit removeMessage(42);
-            if(ktp)emit newTextMessage(db::messages[40], db::textFontColors[40], db::textBgColors[40], 40);
+            if(ktp)emit newLzbTextMessage(db::messages[40], db::textFontColors[40], db::textBgColors[40], 40);
             lmEl = 5;
         }
         if(value == 11){//Hauptschalter Ein
             emit removeMessage(40);
             emit removeMessage(41);
             emit removeMessage(42);
-            if(ktp)emit newTextMessage(db::messages[27], db::textFontColors[27], db::textBgColors[27], 27);
-            if(ktp)emit newTextMessage(db::messages[43], db::textFontColors[43], db::textBgColors[43], 43);
+            if(ktp)emit newLzbTextMessage(db::messages[27], db::textFontColors[27], db::textBgColors[27], 27);
+            if(ktp)emit newLzbTextMessage(db::messages[43], db::textFontColors[43], db::textBgColors[43], 43);
             lmEl = 0;
         }
         if(value == 21){//Hauptschalter Ein erledigt
@@ -373,8 +380,8 @@ void zusiIndicator::setLzbElAuftrag(uint8_t value){
             emit removeMessage(40);
             emit removeMessage(42);
             emit removeMessage(43);
-            if(ktp)emit newTextMessage(db::messages[27], db::textFontColors[27], db::textBgColors[27], 27);
-            if(ktp)emit newTextMessage(db::messages[41], db::textFontColors[41], db::textBgColors[41], 41);
+            if(ktp)emit newLzbTextMessage(db::messages[27], db::textFontColors[27], db::textBgColors[27], 27);
+            if(ktp)emit newLzbTextMessage(db::messages[41], db::textFontColors[41], db::textBgColors[41], 41);
             lmEl = 0;
         }
         if(value == 22){//Stromabnehmer heben erledigt
@@ -393,8 +400,8 @@ void zusiIndicator::setIndusiStoerschalter(uint8_t value){
     if(indusiStoerschalter  &&  ktp && lmUe == 0){
         emit removeMessage(46); // Zugdaten eingeben, Workaround: Message would only removed after the following are coming. So do it now.
         emit removeMessage(69); // Ersatzzugdaten Wirksam
-        emit newTextMessage(db::messages[66], db::textFontColors[66], db::textBgColors[66], 66);    // "V-Überwachung 50 km/h"
-        emit newTextMessage(db::messages[19], db::textFontColors[19], db::textBgColors[66], 19);    // "PZB mit Störschalter abgeschaltet"
+        emit newLzbTextMessage(db::messages[66], db::textFontColors[66], db::textBgColors[66], 66);    // "V-Überwachung 50 km/h"
+        emit newLzbTextMessage(db::messages[19], db::textFontColors[19], db::textBgColors[66], 19);    // "PZB mit Störschalter abgeschaltet"
         lm1000Hz = 0;
     }
     else{
@@ -404,24 +411,24 @@ void zusiIndicator::setIndusiStoerschalter(uint8_t value){
 }
 void zusiIndicator::setLzbStoerschalter(uint8_t value){
     if(value != 1)emit removeMessage(32);
-    if(value == 1 && ktp)emit newTextMessage(db::messages[32], db::textFontColors[32], db::textBgColors[32], 32);
+    if(value == 1 && ktp)emit newLzbTextMessage(db::messages[32], db::textFontColors[32], db::textBgColors[32], 32);
 }
 void zusiIndicator::setPlzbLuftabsperrhahn(uint8_t value){
     if(value != 1)emit removeMessage(33);
-    if(value == 1 && ktp)emit newTextMessage(db::messages[33], db::textFontColors[33], db::textBgColors[33], 33);
+    if(value == 1 && ktp)emit newLzbTextMessage(db::messages[33], db::textFontColors[33], db::textBgColors[33], 33);
 }
 void zusiIndicator::setSystemstatusLzb(uint8_t value){
     if(systemstatusLzb != value){
         systemstatusLzb = value;
         if((systemstatusPzb != 0 && systemstatusPzb != 2) || (systemstatusLzb != 0 && systemstatusLzb != 2)) emit newLevelInforamtion(levelPzbLzbNtc);
-        else{emit newLevelInforamtion(levelUndefined);}
+      //else{emit newLevelInforamtion(levelUndefined);}
     }
 }
 void zusiIndicator::setSystemstatusPzb(uint8_t value){
     if(systemstatusPzb != value){
         systemstatusPzb = value;
         if((systemstatusPzb != 0 && systemstatusPzb != 2) || (systemstatusLzb != 0 && systemstatusLzb != 2)) emit newLevelInforamtion(levelPzbLzbNtc);
-        else{emit newLevelInforamtion(levelUndefined);}
+      //else{emit newLevelInforamtion(levelUndefined);}
     }
     lmPzb = value == 3;
 }
@@ -445,18 +452,18 @@ void zusiIndicator::setLmUe(uint8_t value){
 void zusiIndicator::setLmG(uint8_t value){
     if(value == 0){
         lmG = 0;
-        emit removeMessage(5);
+        if(!ZwangsbremsungAktiv)emit removeMessage(5);
         emit removeMessage(61);
     }
     if(value == 1){
         lmG = 1;
-        emit removeMessage(5);
-        if(ktp)emit newTextMessage(db::messages[61], db::textFontColors[61], db::textBgColors[61], 61);
+        if(!ZwangsbremsungAktiv)emit removeMessage(5);
+        if(ktp)emit newLzbTextMessage(db::messages[61], db::textFontColors[61], db::textBgColors[61], 61);
     }
     if(value == 2){
         lmG = 5;
         emit removeMessage(61);
-        if(ktp)emit newTextMessage(db::messages[5], db::textFontColors[5], db::textBgColors[5], 5);
+        if(ktp)emit newLzbTextMessage(db::messages[5], db::textFontColors[5], db::textBgColors[5], 5);
     }
 }
 void zusiIndicator::setLmEl(uint8_t value){
@@ -520,14 +527,16 @@ void zusiIndicator::setVIst(uint16_t value){
         this->setGrunddatenWirksam(grunddatenWirksam, true);
         this->setErsatzdatenWirksam(ersatzdatenWirksam, true);
     }
-    if(vIst == 0 && value != 0) emit startDriving();
-    if(vIst != 0 && value == 0) emit stopDriving();
+    if(vIst == 0 && value != 0){ emit speedGt0(true); qDebug() << "A";}
+    if(vIst != 0 && value == 0){ emit speedGt0(false); qDebug() << "B";}
+    if(vIst < 39 && value >=40){ emit speedGt40(true); qDebug() << "C";}
+    if(vIst > 40 && value <=40){ emit speedGt40(false); qDebug() << "D";}
     vIst = value;
 }
 void zusiIndicator::setVZiel(int16_t value){
     if (value < 0) value = 0;
     if(vZiel > value && lzbZustand > 0){
-        if(ktp)emit newTextMessage(db::messages[58], db::textFontColors[58], db::textBgColors[58], 58);
+        if(ktp)emit newLzbTextMessage(db::messages[58], db::textFontColors[58], db::textBgColors[58], 58);
         QTimer::singleShot(2000,this,SLOT(remooveMessage58()));// Todo!: 20 Sekunden, nicht 2!
     }
     vZiel = value;//qDebug() << "V-Ziel       " + QString::number(value);
@@ -558,6 +567,7 @@ void zusiIndicator::setFzgVMax(uint16_t value){
 }
 
 void zusiIndicator::calcPzbTextmessages(){
+    if(ZwangsbremsungAktiv)return;
     #define ZugartUndef 1
     #define ZugartU 2
     #define ZugartM 3
@@ -641,9 +651,13 @@ void zusiIndicator::calcPzbTextmessages(){
 void zusiIndicator::sentSpetLimitMessage(quint8 limit){
     if(limit != lastLimitMessage){
         emit removeMessage(lastLimitMessage);
-        emit newTextMessage(db::messages[limit], db::textFontColors[limit], db::textBgColors[limit], limit);
+        emit newLzbTextMessage(db::messages[limit], db::textFontColors[limit], db::textBgColors[limit], limit);
         lastLimitMessage = limit;
     }
+}
+
+void zusiIndicator::setSimTime(QString time){
+    simTime = time;
 }
 
 void zusiIndicator::makeLzbLmDatagram(){

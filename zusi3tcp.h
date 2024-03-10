@@ -6,6 +6,7 @@
 #include <QHostAddress>
 #include <QtMath>
 #include "zusiindicator.h"
+#include "zusi3etcs.h"
 #include <QHostInfo>
 #include <qthread.h>
 #include "era.h"
@@ -13,8 +14,8 @@
 #include <QDateTime>
 
 #define zusiMajor  3
-#define zusiMinor  4
-#define zusiPatch  5
+#define zusiMinor  5
+#define zusiPatch  3
 
 class zusi3Tcp: public QObject
 {
@@ -28,9 +29,6 @@ private slots:
     bool checkHysterise(float *output, float input, bool isRelative = false);
     void clientReadReady();
     void checkClientConnection(QAbstractSocket::SocketState state);
-    void remooveTechMessage9();
-    void remooveTechMessage10();
-    void remooveTechMessage13();
     void resetVehicleBlocking();
     void setTractionType();
     int32_t readIntegerInRawAtPos(int pos);
@@ -39,6 +37,7 @@ private slots:
     void setSammelschine();
     void setZugnummer(QString nummer, QString fromSystem);
     void transmitMtdIndicators();
+    void removeTechniccalMessages();
 
 public slots:
     void cutZusiTelegram();
@@ -55,6 +54,7 @@ public slots:
     void addKnotenAnfang(QVector<unsigned char> *vector, quint16 knoten);
     void addKnotenEnde(QVector<unsigned char> *vector);
     void addAtribut(QVector<unsigned char> *vector, unsigned char atribut);
+    void addByteAtribut(QVector<unsigned char> *vector, unsigned char id, quint8 atribut);
     void addAtribut(QVector<unsigned char> *vector, unsigned char id, quint16 atribut);
     void addAtribut(QVector<unsigned char> *vector, unsigned char id, QString atribut);
     void addTextAtribut(QVector<unsigned char> *vector, quint16 id, QString text);
@@ -62,15 +62,25 @@ public slots:
     void setTextUsing(quint8 useAutomText);
     void setDriverId(QString driverID);
     void setTrainRunningNumber(QString trn);
-    void setTrainData(quint16 BRA, quint16 BRH, quint16 ZL, quint16 VMZ, bool validated);
-
+    void setTrainDataLzb(quint16 BRA, quint16 BRH, quint16 ZL, quint16 VMZ, bool validated);
+    void newTraindataEtcs(quint16 BRH, QString TCT, quint16 ZL, quint16 VMZ, QString AXL, QString AIT, QString LDG, bool validated);
+    void sendEtcsAck();
+    void sendEtcsOverride();
+    void sendEtcsStart();
+    void sendEtcsLevel(QString level);
+    void sendEtcsIndexStm(quint16 index);
+    void sendEtcsMode(quint16 mode);
+    void sendEtcsTafMode(quint16 tafMode);
+    void sendEtcsTestrun(quint8 testrun);
 
 public:
     zusi3Tcp();
     zusiIndicator *myIndicators;
     zusiPower *myPower;
+    zusi3etcs *myEtcs;
 
 private:
+    quint16 plainningCounter = 0;
     //bool DATA_OP_Tast_Zugbeeinf = false;
     uint8_t zusiTextMessagesPossible = false;
     bool autoReconnect = true;
@@ -109,6 +119,7 @@ private:
     bool istReisezug = false, hauptschalter = false;
     QVector<quint8> mtdLmsToDecoder;
     QVector<quint8> mtdLmsToDecoderOld;
+    bool dataContainsEtcs = false;
     QTime simtime;
     union { //Datentyp zur Abfrage des Knotens
       int8_t chr[4];
@@ -132,6 +143,7 @@ private:
         int8_t chr[4];
         uint8_t byte[4];
         int32_t Integer;
+        uint32_t Cardinal;
         float Single;
 
     } useData4Byte;
@@ -142,6 +154,9 @@ private:
         uint16_t Word;
     } useData2Byte;
     #define MAX_NUTZDATA 4
+    void sendKeyboardCommand(quint16 mapping, quint8  command, quint16 action);
+    void sendEtcsSettingsByte(quint8 ID, quint8  value);
+    void sendEtcsSettingsWord(quint8 ID, quint16 value);
 public: signals:
     void newKilometrierung(qint32 kilometrierung);
     void newLzbIndicators(QVector<quint8> lmsToDecoder);
@@ -153,7 +168,7 @@ public: signals:
     void newZugnummer(QString trainNumber);
     void changedTrain();
     void newMtdIndicators(QVector<quint8> lmsToDecoder);
-    void newTechnicalMessage(QString text, QColor forColor, QColor bgColor, quint8 id);
+    void newTechnicalMessage(QStringList timeStamps, QStringList message);
     void removeTechnicalMessage(quint8 id);
     void sendTcpConnectionFeedback(QString feedback);
     void sendDataSourceIsZusi(bool);

@@ -41,6 +41,7 @@ SOURCES += \
     manometer.cpp \
     sep.cpp \
     mtd.cpp \
+    zusi3etcs.cpp \
     zusi3tcp.cpp \
     zusiindicator.cpp \
     power.cpp \
@@ -57,6 +58,7 @@ HEADERS += \
     manometer.h \
     sep.h \
     mtd.h \
+    zusi3etcs.h \
     zusi3tcp.h \
     zusiindicator.h \
     db.h \
