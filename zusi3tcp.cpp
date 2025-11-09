@@ -365,7 +365,6 @@ void zusi3Tcp::sendEtcsSettingsByte(quint8 ID, quint8  value){
     QByteArray genericMessageArr;
     for(int i = 0; i < genericMessageVector.length(); i++)genericMessageArr.append(static_cast<char>(genericMessageVector[i]));
     client->write(genericMessageArr);
-    qDebug() << "sendEtcsSettingsByte " << ID << " " << value;
 }
 void zusi3Tcp::sendEtcsSettingsWord(quint8 ID, quint16 value){
     QVector<unsigned char> genericMessageVector;
@@ -687,7 +686,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                 case 0x0023: lzZE = static_cast<quint16>(qMax(0, static_cast<int>(qCeil(useData4Byte.Single - 0.5f))));return;// Zielweg in m (Wert<0 → dunkel)
                 case 0x0024: lmG  = zusiEnumToSepEnum(useData2Byte.byte[0]); return;                        // Status Melder G
                 case 0x002f: lmTH = zusiEnumToSepEnum(useData2Byte.byte[0]); return;                        // Status Melder „1000 Hz“
-                case 0x0030: lm85 = zusiEnumToSepEnum(useData2Byte.byte[0]);  qDebug() << "lm85 " << lm85; return;                        // Status Melder „Zugart O“
+                case 0x0030: lm85 = zusiEnumToSepEnum(useData2Byte.byte[0]); return;                        // Status Melder „Zugart O“
                 case 0x0031: lm70 = zusiEnumToSepEnum(useData2Byte.byte[0]); return;                        // Status Melder „Zugart M“
                 case 0x0032: lm55 = zusiEnumToSepEnum(useData2Byte.byte[0]); return;                        // Status Melder „Zugart U“
                 case 0x0033: lmFH = zusiEnumToSepEnum(useData2Byte.byte[0]); return;                        // Status Melder „500 Hz“
@@ -699,7 +698,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                 case 0x003C: lmUe = zusiEnumToSepEnum(useData2Byte.byte[0]); return;                        // Status Melder Ü
                 case 0x003D: lmEl = zusiEnumToSepEnum(useData2Byte.byte[0]); return;                        // Status Melder EL
                 case 0x003E: lmV4 = zusiEnumToSepEnum(useData2Byte.byte[0]); return;                        // Status Melder V40
-                case 0x003F: lmS  = zusiEnumToSepEnum(useData2Byte.byte[0]); qDebug() << "S " << lmS; return;                        // Status Melder S
+                case 0x003F: lmS  = zusiEnumToSepEnum(useData2Byte.byte[0]); return;                        // Status Melder S
             }
                 return;
             case 0x0004:        // 11.3.3.3.4.9 System aus der ETCS-Familie - Einstellungen und Interaktionen

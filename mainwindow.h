@@ -94,7 +94,6 @@ private slots:
     void gotTcpConnectionFeedback(QString feedback);
     void setLzbPresent(bool present);
     void setEvcPresent(bool present);
-    void setLevel(quint16 level);
     void setMode(quint16 mode);
     void setTdePage(bool seccondPage);
     void setFirstTdePage();

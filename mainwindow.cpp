@@ -752,8 +752,6 @@ void MainWindow::connectTcpStuff(){
     connect(myTcp, &zusi3Tcp::sendTcpConnectionFeedback, this, &MainWindow::gotTcpConnectionFeedback);
     connect(myTcp, &zusi3Tcp::sendDataSourceIsZusi, myLzb, &lzb::setZusiAsDataSource);
     connect(this,  &MainWindow::newZusiIp,             myTcp, &zusi3Tcp::setIpadress);
-    connect(myLzb,         &lzb::newActiveLevel,       this,  &MainWindow::setLevel);
-    connect(myTcp->myEtcs, &zusi3etcs::newActiveLevel, this,  &MainWindow::setLevel);
     connect(myTcp->myEtcs, &zusi3etcs::newActiveMode,  this,  &MainWindow::setMode);
 }
 
@@ -807,32 +805,6 @@ void MainWindow::setEvcPresent(bool present){
     ui->fieldF2->setAsButton(present);  // Button "Override"
 }
 
-void MainWindow::setLevel(quint16 level){
-    return;
-    // FIXME: delete me!
-    QSizePolicy sp = ui->FieldELzbTexts->sizePolicy();
-    if(level == levelPzbLzbNtc){
-        sp.setVerticalStretch(3);
-    }
-    else{
-        sp.setVerticalStretch(0);
-    }
-    ui->FieldELzbTexts->setSizePolicy(sp);
-    if(level == levelPzbLzbNtc){                  // In level PZB/LZB...
-        ui->fielBHolders->raise();                // ...the indicator for level change must be clickable on top.
-        ui->fieldC_holder->setCurrentIndex(1);    // ...and must be visible.
-        ui->fieldC_holder2->setCurrentIndex(0);
-    }
-    else{                                         // Otherwise...
-      //ui->widgetTacho->raise();                 // ...keep spedo on top for basic speed hook activation
-        ui->fielBHolders->lower();
-        ui->fieldC_holder->setCurrentIndex(0);    // ...the 3 widgehts below the speedometer must be displayed
-        ui->fieldC_holder2->setCurrentIndex(1);
-
-    }
-    actLevel = level;
-    resizeMe();
-}
 void MainWindow::setMode(quint16 mode){
     using M = ::zusi3etcs::etcsMode;
     QSizePolicy sp = ui->FieldELzbTexts->sizePolicy();
@@ -842,6 +814,7 @@ void MainWindow::setMode(quint16 mode){
         ui->fielBHolders->raise();              // ...the indicator for level change must be clickable on top
         ui->fieldC_holder->setCurrentIndex(1);  // ...and must be visible.
         ui->fieldC_holder2->setCurrentIndex(0);
+        ui->fieldD->setCurrentIndex(0);         // Show power guage
     }
     else{                                       // Otherwise...
         sp.setVerticalStretch(0);               // ...hide LZB text messages
@@ -849,6 +822,7 @@ void MainWindow::setMode(quint16 mode){
         ui->fielBHolders->lower();
         ui->fieldC_holder->setCurrentIndex(0);  // ...the 3 widgehts below the speedometer must be displayed
         ui->fieldC_holder2->setCurrentIndex(1);
+        ui->fieldD->setCurrentIndex(1);         // Show planning area
     }
     ui->FieldELzbTexts->setSizePolicy(sp);
     actMode = mode;
@@ -1243,17 +1217,14 @@ void MainWindow::configureSettingsWindow(){
 }
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-
-
-
-
-
-
-
     switch (event->key()) {
-        case Qt::Key_Up:
+        case Qt::Key_Up:break;
+        case Qt::Key_Down:break;
+        case Qt::Key_P:
+            ui->fieldD->setCurrentIndex(1);           // Show planning area
             break;
-        case Qt::Key_Down:
+        case Qt::Key_K:
+            ui->fieldD->setCurrentIndex(0);           // Show power guage
             break;
         case Qt::Key_Escape:
             #ifdef Q_PROCESSOR_ARM

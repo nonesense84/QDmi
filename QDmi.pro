@@ -25,6 +25,7 @@ SOURCES += \
     dmilabel.cpp \
     lzb.cpp \
     manometer.cpp \
+    planningarea.cpp \
     sep.cpp \
     mtd.cpp \
     targetdistance.cpp \
@@ -45,6 +46,7 @@ HEADERS += \
     era.h \
     dmilabel.h \
     manometer.h \
+    planningarea.h \
     sep.h \
     mtd.h \
     targetdistance.h \

@@ -264,7 +264,6 @@ void lzb::setIndicators(QVector<quint8> states){
     }
     // EMB is shown as 500Hz with 1000Hz blinkng or as indicator S
     bool newZB = (isBlinking(lm1000Hz) && isBlinking(lm500Hz)) || lmS == indicator::On;
-    qDebug() << "lm1000Hz " << lm1000Hz << "lm500Hz " << lm500Hz << "lmS " << lmS;
     ZB_changed = false;
     if (ZB != newZB) {
         ZB_changed = true;

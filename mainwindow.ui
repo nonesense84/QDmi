@@ -67,7 +67,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>1032</width>
+      <width>1024</width>
       <height>600</height>
      </rect>
     </property>
@@ -2214,6 +2214,21 @@
 </string>
                      </property>
                      <layout class="QVBoxLayout" name="verticalLayout_17">
+                      <property name="spacing">
+                       <number>0</number>
+                      </property>
+                      <property name="leftMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="topMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>0</number>
+                      </property>
                       <item>
                        <widget class="power" name="widgetPower" native="true">
                         <property name="sizePolicy">
@@ -2247,6 +2262,26 @@
                       <string notr="true">background:rgb(6,34,68)
 </string>
                      </property>
+                     <layout class="QVBoxLayout" name="verticalLayout_35">
+                      <property name="spacing">
+                       <number>0</number>
+                      </property>
+                      <property name="leftMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="topMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>0</number>
+                      </property>
+                      <item>
+                       <widget class="planningArea" name="widgetPlanning" native="true"/>
+                      </item>
+                     </layout>
                     </widget>
                    </widget>
                   </item>
@@ -7049,7 +7084,13 @@
   <customwidget>
    <class>timetoindication</class>
    <extends>QWidget</extends>
-   <header location="global">timetoindication.h</header>
+   <header>timetoindication.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>planningArea</class>
+   <extends>QWidget</extends>
+   <header location="global">planningarea.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
