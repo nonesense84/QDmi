@@ -7,9 +7,9 @@
 #include <QScreen>
 #include <QTimer>
 #include <QSettings>
+#include <QKeyEvent>
 #include <QMouseEvent>
 #include <QDateTime>
-#include <QNetworkInterface>
 #include <QStandardItemModel>
 #include "era.h"
 #include "lzb.h"
@@ -18,10 +18,9 @@
 #include "zusi3tcp.h"
 #include "zusitraindata.h"
 #include "alphanumericinput.h"
-
 #ifdef Q_OS_ANDROID
-#include <QtAndroid>
-#include <QAndroidJniEnvironment>
+#include <QJniObject>
+#include <QJniEnvironment>
 #endif
 
 #define P_ABE_DefaultWindow  0
@@ -72,32 +71,34 @@ class MainWindow : public QMainWindow
 #define levelPzbLzbNtc  6
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
     quint8  showManometer = 1;
+private:
+    zusiTraindata *myZusiTrainData;
 
 private slots:
+    void initialize();
     void setKeyboardType(quint8 type);
     void setKeyboardType(quint8 type, bool showDott);
     void TdeCompeteClicked();
-    void setEtcsTexs(QStringList timeStamps, QStringList messages);
-    void srollTextMessages(qint8 scroll);
     void openMainMenu();
     void fieldF2Clicked();
     void fieldF3Clicked();
     void fieldF4Clicked();
     void openSettings();
-  //void arrowUpClicked();
-  //void arrowDownClicked();
     void connectTimers();
-    void process();
+    void reset();
     void connectPzbIcons();
     void connectMtdIcons();
     void connectMtdPower();
     void connectTcpStuff();
     void gotTcpConnectionFeedback(QString feedback);
+    void setLzbPresent(bool present);
     void setEvcPresent(bool present);
     void setLevel(quint16 level);
-    void swapTdePage(bool seccondPage);
+    void setMode(quint16 mode);
+    void setTdePage(bool seccondPage);
+    void setFirstTdePage();
+    void setSecondTdePage();
     void openTrainDataEntry();
     void cabActivation(bool cabActivated, bool standstill);
     void openDriverIdEntry();
@@ -122,48 +123,45 @@ private slots:
     void applyClicked(QString data, bool enabled);
     void applySettings();
     void configureSettingsWindow();
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
+    void resetInput();
     #ifdef Q_OS_ANDROID
     void keepScreenOn();
     #endif
     void resizeMe();
 
 private:
+    enum InputMode { None, Mode_V, Mode_S, Mode_B, Mode_T, Mode_D, Mode_C } inputMode; // For Keyboard debug
+    QTimer *shortTimer;
+    QString inputBuffer; // For Keyboard debug
+    QString activeDataEntryItem = "";
+    QString dataString = "";
     QSettings *settings;
     Ui::MainWindow *ui;
-    quint8 position;
-    QTimer *shortTimer;
     lzb *myLzb;
     sep *mySep;
     mtd *myMtd;
     zusi3Tcp *myTcp;
-    zusiTraindata *myZusiTrainData;
     alphaNumericInput *myDriverId;
     QThread* lzbThread = new QThread;
     QThread* sepThread = new QThread;
     QThread* mtdThread = new QThread;
     QThread* tcpThread = new QThread;
+    QPoint lKilickPos;
+    quint16 actLevel = 0;
+    quint16 actMode = 0;
+    quint8 maxEntryStrLength;
+    quint8 actKeyboardType = 0;
+    quint8 position;
+    bool evcPresent = false;
     bool useDistEraForLzb;
     bool useHookForLzb;
     bool useTextFromPzb;
-  //bool MessaesOutOffView5to9 = false;
-  //bool MessaesOutOffView8to9 = false;
-    quint8 indexOffsetTextmessage = 0;
-    quint8 numTextmessage = 0;
-    QPoint lKilickPos;
-    QString dataString = "";
-    quint8 maxEntryStrLength;
-    quint8 actKeyboardType = 0;
-    QString activeDataEntryItem = "";
-    uint16_t  actLevel = 0;
-    bool evcPresent = false;
 
 protected:
-  void resizeEvent ( QResizeEvent * event );
-  #ifdef Q_PROCESSOR_ARM
-  void keyPressEvent(QKeyEvent *event);
-  #endif
+  void resizeEvent ( QResizeEvent * event )override;
+  void keyPressEvent(QKeyEvent *event)override;
+  void mousePressEvent(QMouseEvent *event)override;
+  void mouseMoveEvent(QMouseEvent *event)override;
 
 signals:
     void newDotsPerInch(qreal dpi);
@@ -172,7 +170,7 @@ signals:
     void newZusiIp(QString ip);
     void newDriverId(QString number);
     void newTrainRunningNumber(QString number);
-    void newLevelSelection(QString level);
+    void newLevelSelection(qint8 level);
     void newTextMessagesSettings(quint8  setting);
     void naivationArrowClick(qint8 direction);
 };

@@ -7,14 +7,15 @@
 QT       += core gui svg network multimedia
 #ifdef Q_OS_ANDROID
 #QT       += androidextras
-
+#ANDROID_ABIS = arm64-v8a armeabi-v7a x86 x86_64
+#ANDROID_ABIS = arm64-v8a #armeabi-v7a x86 x86_64
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = QDmi
 TEMPLATE = app
-ANDROID_VERSION_CODE = 13
-ANDROID_VERSION_NAME = "1.2"
-ANDROID_TARGET_SDK_VERSION = 29
+ANDROID_VERSION_CODE = 22
+ANDROID_VERSION_NAME = "1.4.0"
+
 APP_NAME = QDmi
 
 # The following define makes your compiler emit warnings if you use
@@ -29,36 +30,47 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 CONFIG += c++11
-CONFIG += static
+#CONFIG += static
 
 SOURCES += \
-        main.cpp \
-        mainwindow.cpp \
+    alphanumericinput.cpp \
+    etcstextwidget.cpp \
+    main.cpp \
+    mainwindow.cpp \
     gauge.cpp \
     dmilabel.cpp \
     lzb.cpp \
     manometer.cpp \
     sep.cpp \
     mtd.cpp \
+    targetdistance.cpp \
+    timetoindication.cpp \
+    zusi3etcs.cpp \
     zusi3tcp.cpp \
     zusiindicator.cpp \
     power.cpp \
-    zusipower.cpp
+    zusipower.cpp \
+    zusitraindata.cpp
 
 HEADERS += \
-        mainwindow.h \
+    alphanumericinput.h \
+    etcstextwidget.h \
+    lzb.h \
+    mainwindow.h \
     gauge.h \
     era.h \
     dmilabel.h \
-    lzb.h \
     manometer.h \
     sep.h \
     mtd.h \
+    targetdistance.h \
+    timetoindication.h \
+    zusi3etcs.h \
     zusi3tcp.h \
     zusiindicator.h \
-    db.h \
     power.h \
-    zusipower.h
+    zusipower.h \
+    zusitraindata.h
 
 FORMS += \
         mainwindow.ui
@@ -77,7 +89,7 @@ RESOURCES += \
     icons.qrc \
     sunds.qrc
 
-ANDROID_ABIS = armeabi-v7a arm64-v8a
+ANDROID_ABIS = armeabi-v7a arm64-v8a arm64-v8a x86
 
 DISTFILES += \
     android/AndroidManifest.xml \
@@ -87,6 +99,4 @@ DISTFILES += \
     android/gradlew \
     android/gradlew.bat \
     android/res/values/libs.xml
-
-ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 

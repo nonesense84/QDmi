@@ -3,18 +3,11 @@ QT += core gui svg network multimedia widgets
 TARGET = QDmi
 TEMPLATE = app
 
-ANDROID_VERSION_CODE = 24 #base-arm64
-ANDROID_VERSION_CODE = 25 #armeabi
-ANDROID_VERSION_CODE = 26 #x86
-ANDROID_VERSION_CODE = 27 #x86_64
-
-ANDROID_VERSION_NAME = "1.4.0"
-ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
-
 DEFINES += QT_DEPRECATED_WARNINGS
-CONFIG += c++17
-CONFIG += debug
-QMAKE_CXXFLAGS += -Wno-switch
+
+# Für maximale Kompatibilität mit alten Plattformen
+CONFIG += c++11
+# CONFIG += static  # Falls du statisch linken willst
 
 SOURCES += \
     alphanumericinput.cpp \
@@ -64,16 +57,7 @@ RESOURCES += \
     icons.qrc \
     sounds.qrc
 
-DISTFILES += \
-    android/AndroidManifest.xml \
-    android/build.gradle \
-    android/gradle/wrapper/gradle-wrapper.jar \
-    android/gradle/wrapper/gradle-wrapper.properties \
-    android/gradlew \
-    android/gradlew.bat \
-    android/res/values/libs.xml
-
-# Install rule for non-Android
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
+# Install rule für Desktop-Zielsysteme
+unix: target.path = /opt/$${TARGET}/bin
+win32: target.path = $$[QT_INSTALL_PREFIX]/bin
 !isEmpty(target.path): INSTALLS += target

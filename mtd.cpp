@@ -56,24 +56,24 @@ void mtd::setStates(QVector<quint8> states){
     }
     if(!indSifaOff){
         if(indSifaOpto){      // akt    fr  invers
-            emit newIconBehavE2(true, 0, false);
-            emit newIconE2(indicatorFiles[5][0],indicatorFiles[5][1]);
+            emit newIconBehavG10(true, 0, false);
+            emit newIconG10(indicatorFiles[5][0],indicatorFiles[5][1]);
         }
         if(indSifaAudio){
-            emit newIconBehavE2(true, 0, false);
-            emit newIconE2(indicatorFiles[6][0],indicatorFiles[6][1]);
+            emit newIconBehavG10(true, 0, false);
+            emit newIconG10(indicatorFiles[6][0],indicatorFiles[6][1]);
         }
         if(indSifaBrake){
-            emit newIconBehavE2(true, 0, false);
-            emit newIconE2(indicatorFiles[7][0],indicatorFiles[7][1]);
+            emit newIconBehavG10(true, 0, false);
+            emit newIconG10(indicatorFiles[7][0],indicatorFiles[7][1]);
         }
         if(!indSifaOpto && !indSifaAudio && !indSifaBrake){
-            emit newIconBehavE2(false, 0, false);
+            emit newIconBehavG10(false, 0, false);
         }
     }
     else{
-        emit newIconE2(indicatorFiles[0][0],indicatorFiles[0][1]);  //indSifaOff
-        emit newIconBehavE2(indSifaOff, 0, false);
+        emit newIconG10(indicatorFiles[0][0],indicatorFiles[0][1]);  //indSifaOff
+        emit newIconBehavG10(indSifaOff, 0, false);
     }
     if(tractionType == 1){
         if((InfPanto & 0x0f) > 0){  // One or more pantographs are up or rising

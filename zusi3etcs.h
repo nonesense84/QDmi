@@ -3,14 +3,20 @@
 #include <QObject>
 #include <QMetaEnum>
 #include "era.h"
+#include <QDateTime>
+#include <QMetaType>
+//#include <QtGlobal>
+#include <QtMath>
+#include <QElapsedTimer>
+#include <QFile>
 class zusi3etcs : public QObject
 {
     Q_OBJECT
 public:
-    zusi3etcs();
+    explicit zusi3etcs(QObject *parent = nullptr);
     enum etcsLevel: quint16
     {
-        level_undefined  = 0,
+        level_undefined  =  0,
         level_Stm        =  1,
         level_0          =  2,
         level_1          =  3,
@@ -21,7 +27,7 @@ public:
     Q_ENUM(etcsLevel)
     enum etcsMode: quint16
     {
-        mode_undefined  = 0,
+        mode_undefined  =  0,
         mode_FS         =  1,
         mode_OS         =  2,
         mode_SR         =  3,
@@ -42,49 +48,60 @@ public:
         mode_PS         = 18
     };
     Q_ENUM(etcsMode)
+    enum supervisionStatus: quint16
+    {
+        state_CSM       = 0,
+        state_TSM       = 1,
+        state_RSM       = 2,
+    };
+    Q_ENUM(supervisionStatus)
     enum etcsSettingsState: quint8
     {
         trainDataEntryUndefined = 0,
         trainDataEntryNecessary = 1,
-        trainDataEntryEntered = 2,
-        startOfMissionFinished = 3
+        trainDataEntryEntered   = 2,
+        startOfMissionFinished  = 3
     };
     Q_ENUM(etcsSettingsState)
     enum fixedradioNetwork: quint16
     {
-        fixedOnVehicle  = 0,
-        toBeEnteredByDriver  =  1
+        fixedOnVehicle       = 0,
+        toBeEnteredByDriver  = 1
     };
     Q_ENUM(fixedradioNetwork)
     enum adhesionValueState: quint8
     {
-        reduced  = 1,
-        notReduced  =  2
+        reduced     = 1,
+        notReduced  = 2
     };
     Q_ENUM(adhesionValueState)
     enum switchState: quint8
     {
         applied_position  = 1,
-        normal_position  =  2
+        normal_position   = 2
     };
     Q_ENUM(switchState)
     enum valveState: quint8
     {
         closed  = 1,
-        open  =  2
+        open    = 2
     };
     Q_ENUM(valveState)
     enum requestSwitchState: quint8
     {
-        applied  = 1,
-        basicPosition  =  2
+        applied        = 1,
+        basicPosition  = 2
     };
     Q_ENUM(requestSwitchState)
     enum baselineType: quint8
     {
-        baseline_2_2_2 = 0,
-        baseline_2_3_0_d = 1,
-        baseline_3_6_0 = 2
+        unlimited        = 0,
+        noEtcs           = 1,
+        baseline_2_2_2   = 2,
+        baseline_2_3_0_d = 3,
+        baseline_3_4_0   = 4,
+        baseline_3_6_0   = 5,
+        baseline_4_0_0   = 6
     };
     Q_ENUM(baselineType)
     enum circuitBreakerState: quint8
@@ -158,11 +175,11 @@ public:
     {
         el_noOrder                       = 0, // Not part of spec
         el_prennouncementMainSwitchOff   = 1,
-        el_orderMainSwitchOff          = 2,
-        el_orderMainSwitchOn           = 3,
+        el_orderMainSwitchOff            = 2,
+        el_orderMainSwitchOn             = 3,
         el_prennouncementLowerPantograph = 8,
-        el_orderLowerPantograph        = 9,
-        el_orderRaisPantograph         = 10
+        el_orderLowerPantograph          = 9,
+        el_orderRaisPantograph           = 10
     };
     Q_ENUM(elOrderState)
     enum etcsTestRunnState: quint8
@@ -201,19 +218,22 @@ public:
         parameter_commandMainSwitchOn    = 8,
     };Q_ENUM(planningInfoParameter)
 private:
-    bool D = false;
-    bool ackTextMessagePersistend = false;
     QString simTime = "--:--";
     template<typename QEnum>
     QString QtEnumToString (const QEnum value)
     {
       return QString(QMetaEnum::fromType<QEnum>().valueToKey(value));
     }
-    QStringList         textMessages[2] = {{""},{""}};//{{"00:00"},{"Beispiel zum testen"}};
+    float               speedF = 0.0;
+    float accelerationF = 0.0f; // [m/s²], positive for acceleration, negative for braking
+    float speedOldF = 0.0f; // previous speed in m/s
+    QVector<float>      recentSpeeds;
+    const int           maxAccelSamples = 1;
+    QElapsedTimer       AccelerationSpeedTimer;
+  //QElapsedTimer       AccelerationPermittedSpeedTimer;
     quint16             vAct = 0;
     etcsSettingsState   tdestate = etcsSettingsState::trainDataEntryUndefined;
-    quint16             nextNtcIindex = 0;
-    QStringList        *listNtc;
+    QStringList         listNtc;
     quint16             brakingPercentage = 0;
     quint16             trainCategory = 0;
     quint16             trainLength = 0;
@@ -254,17 +274,24 @@ private:
     etcsLevel           nextLevel = etcsLevel::level_undefined;
     acknowledgeState    nextLevelAcknowledge = acknowledgeState::acknowledge_notNecessary;
     etcsMode            nextMode = etcsMode::mode_undefined;
+    supervisionStatus   supState = supervisionStatus::state_CSM;
     acknowledgeState    nextModeAcknowledge = acknowledgeState::acknowledge_notNecessary;
     radioState          radioConnectionState = radioState::radio_noConnection;
     quint16             targetSpeed = 0;
+    float               targetSpeedF = 0;
     quint16             targetDistance = 0;
+    bool                showTargetDistanceGraph = false;
+    bool                showTargetDistanceDigital = false;
     float               brakeApplicationPointDistance = 0;
     quint16             releaseSpeed = 0;
     quint16             permittedSpeed = 0;
+    float               permittedSpeedF0 = 0;
+    float               permittedSpeedF = 0;
+  //float               permittedSpeedOldF = 0;
     quint16             alertSpeed = 0;
     quint16             serviceBreakSpeed = 0;
     quint16             emergencyBreakSpeed = 0;
-    bool                permittedSpeedReducing = false;
+    //bool                permittedSpeedReducing = false;
     tafState            trackAheadFreeRequestState = tafState::taf_notActive;
     switchState         overrideActive = switchState::normal_position;
     emergencyStopState  emergencyStop = emergencyStopState::emergencyStop_none;
@@ -272,94 +299,87 @@ private:
     elOrderState        elOrder = elOrderState::el_noOrder;
     etcsTestRunnState   etcsTestRunn = etcsTestRunnState::testRun_NoVotableState;
     evcBootUpState      evcBootup = evcBootUpState::bootUp_undefined;
-    QString             textMessage = "";
+    QList<EtcsTextMessage> messageList;
+    QList<previewPoint>    planningPreviewPoints;
+   // QString             textMessage = "";
     bool                OvS = false;
     bool                WaS = false;
     bool                IntS = false;
     bool                reasonServiceBrackeWasTransmitted = false;
     bool                reasonEmergencyBrackeWasTransmitted = false;
     bool                overrideActiveWasTransmitted = false;
-    bool                textMessageByEnumWasTransmitted = false;
+  //bool                textMessageByEnumWasTransmitted = false;  // FIXME: Obsolet
     bool                elOrderWasTransmitted = false;
     bool                targetInfoPresent = false;
-    class planningInfo : public QObject
-    {
-        public:
-        enum planningInfoOrigin origin;
-        quint16 speed = 0;
-        qint32 distance = 0;
-        qint32 altitude = 0;
-        enum planningInfoParameter parameter ;
-    };
-    QList<planningInfo *> planningInfos;
+    bool D = false;
 
 public slots:
-    void setSimTime(            QString time);
-    void setSpeed(              quint16 speed);
-    void setTdeState(           quint8  state);
-    void addNtcToListIndex(     quint16 index);
-    void addNtcToListName(      QString name);
-    void setBrakingPercentage(  quint16 percentage);
-    void setTrainCategory(      quint16 category);
-    void setAirTight(           QString airTight); // Not yet part of Zusi TCP.
-    void setLoadingGauge (QString loadingGauge); // Not yet part of Zusi TCP.
-    void setTrainLength(        quint16 length);
-    void setMaxSpeed(           quint16 speed);
-    void setAxleLoad(           quint16 load);
-    void setTrainNumber(        QString number);
-    void setDriverId(           QString id);
-    void setRbcNumber(          quint32 number);
-    void setRbcTelNumber(       QString number);
-    void setRbcId(              quint32 id);
-    void setRbcCountry(         quint32 country);
-    void setRadioNetworkId(     quint32 id);
-    void setRadioNetworkIdIsFix(quint8  isFix);
-    void setAdhesionValue(      quint8  value);
-    void setEtcsPassiveSwitch(  quint8  passiveSwitch);
-    void setEtcsFaultySwitch(   quint8  faultySwitch);
-    void setAirShutOff(         quint8  shutOff);
-    void setEtcsAcknowledger(   quint8  acknowledger);
-    void setOverrideRequested(  quint8  requested);
-  //void setRequestedLevel(     quint16 level);
-  //void setIndexOfSelectedStm( quint16 index);
-  //void setRequestedModus(     quint16 modus);
-  //void setTafModus(           quint8  modus);
-    void setTrainRestart(       quint8  restart);
-    void setMaxBaseline(        quint8  baseline);
-    void setVehicleHasEtcsCB(   quint8  hastCB);    // CB: circuit breaker
-    void setVehicleHasEtcsPS(   quint8  hastCB);    // PS: passive switch
-    void setVehicleHasEtcsRSW(  quint8  hastRSS);   // RSW: reset switch
-    void setVehicleHasEtcsRSK(  quint8  hastRSK);   // RSK: reset softkey
-    void setEtcsCBState(        quint8  cBState);   // CB: circuit breaker
-    void setEvcTyte(            QString type);
+    void reset();
+    void setSimTime             (QString time);
+    void setSpeed               (float speed);
+    void setTdeState            (quint8  state);
+    void addNtcToList           (quint16 index, QString name);
+    void setBrakingPercentage   (quint16 percentage);
+    void setTrainCategory       (quint16 category);
+    void setAirTight            (QString airTight); // Not yet part of Zusi TCP.
+    void setLoadingGauge        (QString loadingGauge); // Not yet part of Zusi TCP.
+    void setTrainLength         (quint16 length);
+    void setMaxSpeed            (quint16 speed);
+    void setAxleLoad            (quint16 load);
+    void setTrainNumber         (QString number);
+    void setDriverId            (QString id);
+    void setRbcNumber           (quint32 number);
+    void setRbcTelNumber        (QString number);
+    void setRbcId               (quint32 id);
+    void setRbcCountry          (quint32 country);
+    void setRadioNetworkId      (quint32 id);
+    void setRadioNetworkIdIsFix (quint8  isFix);
+    void setAdhesionValue       (quint8  value);
+    void setEtcsPassiveSwitch   (quint8  passiveSwitch);
+    void setEtcsFaultySwitch    (quint8  faultySwitch);
+    void setAirShutOff          (quint8  shutOff);
+    void setEtcsAcknowledger    (quint8  acknowledger);
+    void setOverrideRequested   (quint8  requested);
+  //void setRequestedLevel      (quint16 level);
+  //void setIndexOfSelectedStm  (quint16 index);
+  //void setRequestedModus      (quint16 modus);
+  //void setTafModus            (quint8  modus);
+    void setTrainRestart        (quint8  restart);
+    void setMaxBaseline         (quint8  baseline);
+    void setVehicleHasEtcsCB    (quint8  hastCB);    // CB: circuit breaker
+    void setVehicleHasEtcsPS    (quint8  hastCB);    // PS: passive switch
+    void setVehicleHasEtcsRSW   (quint8  hastRSS);   // RSW: reset switch
+    void setVehicleHasEtcsRSK   (quint8  hastRSK);   // RSK: reset softkey
+    void setEtcsCBState         (quint8  cBState);   // CB: circuit breaker
+    void setEvcTyte             (QString type);
 
-    void setActiveLevel(quint16 level);
-    void setActiveMode(quint16 mode);
-    void setReasonOfEmrBreakEnum(quint16 reason);
-    void setReasonOfEmrBreakText(QString reason);
-    void setIndexOfActiveStm(quint16 index);
-    void setAnnouncementOfNextStm(quint16 index);
-    void setNextLevel(quint16 level, quint8 acknowledge);
-    //void setNextLevelAcknowledge(quint16 level, quint8 acknowledge);
-    void setNextMode(quint16 index, quint8 acknowledge);
-    //void setNextModeAcknowledge(quint8 acknowledge);
-    void setRadioState(quint8 state);
-    void setTargetSpeed(float speed);
-    void setTargetDistance(float distance);
-    void setBrakeApplicationPointDistance(float distance);
-    void setReleaseSpeed(float speed);
-    void setPermittedSpeed(float speed);
-    void setAlertSpeed(float speed);
-    void setEmergencyBreakSpeed(float speed);
-    void setServBreakSpeed(float speed);
-    void setPermittedSpeedReducing(bool reducing);
+    void setActiveLevel                 (quint16 level);
+    void setActiveMode                  (quint16 mode);
+    void setReasonOfEmrBreakEnum        (quint16 reason);
+    void setReasonOfEmrBreakText        (QString reason);
+    void setIndexOfActiveStm            (quint16 index);
+    void setAnnouncementOfNextStm       (quint16 index);
+    void setNextLevel                   (quint16 level, quint8 acknowledge);
+    void setNextMode                    (quint16 index, quint8 acknowledge);
+    void setRadioState                  (quint8 state);
+    void setTargetSpeed                 (float speed);
+    void setTargetDistance              (float distance);
+    void setBrakeApplicationPointDistance (float distance);
+    void setReleaseSpeed                (float speed);
+    void setPermittedSpeed              (float speed);
+    void setAlertSpeed                  (float speed);
+    void setEmergencyBreakSpeed         (float speed);
+    void setServBreakSpeed              (float speed);
+    void setTargetSpeedMonitoring       (bool tsm);
 
+    void addPlanningInfo(quint16 origin, float speed, float distance, float gradient, quint16 parameter);
+/*
     void addPlanningInfoOrigin(quint16 origin, quint16 index);
     void addPlanningInfoSpeed(float speed, quint16 index);
     void addPlanningInfoDistance(float distance, quint16 index);
     void addPlanningGradient(float gradient, quint16 index);
     void addPlanningParameter(quint16 parameter, quint16 index);
-
+*/
     void setTrackAheadFreeRequestState(quint8 RequestState);
     void setOverrideActive(quint8 active);
     void setEmergencyStop(quint8 stop);
@@ -367,12 +387,18 @@ public slots:
     void setElOrder(quint8 order);
     void setEtcsTestRunnState(quint8 state);
     void setEvcBootupState(quint8 state);
-    void setTextMessageByEnum(quint16 message);
-    void setTextMessageByString(QString message);
+    void setImmediatTextMessage(QString msgText);
+    void setTextMessage(uint32_t  msgID,
+                        QDateTime timeStamp,
+                        uint16_t  zusiKennung,
+                        QString   msgTypeEtcsSpec,
+                        QString   msgText,
+                        uint8_t   ackNeeded);
     void doStuffAfterFinishOfZusiTelegram();
-
 private slots:
+    void calcTti();
     void playEraSound(QString filename);
+    void updateButtons();
 
 signals:
     void newVPermit(quint16 V, bool visible, bool fromEtcs);
@@ -397,16 +423,29 @@ signals:
     void newOverrideIcon(QString icon);
     void newOverrideActive(bool active);
     void newIconB5(QString icon);
-    void newTextmessages(QStringList times, QStringList messages);
     void newEvcPresent(bool installed);
     void newActiveTct(QString TCT);
     void newActiveAxl(QString AXL);
     void newActiveAit(QString AIT);
     void newActiveLdg(QString LDG);
-    void newBehavBtnStartOfMission(bool enabled, QString btnText);
-    void newBehavBtnLevel(bool enabled, QString btnText);
-    void newBehavBtnShounting(bool enabled, QString btnText);
-    void newBehavBtnNonLeading(bool enabled, QString btnText);
+  //void newBehavBtnStartOfMission(bool enabled, QString btnText);
+  //void newBehavBtnLevel(bool enabled, QString btnText);
+  //void newBehavBtnShunting(bool enabled, QString btnText);
+  //void newBehavBtnNonLeading(bool enabled, QString btnText);
+    void newTextMessages(const QList<EtcsTextMessage>& messages);
+    void newTti(float tti, bool visible);
+    void newBehavBtnStart(bool enabled);
+    void newBehavBtnLevel(bool enabled);
+    void newBehavBtnShunting(bool enabled);
+    void newBehavBtnNonLeading(bool enabled);
+    void newBehavBtnEoa(bool enabled);
+    void newBehavBtndriverId(bool enabled);
+    void newBehavBtnTde(bool enabled);
+    void newBehavBtnTrn(bool enabled);
+    void newBehavBtnMaintainShunting(bool enabled);
+    void newBehavBtnExitShunting(bool enabled);
+    void newBehavBtnRadio(bool enabled);
+
   //void newStateLzb(bool silent);
 };
 

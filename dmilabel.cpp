@@ -1,33 +1,12 @@
 #include "dmilabel.h"
+#include "qapplication.h"
 #include <QDebug>
-#include <QtSvg>
+#include <QApplication>
 
 dmiLabel::dmiLabel(QWidget *parent) : QWidget(parent){
     fontFactor = 96 / QApplication::screens().at(0)->logicalDotsPerInch();
-    setTargetDistance(100,false, false, false);
     QFontDatabase::addApplicationFont(":/fonts/FreeSans.ttf");
     QFontDatabase::addApplicationFont(":/fonts/Segment7Standard.otf");
-}
-
-void dmiLabel::setDpi(qreal dpi){
-}
-
-void dmiLabel::attenuationRoutine(){
-    bool updateNedded = false;
-    qreal attenuation = 0.2;
-    if(targetDistanceGraph < targetDistanceDest){
-        targetDistanceGraph =targetDistanceDest;
-        updateNedded = true;
-    }
-    if(targetDistanceGraph > targetDistanceDest){
-        targetDistanceGraph = targetDistanceGraph - (targetDistanceGraph - targetDistanceDest) * attenuation;
-        if((targetDistanceGraph - targetDistanceDest) < 0.25){
-            targetDistanceGraph = targetDistanceDest;
-            attenuationTimer->stop();
-        }
-        updateNedded = true;
-    }
-    if(updateNedded)update();
 }
 
 void dmiLabel::mousePressEvent(QMouseEvent *event){
@@ -35,13 +14,13 @@ void dmiLabel::mousePressEvent(QMouseEvent *event){
         isPushed = true;
         update();
     }
+    (void)event;
 }
 
 void dmiLabel::mouseReleaseEvent(QMouseEvent *event){
     isPushed = false;
-    static quint8 count = 0;
     if(isEnab){
-        emit clicked(true);
+        emit clicked();
         if(isButton && !isDataEntryButton){
             click1->stop();
             click1->play();
@@ -50,6 +29,7 @@ void dmiLabel::mouseReleaseEvent(QMouseEvent *event){
         emit txtBtnClicked(emitText);
     }
     emit dataEntryBtnClicked(labelText, isEnab);
+    (void)event;
 }
 
 void dmiLabel::setAsButton(QString text){
@@ -62,9 +42,17 @@ void dmiLabel::setAsButton(bool enabled, QString text){
 
 void dmiLabel::setAsButton(bool enabled, QString text, QString textToEmit){
     if(click1 == nullptr){
-        click1 =new QMediaPlayer;          // workaround: QSound::play crash on some android devices
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        click1 = new QMediaPlayer(this);
         click1->setMedia(QUrl("qrc:/sounds/click.wav"));
         click1->setVolume(50);
+#else
+        click1 = new QMediaPlayer(this);
+        auto audioOutput = new QAudioOutput(this);
+        click1->setAudioOutput(audioOutput);
+        audioOutput->setVolume(0.5);
+        click1->setSource(QUrl("qrc:/sounds/click.wav"));
+#endif
     }
     bool needUpdate = false;
     if(isEnab != enabled || labelText != text)needUpdate = true;
@@ -76,7 +64,14 @@ void dmiLabel::setAsButton(bool enabled, QString text, QString textToEmit){
     if(needUpdate)update();
 }
 
-void dmiLabel::setAsDataEntryLabel(QString text, bool isInputfield, bool isEnabled, bool isValid, bool isApplicable, bool fullGrid){
+void dmiLabel::setFrameless(){
+    borderThickness = 0;
+}
+void dmiLabel::setAsDataEntryLabel(QString text, bool isInputfield, bool isEnabled, bool isValid, bool isApplicable){
+    setAsDataEntryLabelFg(text, isInputfield, isEnabled, isValid, isApplicable, false);
+}
+
+void dmiLabel::setAsDataEntryLabelFg(QString text, bool isInputfield, bool isEnabled, bool isValid, bool isApplicable, bool fullGrid){
     if(!isApplicable){
         labelText = "";
         bgColor = era::darkBlue;
@@ -95,7 +90,7 @@ void dmiLabel::setAsDataEntryLabel(QString text, bool isInputfield, bool isEnabl
     if(isInputfield){
         if(!hasCustomAlignment)alignment = Qt::AlignLeft;
         isButton = true;
-        setUnclosedFrame(!fullGrid && !isEnabled,false,false,false);
+        setUnclosedFrame(!fullGrid && !isEnabled,false);
         if(isEnabled){
             bgColor = era::mediumGrey;
             labelTextColorEnab = era::black;
@@ -113,11 +108,10 @@ void dmiLabel::setAsDataEntryLabel(QString text, bool isInputfield, bool isEnabl
                 labelTextColorDisab = era::grey;
             }
         }
-
     }
     else{
         if(!hasCustomAlignment)alignment = Qt::AlignRight;
-        setUnclosedFrame(false,true,false,false);
+        setUnclosedFrame(false,true);
         bgColor = era::darkGrey;
         labelTextColorEnab  = era::grey;
         labelTextColorDisab = era::grey;
@@ -127,63 +121,19 @@ void dmiLabel::setAsDataEntryLabel(QString text, bool isInputfield, bool isEnabl
     update();
 }
 
-void dmiLabel::setTargetDistance(quint16 distance, bool barVisible, bool digitalVisible, bool fromEtcs){
-    if(targetDistanceFromEtcs != fromEtcs){
-        targetDistanceFromEtcs = fromEtcs;
-        setIsDistanceScale();
-    }
-    targetDistanceDest = distance;
-    targetDistance = distance;
-    targetDistanceBarVisible = barVisible;
-    targetDistanceDigitalVisible = digitalVisible;
-    if(targetDistance > distanceScale){
-        targetDistanceGraph = distanceScale;
-        attenuationTimer->stop();
-    }
-    else{
-        attenuationTimer->start();
-    }
-    update();
-}
-
-void dmiLabel::setIsDistanceScale(){
-    connect(attenuationTimer, SIGNAL(timeout()),this,SLOT(attenuationRoutine()));
-    attenuationTimer->setInterval(80);
-    attenuationTimer->start();
-    isTargetDistance = true;
-    if(useEraStyle || targetDistanceFromEtcs){
-        fileForDistanceScale = ":/icons/targetDistEra1000m.svg";
-        distanceScale = 1000;
-    }
-    else{
-        fileForDistanceScale = ":/icons/targetDistDb4000m.svg";
-        distanceScale = 4000;
-    }
-}
-
-void dmiLabel::setEraUse(bool useEra){
-    useEraStyle = useEra;
-    if(isTargetDistance) setIsDistanceScale();
-    updateLabel();
-}
-
 void dmiLabel::updateBlinking(){
+    tickCounter++;
     blinkerSuperFast = !blinkerSuperFast;
-    if(blinkerSuperFast)blinkerFast = !blinkerFast;
-    if(blinkerFast) blinkerSlow = !blinkerSlow;
-    if((blinkFrequency != 0 && fileNameIsSet) || acklowedgeFrameActive){
+    if (tickCounter % 2 == 0) blinkerFast = !blinkerFast;
+    if (tickCounter % 4 == 0) blinkerSlow = !blinkerSlow;
+    if ((blinkFrequency != 0 && fileNameIsSet) || acknowledgeFrameActive)
         update();
-    }
 }
 
 void dmiLabel::updateLabel(){
     if(blinkFrequency == 0){
         update();
     }
-}
-
-void dmiLabel::setBorderThickness(int thickness){
-    borderThickness = thickness;
 }
 
 void dmiLabel::setVisib(bool visible){
@@ -199,25 +149,39 @@ void dmiLabel::setWorking(bool enabled, quint8 blinkingFreq, bool inverse){
         updateLabel();
     }
 }
+void dmiLabel::setEnabled(bool enabled){
+    isEnab = enabled;
+    updateLabel();
+}
+
 
 void dmiLabel::setIcon(QString filename){
     if(filenameIconActive != filename){
         if(mimeFile.suffixForFileName(filename) == "svg"){
             svgActive.load(filename);
             fileNameIsSet = filename != "";
+            filenameIconActive = filename;
+            filenameIconInactive = ":/icons/blanc.svg";
+            svgInactive.load(filenameIconInactive);
         }
-        filenameIconActive = filename;
         updateLabel();
     }
 }
 
 void dmiLabel::setIcon(QString filenameActive, QString filenameInactive){
     if((filenameIconActive != filenameActive)||(filenameIconInactive != filenameInactive)){
-        svgActive.load(filenameActive);
-        svgInactive.load(filenameInactive);
         fileNameIsSet = filenameActive != "";
-        filenameIconActive = filenameActive;
-        filenameIconInactive = filenameInactive;
+        if(filenameActive == "")
+            filenameIconActive = ":/icons/blanc.svg";
+        else
+            filenameIconActive = filenameActive;
+
+        if(filenameInactive == "")
+            filenameIconInactive = ":/icons/blanc.svg";
+        else
+            filenameIconInactive = filenameInactive;
+        svgActive.load(filenameIconActive);
+        svgInactive.load(filenameIconInactive);
         updateLabel();
     }
 }
@@ -232,7 +196,7 @@ void dmiLabel::setCustomFontFactor(qreal factor, Qt::Alignment customAlignment){
     alignment = static_cast<int>(customAlignment);
 }
 
-void dmiLabel::setCustomFontFactor(qreal factor, Qt::Alignment customAlignment, quint8 style){
+void dmiLabel::setCustomFontFactor(qreal factor, Qt::Alignment customAlignment, QFont::Weight style){
     textStyle = style;
     setCustomFontFactor(factor, customAlignment);
 }
@@ -253,7 +217,7 @@ void dmiLabel::setText(quint16 value){
     }
 }
 
-void dmiLabel::setText(QString text, QColor textColorEnabled, QColor textColorDisabled, quint8 boldOrThin){
+void dmiLabel::setText(QString text, QColor textColorEnabled, QColor textColorDisabled, QFont::Weight boldOrThin){
     if((labelText != text)||(labelTextColorEnab != textColorEnabled)||(labelTextColorDisab != textColorDisabled)||(textStyle != boldOrThin)){
         textStyle = boldOrThin; //Normal (Not bold)
         labelText = text;
@@ -272,14 +236,12 @@ void dmiLabel::setText(QString text, QColor textColor, QColor backgroundColor){
     }
 }
 
-void dmiLabel::setUnclosedFrame(bool openL, bool openR, bool openU, bool openD){
-    borderLClosed = !openL;
-    borderRClosed = !openR;
-    borderTClosed = !openU;
-    borderBClosed = !openD;
+void dmiLabel::setUnclosedFrame(bool openL, bool openR){
+    borderLOpen = openL;
+    borderROpen = openR;
 }
 void dmiLabel::setAcklowedgeFrame(bool active){
-    acklowedgeFrameActive = active;
+    acknowledgeFrameActive = active;
 }
 
 void dmiLabel::setTextFieldUsing(quint8 numFields){
@@ -299,14 +261,22 @@ void dmiLabel::setSegmentDigitToUse(quint8 position){
     segmentPosition = position;
 }
 
-void dmiLabel::setSegmentText(quint16 value, bool textVisible, bool fromEtcs){
+void dmiLabel::setSegmentDigit(quint16 value, bool textVisible, bool fromEtcs){
     if(isSegment != textVisible || segmentValue != value){
+        customFontFactor = 0.6;
         segmentValue = value;
         isSegment = textVisible;
         segmentText = QString::number(value);
         segmentText = segmentText.mid(segmentText.length() - segmentPosition,1);
         updateLabel();
     }
+    (void)fromEtcs;
+}
+
+void dmiLabel::setSegmentText(quint16 value){
+    isSegment = true;
+    segmentText = QString::number(value);
+    update();
 }
 
 void dmiLabel::addTextLzbMessage(QString text, QColor textColor, QColor bgColor, quint8 msgId){
@@ -371,35 +341,38 @@ void dmiLabel::setTextMessageOffset(qint8 offset){
 void dmiLabel::paintEvent(QPaintEvent *)
 {
     if(isVisible){
+        if(borderThickness > 0) borderThickness = qApp->property("borderThickness").toInt();
         QPainter painter(this);
+
         painter.setRenderHint(QPainter::Antialiasing);
-        QRect centralAreaLbl(  borderThickness * borderLClosed,
-                               borderThickness * borderTClosed,
-                               width() -  borderThickness * (borderRClosed + borderLClosed),
-                               height() - borderThickness * (borderBClosed + borderTClosed));
+        // Create a rect, that does not contain the frame
+        QRect centralAreaLbl(  borderThickness * !borderLOpen,
+                               borderThickness,
+                               width() -  borderThickness * (!borderROpen + !borderLOpen),
+                               height() - 2 * borderThickness);
+
         // First we have to draw the frame of the label.
         // In case of a data entry button, there is no frame arround,
         // so the buttom will be drawn by the frame itself, and without a frame if its pushed.
         // If it is a regular button, we have to draw the button INSIDE the label with swaped border colors.
-        // ...But only, when its not pushed, because the we only need the frame.
-        if(isDataEntryButton && isPushed){ // Pushed data enrtry button. Entire label without a frame:
-            paintFrame(&painter, centralAreaLbl, bgColor,  bgColor, 0);
-        }
-        else{ // Regualar frame:
-         paintFrame(&painter, centralAreaLbl, borderColorButtomAndRight,  borderColorTopAndLeft, 0);
+        // ...But only, when its not pushed, because then we only need the frame.
+        painter.fillRect(rect(), bgColor);
+        if(!(isDataEntryButton && isPushed)){ // Regualar frame:
+         paintFrame(&painter, borderColorTopAndLeft, borderColorButtomAndRight, borderThickness, false);
         }
         if(isButton && !isDataEntryButton){ // Regular button inside a frame, thats allready painted
             QRect centralAreaBtn(2*borderThickness, 2 * borderThickness, width() - 4 * borderThickness, height() - 4 * borderThickness);
             if(!isPushed){ // Regular bushed button inside a frame, thats allready painted
-                paintFrame(&painter, centralAreaBtn, borderColorTopAndLeft, borderColorButtomAndRight,  borderThickness);
+                paintFrame(&painter, borderColorButtomAndRight, borderColorTopAndLeft, borderThickness, true);
             }
             paintIcon(&painter, centralAreaBtn);
         }
-        if(acklowedgeFrameActive && blinkerSuperFast)       paintAckFrame(&painter, centralAreaLbl, era::yellow);
+        else{
+            if(fileNameIsSet)paintIcon(&painter, centralAreaLbl);
+        }
+        if(acknowledgeFrameActive && blinkerSuperFast)      paintFrame(&painter, era::yellow, era::veryDarkYellow, borderThickness,false);
         if(isTextField)                                     paintTextMessages(&painter, centralAreaLbl);
         if(isSegment)                                       paintSegment(&painter, centralAreaLbl);
-        if(isTargetDistance)                                paintDistance(&painter, centralAreaLbl);
-        if(!isTargetDistance && !isSegment && !isButton)    paintIcon(&painter, centralAreaLbl);
         if(labelText != "")                                 paintText(&painter, centralAreaLbl);
     }
 }
@@ -430,78 +403,32 @@ void dmiLabel::paintText(QPainter *iconPainter, QRect centralArea){
     iconPainter->drawText(textRect,labelText);
 }
 
-void dmiLabel::paintDistance(QPainter *iconPainter, QRect centralArea){
-    iconPainter->save();
-    if(targetDistanceBarVisible){
-        svgActive.load(fileForDistanceScale);
-        svgActive.render(iconPainter,centralArea);
-    }
-    iconPainter->scale(static_cast<qreal>(width()) / 58.0, static_cast<qreal>(height()) / 221.0);
-
-    QRect digitalDistPosition(8,5,48,18);
-    if(useEraStyle || targetDistanceFromEtcs){
-        iconPainter->setBrush(era::grey);
-        iconPainter->setPen(era::grey);
-        iconPainter->setFont(QFont("FreeSans",
-                                   static_cast<int>(12 * fontFactor),
-                                   QFont::Normal,
-                                   false));
-    }
-    else{
-        iconPainter->setBrush(era::darkYellow);
-        iconPainter->setPen(era::darkYellow);
-        iconPainter->setFont(QFont("Segment7",
-                                   static_cast<int>(12 * fontFactor),
-                                   QFont::Normal,
-                                   false));
-    }
-    QRect textRect = iconPainter->boundingRect(digitalDistPosition,Qt::AlignRight,QString::number(targetDistance));
-    digitalDistPosition.setLeft(45 - textRect.width());
-    //quint16 targetDistanceAnalog = targetDistance;
-    qreal tem = 0.0;
-    if(useEraStyle || targetDistanceFromEtcs){
-        if( targetDistanceFromEtcs && targetDistanceDigitalVisible)iconPainter->drawText(digitalDistPosition,QString::number(ceil((targetDistance / 10)) * 10));
-        if(!targetDistanceFromEtcs && targetDistanceBarVisible)iconPainter->drawText(digitalDistPosition,QString::number(ceil((targetDistance / 10)) * 10));
-        if(targetDistanceBarVisible){
-            if(targetDistanceGraph < 1000)
-                tem = -2.50582750582749E-10 * qPow(targetDistanceGraph,4)
-                      +7.07459207459205E-07 * qPow(targetDistanceGraph,3)
-                      -0.000815792540793 * qPow(targetDistanceGraph,2)
-                      +0.545314685314686 * targetDistanceGraph
-                      +0.300699300699198;
-            else
-                tem = 187;
-            QRectF distBar(30,217,10,-tem);
-            iconPainter->drawRect(distBar);
-        }
-    }
-    else{
-        if(targetDistanceDigitalVisible)iconPainter->drawText(digitalDistPosition,QString::number(ceil((targetDistance + 100)/ 200) * 200));
-        if(targetDistanceBarVisible){
-            if(targetDistance <= 100)
-                tem = 0.19135135136 * targetDistanceGraph + 1.58882185807825E-15;
-            if(targetDistanceGraph >  100 && targetDistanceGraph <= 1000)
-                tem = 0.09567567568 * targetDistanceGraph + 9.56756756800004;
-            if(targetDistanceGraph >  1000)
-                tem = 0.02391891892 * targetDistanceGraph + 81.3243243279999;
-            QRectF distBar(42,213,10,-tem);
-            iconPainter->drawRect(distBar);
-        }
-    }
-
-    iconPainter->restore();
-}
-
 void dmiLabel::paintSegment(QPainter *iconPainter, QRect centralArea){
     iconPainter->save();
     iconPainter->setPen(era::darkYellow);
     iconPainter->setFont(QFont("Segment7",
-                               static_cast<int>(fontFactor * 0.6 * centralArea.height()),
+                               static_cast<int>(fontFactor * customFontFactor * centralArea.height()),
                                QFont::Normal,
                                false));
     QRect textRect = iconPainter->boundingRect(centralArea,Qt::AlignLeft,segmentText);
-    textRect.translate(centralArea.width()/1.5 - textRect.width()/1.5,
-                      (centralArea.height()/1.3 - textRect.height()/1.3));
+    QPointF offset;
+    if(alignment == Qt::AlignLeft){
+        offset = QPointF(
+            static_cast<qreal>(0),
+            static_cast<qreal>(centralArea.height() - textRect.height()) / 1.3);
+    }
+    else if(alignment == Qt::AlignRight){
+        offset = QPointF(
+            static_cast<qreal>(centralArea.width() - textRect.width()) / 1.5,
+            static_cast<qreal>(centralArea.height() - textRect.height()) / 1.3);
+    }
+    else{
+        offset = QPointF(
+            static_cast<qreal>(centralArea.width() - textRect.width()) / 1.5,
+            static_cast<qreal>(centralArea.height() - textRect.height()) / 1.3);
+    }
+    textRect.translate(offset.toPoint());
+
     iconPainter->drawText(textRect,segmentText);
     iconPainter->restore();
 }
@@ -541,60 +468,49 @@ void dmiLabel::paintIcon(QPainter *iconPainter, QRect centralArea){
        ((blinkFrequency == 2) && !blinkerFast &&  isInvert) ||
        !isEnab){
        svgInactive.render(iconPainter, centralArea);
-
     }
     else{
-        svgActive.render(iconPainter,centralArea);
+        if(fileNameIsSet)svgActive.render(iconPainter,centralArea);
     }
 }
 
 QRect dmiLabel::calcOptimalRect(QRect destArea, QRect iconArea){
-    if(iconArea.width()>0 && isButton){
-        qreal relDest = static_cast<qreal>(destArea.width()) / static_cast<qreal>(destArea.height()); // >1 Breiter als hoch. Je größer, desto Breiter.
-        qreal relIcon = static_cast<qreal>(iconArea.width()) / static_cast<qreal>(iconArea.height());
-        qreal destRatio = static_cast<qreal>(destArea.height()) / static_cast<qreal>(destArea.width());
-        if(relDest > relIcon){   // Wenn das Widget breiter als das Icon
-            int originWidth = destArea.width();
-            destArea.setWidth(static_cast<int>(static_cast<qreal>(destArea.width())*destRatio));
-            destArea.moveLeft(originWidth/2 -destArea.width()/2 + destArea.left());
-        }
-        if(relDest < relIcon){   // Wenn das Widget schmaler als das Icon
-            int originHeight = destArea.height();
-            destArea.setHeight(static_cast<int>(static_cast<qreal>(destArea.height())/destRatio));
-            destArea.moveTop(originHeight/2 -destArea.height()/2 + destArea.top());
-        }
-    }
-    return destArea;
+    if (!isButton || iconArea.isEmpty())
+        return destArea;
+    // Fit size of icon (viewBox) proportionaly in destArea
+    const QSizeF fitted = QSizeF(iconArea.size())
+                              .scaled(destArea.size(), Qt::KeepAspectRatio);
+    QRect result(QPoint(0,0), fitted.toSize());
+    result.moveCenter(destArea.center());
+    return result;
 }
 
-void dmiLabel::paintFrame(QPainter *framePainter,QRect centralArea, QColor colorLefUp, QColor colorRightDown, int offset){
-    int halfHeight = height()/2;
-    int halfWidth = width()/2;
-    QRect darkBorder(0 + offset, 0 + offset, width() - 2 * offset, height() - 2 * offset);
-    QPoint brightBorder[5];
-    brightBorder[0] = QPoint(width() - offset,  0        + offset);
-    brightBorder[1] = QPoint(width() - offset,  height() - offset);
-    brightBorder[2] = QPoint(0       + offset,  height() - offset);
-    if(halfWidth > halfHeight){
-        brightBorder[3] = QPoint(0 + halfHeight + offset,  halfHeight - offset);
-        brightBorder[4] = QPoint( width() - halfHeight - offset, halfHeight + offset);
-    }
-     else{
-        brightBorder[3] = QPoint(halfWidth + offset, height() - halfWidth - offset);
-        brightBorder[4] = QPoint(halfWidth - offset, halfWidth + offset);
-    }
-    framePainter->setPen(Qt::NoPen);
-    framePainter->setBrush(colorLefUp);
-    framePainter->drawRect(darkBorder);
-    framePainter->setBrush(colorRightDown);
-    framePainter->drawPolygon(brightBorder, 5);
-    framePainter->setBrush(bgColor);
-
-    framePainter->drawRect(centralArea);
-}
-void dmiLabel::paintAckFrame(QPainter *framePainter,QRect centralArea, QColor framecolor){
-    centralArea.adjust(borderThickness,borderThickness, -borderThickness, -borderThickness);
-    QPen pen(framecolor, 2 * borderThickness, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
-    framePainter->setPen(pen);
-    framePainter->drawRect(centralArea);
+void dmiLabel::paintFrame(QPainter *framePainter, QColor bright, QColor dark,  int bt, bool isBtn){
+    // We draw the 3D sunken border
+    int w = width();
+    int h = height();
+    int bO = bt*isBtn;                          // Offset of widget corner, in case of painting a button
+    bool lC = !borderLOpen;                     // We need to take care of labels with open frames
+    bool rC = !borderROpen;
+    QPoint brightBorder[6] = {
+        QPoint(  - bO        , h - bO     ),    // Bottom left corner
+        QPoint(w - bO        , h - bO     ),    // Bottom right corner
+        QPoint(w - bO        ,     bO     ),    // Top right corner
+        QPoint(w - bO - bt*rC,     bO + bt),    // Shifted top right corner
+        QPoint(w - bO - bt*rC, h - bO - bt),    // Shifted bottom right corner
+        QPoint(  - bO + bt*lC, h - bO - bt)     // Shifted bottom left corner
+    };
+    QPoint darkBorder[6] = {
+        QPoint(    bO        , h - bO     ),    // Bottom left corner
+        QPoint(    bO        ,     bO     ),    // Top left corner
+        QPoint(w - bO        ,     bO     ),    // Top right corner
+        QPoint(w - bO - bt*rC,     bO + bt),    // Shifted top right corner
+        QPoint(    bO + bt*lC,     bO + bt),    // Shifted lop left corner
+        QPoint(    bO + bt*lC, h - bO - bt)     // Shifted bottom left corner
+    };
+    framePainter->setPen(Qt::NoPen);            // Set no outlin
+    framePainter->setBrush(bright);             // Apply the shadow color
+    framePainter->drawPolygon(brightBorder, 6); // Draw the frame border at buttom and right
+    framePainter->setBrush(dark);               // Set the brush to dark for the mirrored polygon
+    framePainter->drawPolygon(darkBorder, 6);   // Draw the frame border at top and left
 }

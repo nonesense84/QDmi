@@ -14,8 +14,10 @@ public:
     explicit gauge(QWidget *parent = nullptr);
 
 signals:
+    void activatedSpeedHooks(bool active);
 
 public slots:
+    void reset();
     void setVMaxDial(quint16 V);
     void setVPerm(quint16 V, bool visibl, bool fromEtcs);
     void setVSet(quint16 V, bool visible);
@@ -25,6 +27,7 @@ public slots:
     void setOverspeed(bool intervenation);
     void setVOverspeed(quint16 V);
     void setMode(quint16 newMode);
+    void setBasicSpeedHooks(bool active);
 
     qreal calcPosition(quint16 V);
     void setVAct(quint16 V);
@@ -50,50 +53,13 @@ private:
     QPen ringWhiteRelWhite;
     QPen ringWhiteRelBlue;
     QPen ringYellow;
-
     QTimer *attenuationTimer = new QTimer();
-    int VMaxDial;
-    quint16 vAct, vPerm, vSet, vTarget, vOverspeed = 0, vRelease = 0;
-   //quint16 vAlert, vBreak, vEmerg;
+    QVector<QPoint> numberPositions;
     qreal scaleDegStep;
     qreal scaleDegStepSmall;
-    quint8 numShortLines;
-    quint8 numLongLines;
-    quint8 numNumbers;
-    quint16 mode = 0;
-    bool showNeedle = true;
-    bool useEraStyle = true;
-    bool dataFromEtcs = false;
-    bool useCsg = true;
-    bool useBasicHooks = false;
-    bool displayBasicHooks = false;
-    bool IntS = false;          // Intervention Status information
-    bool OvS = false;           // Over-speed Status information
-    bool TSM = false;           // Target Speed Monitoring
-
-    //bool csmYellow = false;
     qreal arcOpenTotal = 288;   // 288° 0 to Vmax
     qreal startPosZero = -234; //-(144 + 90)
     qreal dimensionMatrix = 548;
-    quint16 outEndLines = 250;
-    quint16 lenShortLines = 30;
-    quint16 lenLongLines = 50;
-    quint16 beginTriangle = 253;
-    quint16 deepSollTriangle = 17;
-    quint16 widthSollTriangleHalf = 13;
-    quint16 scale400Numbers[7] = {0,50,100,150,200,300,400};
-
-    quint16 beginVSetArc = 212;
-    quint16 diamVSetArc = 19;
-
-    quint16 outBorderCsg = 274;
-    quint16 diamNose = 50;
-    quint16 widhtNeedleThick = 18;
-    quint16 widhtNeedleThin = 6;
-    quint16 lenNeedleThick = 164;
-    quint16 lenNeedleRamp = 180;
-    quint16 lenNeedleThin = 210;
-
     qreal posCsg = 0;
     qreal posCsgDest = 0;
     qreal posTarget = 0;
@@ -105,6 +71,36 @@ private:
     qreal posNeedleDest = 0;
     qreal fontSiceDial = 26;
     qreal fontSiceNose = 37;
+    quint16 VMaxDial;
+    quint16 vAct, vPerm, vSet, vTarget, vOverspeed = 0, vRelease = 0;
+    quint16 outEndLines = 250;
+    quint16 lenShortLines = 30;
+    quint16 lenLongLines = 50;
+    quint16 beginTriangle = 253;
+    quint16 deepSollTriangle = 17;
+    quint16 widthSollTriangleHalf = 13;
+    quint16 scale400Numbers[7] = {0,50,100,150,200,300,400};
+    quint16 mode = 0;
+    quint16 beginVSetArc = 212;
+    quint16 diamVSetArc = 19;
+    quint16 outBorderCsg = 274;
+    quint16 diamNose = 50;
+    quint16 widhtNeedleThick = 18;
+    quint16 widhtNeedleThin = 6;
+    quint16 lenNeedleThick = 164;
+    quint16 lenNeedleRamp = 180;
+    quint16 lenNeedleThin = 210;
+    quint8 numShortLines;
+    quint8 numLongLines;
+    bool showNeedle = true;
+    bool useEraStyle = true;
+    bool dataFromEtcs = false;
+    bool useCsg = true;
+    bool useBasicHooks = false;
+    bool displayBasicHooks = false;
+    bool IntS = false;          // Intervention Status information
+    bool OvS = false;           // Over-speed Status information
+    bool TSM = false;           // Target Speed Monitoring
     bool csgVisible = false;
     bool vSetVisible =false;
     QColor colorListCsg[14][5] ={   // 8.2.1.4.9 The CSG shall follow the DMI colour as defined in Table 9.
@@ -140,6 +136,7 @@ private:
         {era::darkBlue,era::yellow,  era::darkBlue,era::darkBlue,era::darkBlue},  // RSM IndS
         {era::darkBlue,era::yellow,  era::darkBlue,era::darkBlue,era::red     },  // RSM IntS
     };
+    QBrush selectNoseBrush() const;
 private slots:
     void attenuationRoutine();
     void paintVSet(QPainter *painter);
@@ -150,7 +147,7 @@ private slots:
     void paintBasicHookTarget(QPainter *painter);
     void paintCircle(QPainter *painter);
     void paintOverspeed(QPainter *painter);
-
+    void drawLines(QPainter* painter, int count, qreal step, int length, int halfStepStartIndex, qreal initialRotate);
 protected:
     void paintEvent(QPaintEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;

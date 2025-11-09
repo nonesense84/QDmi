@@ -32,6 +32,10 @@ private:
     QString enteredAxl = "";
     QString enteredAit = "";
     QString enteredLdg = "";
+    QString driverId;
+    QString trainRunningNumber;
+    quint16 TCT_out; // For transmitting to Zusi
+    quint16 AXL_out; // For transmitting to Zusi
     bool validBra = false;  // Bremsart valid
     bool validBrh = false;  // Bremshunderstel valid
     bool validZl  = false;  // Train length valid
@@ -74,6 +78,8 @@ public slots:
     void setActiveAxl(QString AXL);
     void setActiveAit(QString AIT);
     void setActiveLdg(QString LDG);
+    void setTrainRunningNumber(QString trn);
+    void setDriverId(QString ID);
     void setTextFromKeyboard(QString text);
     void setCursorBlink();
     void finalizeDataEntry();
@@ -87,7 +93,7 @@ public: signals:
     void closeDataEntryWindow();
     void repeateDataEntry();
     void newTraindataLzb(quint16 BRH, quint16 BRA, quint16 ZL, quint16 VMZ, bool validated);
-    void newTraindataEtcs(quint16 BRH, QString TCT, quint16 ZL, quint16 VMZ, QString AXL, QString AIT, QString LDG, bool validated);
+    void newTraindataEtcs(quint16 BRH, quint16 TCT, quint16 ZL, quint16 VMZ, quint16 AXL, QString AIT, QString LDG);
     void newBehavBrhBtn(QString text, bool editable, bool enabled, bool dataValid, bool applicable);
     void newBehavBraBtn(QString text, bool editable, bool enabled, bool dataValid, bool applicable);
     void newBehavZlBtn (QString text, bool editable, bool enabled, bool dataValid, bool applicable);
@@ -98,10 +104,10 @@ public: signals:
     void newBehavLdgBtn(QString text, bool editable, bool enabled, bool dataValid, bool applicable);
     void newBehavZlLbl (QString text, bool editable, bool enabled, bool dataValid, bool applicable);
     void newBehavVmzLbl(QString text, bool editable, bool enabled, bool dataValid, bool applicable);
-  //void newBehavTctLbl(QString text, bool editable, bool enabled, bool dataValid, bool applicable);
-  //void newBehavAxlLbl(QString text, bool editable, bool enabled, bool dataValid, bool applicable);
-  //void newBehavAitLbl(QString text, bool editable, bool enabled, bool dataValid, bool applicable);
-  //void newBehavLdgLbl(QString text, bool editable, bool enabled, bool dataValid, bool applicable);
+    void newBehavTctLbl(QString text, bool editable, bool enabled, bool dataValid, bool applicable); // FIMXE: Not used yet
+    void newBehavAxlLbl(QString text, bool editable, bool enabled, bool dataValid, bool applicable); // FIMXE: Not used yet
+    void newBehavAitLbl(QString text, bool editable, bool enabled, bool dataValid, bool applicable); // FIMXE: Not used yet
+    void newBehavLdgLbl(QString text, bool editable, bool enabled, bool dataValid, bool applicable); // FIMXE: Not used yet
     void requestKeyboardLayout(quint8 keyboardtype);
     void requestSecondTdePage(bool secondPage);
     void requestDataEntrStrInitials(quint8 maxlength, QString startvalue);

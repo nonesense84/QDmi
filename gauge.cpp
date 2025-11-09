@@ -23,6 +23,19 @@ gauge::gauge(QWidget *parent) : QWidget(parent)
     ringWhiteRelWhite = QPen(era::white,      widthReleaseRingOuter, Qt::SolidLine, Qt::FlatCap,Qt::BevelJoin);
     ringWhiteRelBlue  = QPen(era::darkBlue,   widthReleaseRingInner, Qt::SolidLine, Qt::FlatCap,Qt::BevelJoin);
 }
+
+void gauge::reset(){
+    setVMaxDial(400);
+    setVPerm(0, false, false);
+    setVAct(0.0);
+    setVSet(0, false);
+    setVOverspeed(0);
+    setVTarget(0, false, false);
+    setVRelease(0);
+    setIntervenation(0);
+    setOverspeed(false);
+    setCsmReducing(false);
+}
 void gauge::setDpi(qreal dpi){
     fontSiceDial = 26.0 * 96 / dpi;
     fontSiceNose = 37.0 * 96 / dpi;
@@ -130,7 +143,6 @@ void gauge::setVEmerg(quint16 V){
 void gauge::setVTarget(quint16 V, bool visible, bool fromEtcs){
     if((V != vTarget) || (visible != csgVisible)){
         vTarget = V;
-      //qDebug() << "vTarget: " << vTarget;
         csgVisible = visible;
         posTarget = calcPosition(V);
         dataFromEtcs = fromEtcs;
@@ -163,7 +175,6 @@ void gauge::setOverspeed(bool overspeedWarning){
 void gauge::setCsmReducing(bool reducing){
     if(reducing != TSM){
         TSM = reducing;
-      //qDebug() << "TSM: "  << TSM;
         update();
     }
 }
@@ -184,37 +195,78 @@ qreal gauge::calcPosition(quint16 V){
 
 void gauge::setVMaxDial(quint16 V){
     quint16 newVMaxDial = 0;
-    if (V < 251){
-        newVMaxDial = 250;
-        scaleDegStep = 23.04;
-        scaleDegStepSmall = 23.04;
-        numShortLines = 13;
-        numLongLines = 13;
-        numNumbers = 13;
-    }
-    if (V < 181){
-        newVMaxDial = 180;
-        scaleDegStep = 32.0;
-        scaleDegStepSmall = 32.0;
-        numShortLines = 9;
-        numLongLines = 10;
-        numNumbers = 10;
-    }
     if (V < 141){
         newVMaxDial = 140;
         scaleDegStep = 41.14;
         scaleDegStepSmall = 41.14;
         numShortLines = 7;
         numLongLines = 8;
-        numNumbers = 8;
+        numberPositions = {
+            {-116,  157},
+            {-186,   59},
+            {-168,  -68},
+            { -76, -149},
+            {  35, -149},
+            { 109,  -69},
+            { 124,   59},
+            {  60,  157}
+        };
+    }else if (V < 181){
+        newVMaxDial = 180;
+        scaleDegStep = 32.0;
+        scaleDegStepSmall = 32.0;
+        numShortLines = 9;
+        numLongLines = 10;
+        numberPositions = {
+            { -116,  158},   //  0
+            { -182,   78},   // 20
+            { -194,  -16},   // 40
+            { -148, -104},   // 60
+            {  -69, -162},   // 80
+            {   19, -162},   //100
+            {   94, -104},   //120
+            {  136,  -16},   //140
+            {  128,   78},   //160
+            {   62,  158}    //180
+        };
     }
-    if (V > 250){
+    else if (V < 251){
+        newVMaxDial = 250;
+        scaleDegStep = 23.04;
+        scaleDegStepSmall = 23.04;
+        numShortLines = 13;
+        numLongLines = 13;
+        numberPositions = {
+            {-116,  158},      //  0
+            {-165,   99},      // 20
+            {-192,   33},      // 40
+            {-187,  -36},      // 60
+            {-153,  -99},      // 80
+            {-118, -144},      //100
+            { -48, -166},      //120
+            {  30, -158},      //140
+            {  92, -122},      //160
+            { 118,  -66},      //180
+            { 137,    2},      //200
+            { 126,   71},      //220
+            {  87,  136}       //240
+        };
+    }
+    else{
         newVMaxDial = 400;
         scaleDegStep = 48;
         scaleDegStepSmall = 9.6;
         numShortLines = 40;
         numLongLines = 9;
-        numNumbers = 7;
+        numberPositions = {
+            { -116,  158},     //0
+            { -193,   27},     //50
+            { -153, -103},     //100
+            {  -30, -168},     //150
+            {   99, -102},     //200
+            {  138,   27},     //300
+            {   65,  157},     //400
+        };
     }
     if(VMaxDial != newVMaxDial){
         VMaxDial = newVMaxDial;
@@ -226,12 +278,12 @@ void gauge::setVMaxDial(quint16 V){
         setVSet(vSet-1, vSetVisible);
         setVTarget(vTarget+1, csgVisible, dataFromEtcs);
         setVTarget(vTarget-1, csgVisible, dataFromEtcs);
-        setOverspeed(!OvS);
-        setOverspeed(!OvS);
+      //setOverspeed(!OvS);
+      //setOverspeed(!OvS);
         posVOverspeed = calcPosition(vOverspeed);
         posVSetDest = calcPosition(vSetVisible);
         posCsgDest = calcPosition(vPerm);
-        posNeedleDest = calcPosition(vAct);
+        posNeedleDest = calcPosition(vAct); 
     }
 }
 
@@ -242,6 +294,8 @@ void gauge::setEraUse(bool useEra){
 
 void gauge::paintEvent(QPaintEvent *)
 {
+    QFont dialFont("FreeSans", static_cast<int>(fontSiceDial), QFont::Bold, false);
+    QFont noseFont("FreeSans", static_cast<int>(fontSiceNose), QFont::Bold,false);
     static const QPoint speedPointer[8] = {
         QPoint( diamNose -3,  widhtNeedleThick/2),
         QPoint( lenNeedleThick,  widhtNeedleThick/2),
@@ -251,53 +305,7 @@ void gauge::paintEvent(QPaintEvent *)
         QPoint( lenNeedleRamp,  -widhtNeedleThin/2),
         QPoint( lenNeedleThick, -widhtNeedleThick/2),
         QPoint( diamNose -3, -widhtNeedleThick/2)
-    };
-    static const QPoint numberPositions140[8] = {
-        QPoint( -116, 157),
-        QPoint( -186, 59),
-        QPoint( -168, -68),
-        QPoint( -76, -149),
-        QPoint( 35, -149),
-        QPoint( 109, -69),
-        QPoint( 124, 59),
-        QPoint( 60, 157)
-    };
-    static const QPoint numberPositions180[10] = {
-        QPoint( -116, 158),     //0
-        QPoint( -182, 78),      //20
-        QPoint( -194, -16),      //40
-        QPoint( -148, -104),      //60
-        QPoint( -69, -162),      //80
-        QPoint( 19, -162),      //100
-        QPoint( 94, -104),      //120
-        QPoint( 136, -16),      //140
-        QPoint( 128, 78),      //160
-        QPoint( 62, 158)      //180
-    };
-    static const QPoint numberPositions250[13] = {
-        QPoint( -116, 158),     //0
-        QPoint( -165, 99),      //20
-        QPoint( -192, 33),      //40
-        QPoint( -187, -36),      //60
-        QPoint( -153, -99),      //80
-        QPoint( -118, -144),      //100
-        QPoint( -48, -166),      //120
-        QPoint( 30, -158),      //140
-        QPoint( 92, -122),      //160
-        QPoint( 118, -66),      //180
-        QPoint( 137, 2),      //200
-        QPoint( 126, 71),      //220
-        QPoint( 87, 136)      //240
-    };
-    static const QPoint numberPositions400[7] = {
-        QPoint( -116, 158),     //0
-        QPoint( -193,  27),     //50
-        QPoint( -153, -103),     //100
-        QPoint(  -30,-168),     //150
-        QPoint(   99, -102),     //200
-        QPoint(  138,  27),     //300
-        QPoint(   65, 157),     //400
-    };
+    };   
     static QRectF digitalSpeedPos(-41,-30,100,50);
     int side = qMin(width(), height());
     QPainter painter(this);
@@ -306,74 +314,35 @@ void gauge::paintEvent(QPaintEvent *)
     painter.scale(side / dimensionMatrix, side / dimensionMatrix);
     // Draw Numbers ===============================================
     painter.setPen(era::white);
-    painter.setFont(QFont("FreeSans",fontSiceDial,QFont::Bold,false));
-    for (int i = 0; i < numNumbers; ++i) {
-        if(VMaxDial == 180)
-            painter.drawText(numberPositions180[i],QString::number(i*20));
-        if(VMaxDial == 140)
-            painter.drawText(numberPositions140[i],QString::number(i*20));
-        if(VMaxDial == 250)
-            painter.drawText(numberPositions250[i],QString::number(i*20));
-        if(VMaxDial == 400)
-            painter.drawText(numberPositions400[i],QString::number(scale400Numbers[i]));
+    painter.setFont(dialFont);
+    for (int i = 0; i < numberPositions.size(); ++i) {
+        QString text = (VMaxDial == 400)
+                           ? QString::number(scale400Numbers[i])
+                           : QString::number(i * 20);
+        painter.drawText(numberPositions[i], text);
     }
     // Draw nose =============================================== Req 8.2.1.2.5
     painter.setPen(Qt::NoPen);
-    painter.setBrush(era::grey);                                                     // Ceiling Speed Monitoring
-    if(vAct > vTarget)                               painter.setBrush(era::white);   // Ceiling Speed Monitoring with target Information
-    if((TSM && vAct > vTarget) || vAct < vRelease)   painter.setBrush(era::yellow);  // Target Speed Monitoring
-    if(OvS)                                          painter.setBrush(era::orange);  // Over-speed Status information
-    if(IntS && ((vAct > vPerm) || (vAct > vRelease)))painter.setBrush(era::red);     // Intervention Status information
-    if(mode == zusi3etcs::mode_TR)                   painter.setBrush(era::red);     // Trip
+    painter.setBrush(selectNoseBrush());
     painter.drawEllipse(-diamNose,-diamNose,diamNose*2,diamNose*2);
     // Draw nose text ==========================================
     painter.setPen(era::black);
     if(IntS && ((vAct > vPerm) || (vAct > vRelease)))painter.setPen(era::white);
     if(mode == zusi3etcs::mode_TR)painter.setPen(era::white);
-    painter.setFont(QFont("FreeSans",fontSiceNose,QFont::Bold,false));
+    painter.setFont(noseFont);
     QRectF textRect = painter.boundingRect(digitalSpeedPos,Qt::AlignLeft,QString::number(vAct));
     qreal modPos = textRect.width() - 81;
     digitalSpeedPos.setLeft(-41 - modPos);
     painter.drawText(digitalSpeedPos,QString::number(vAct));
     // Draw long lines ===============================================
-    qreal rotatetSteps = 0;
     painter.setPen(QPen(era::white, 3.5));
     painter.rotate(startPosZero);
-    for (int i = 0; i < numLongLines; ++i) {
-        painter.drawLine(outEndLines - lenLongLines, 0, outEndLines, 0);
-        if((VMaxDial == 400)&& (i > 3)){
-            painter.rotate(scaleDegStep / 2);
-            rotatetSteps += scaleDegStep / 2;
-        }
-        else{
-            painter.rotate(scaleDegStep);
-            rotatetSteps += scaleDegStep;
-        }
-    }
-    painter.rotate(-rotatetSteps);
+    drawLines(&painter, numLongLines , scaleDegStep     , lenLongLines , VMaxDial == 400 ? 3  : -1, 0);
     // Draw short lines ===============================================
-    rotatetSteps = 0;
     painter.setPen(QPen(era::white, 3));
-    if(VMaxDial == 400){
-        painter.rotate(scaleDegStepSmall);
-        rotatetSteps += scaleDegStepSmall;
-    }
-    else{
-        painter.rotate(scaleDegStepSmall / 2);
-        rotatetSteps += scaleDegStepSmall / 2;
-    }
-    for (int j = 0; j < numShortLines; ++j) {
-        painter.drawLine(outEndLines - lenShortLines, 0, outEndLines, 0);
-        if((VMaxDial == 400)&& (j > 18)){
-            painter.rotate(scaleDegStepSmall / 2);
-            rotatetSteps += scaleDegStepSmall / 2;
-        }
-        else{
-            painter.rotate(scaleDegStepSmall);
-            rotatetSteps += scaleDegStepSmall;
-        }
-    }
-    painter.rotate(-rotatetSteps);
+    drawLines(&painter, numShortLines, scaleDegStepSmall, lenShortLines, VMaxDial == 400 ? 18 : -1,
+              VMaxDial == 400 ? scaleDegStepSmall : scaleDegStepSmall / 2);
+
     // Draw needle ===============================================
     if (showNeedle){
         painter.setPen(Qt::NoPen);
@@ -420,6 +389,7 @@ void gauge::paintLzbTriangular(QPainter *painter){
     painter->setBrush(era::red);
     painter->setPen(Qt::NoPen);
     painter->drawPolygon(vSollTriangle, 3);
+    painter->rotate(-posCsg);
 }
 void gauge::paintHookCsg(QPainter *painter){
     int t = int(dimensionMatrix) - widthCsgRing;
@@ -499,6 +469,37 @@ void gauge::paintOverspeed(QPainter *painter){
         painter->rotate(-posCsg);
     }
 }
+void gauge::drawLines(QPainter* painter, int count, qreal step, int length, int halfStepStartIndex, qreal initialRotate){
+    qreal rotated = initialRotate;
+    painter->rotate(initialRotate);
+    for (int i = 0; i < count; ++i) {
+        painter->drawLine(outEndLines - length, 0, outEndLines, 0);
+        qreal actualStep = step;
+        if (halfStepStartIndex >= 0 && i > halfStepStartIndex) {
+            actualStep /= 2.0;
+        }
+        painter->rotate(actualStep);
+        rotated += actualStep;
+    }
+    painter->rotate(-rotated);
+}
+
+QBrush gauge::selectNoseBrush() const {
+    if (mode == zusi3etcs::mode_TR)                 return era::red;    // Trip
+    if (IntS && (vAct > vPerm || vAct > vRelease))  return era::red;    // Intervention Status information
+    if (OvS)                                        return era::orange; // Over-speed Status information
+    if ((TSM && vAct > vTarget) || vAct < vRelease) return era::yellow; // Target Speed Monitoring
+    if (vAct > vTarget)                             return era::white;  // Ceiling Speed Monitoring with target Information
+    return era::grey;                                                   // Ceiling Speed Monitoring
+}
+
 void gauge::mousePressEvent(QMouseEvent *event){
-    displayBasicHooks = !displayBasicHooks;
+    setBasicSpeedHooks(!displayBasicHooks);
+    emit activatedSpeedHooks(displayBasicHooks);
+    (void)event;
+}
+
+void gauge::setBasicSpeedHooks(bool active){
+    displayBasicHooks = active;
+    update();
 }

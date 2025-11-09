@@ -13,7 +13,7 @@ class sep : public QObject
 public:
     sep();
 public slots:
-    void process();
+    void initialize();
 
 signals:
     //void newLzbIndicators(quint8 lmsToDecoder[16]);
@@ -30,7 +30,7 @@ signals:
     void newSimTime(QString simtime);
     void newTrainnumber(QString trainNumber);
     void newGeoPos(qint32 geoPos);
-    void newLevelInforamtion(quint16 level);
+    void tcpConnectionSettings(quint8 settings);
 
 private:
     QUdpSocket *udpSocketSep;
@@ -38,11 +38,11 @@ private:
     QUdpSocket *udpSocketLzb;
     QUdpSocket *udpSocketMtd;
     QUdpSocket *udpSocketSpeed;
-    QHostAddress sender;
-    quint16 senderPort;
+    QHostAddress sender;    
     quint32 simTime;
     quint32 simTimeOld;
     quint32 trainNumber;
+    quint16 senderPort;
 
 private slots:
     void readingPendingSep();

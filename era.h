@@ -3,6 +3,28 @@
 #include <QObject>
 #include <QColor>
 #include <QRect>
+#include <QDateTime>
+#include <QString>
+
+struct EtcsTextMessage {
+    uint32_t  msgID;
+    QDateTime timeStamp;
+    uint16_t  zusiKennung;
+    QString   msgTypeEtcsSpec;
+    QString   msgText;
+    QString   fillingText;
+    uint8_t   ackNeeded;
+};
+struct previewPoint {
+    uint16_t  origin;
+    float     speed;
+    float     distance;
+    float     altitude;
+    uint16_t  parameter;
+};
+Q_DECLARE_METATYPE(QList<EtcsTextMessage>)  // Wichtig für Signal/Slot mit QList
+Q_DECLARE_METATYPE(QList<previewPoint>)  // Wichtig für Signal/Slot mit QList
+
 namespace era{
 class era : public QObject
 {
@@ -109,7 +131,7 @@ const QStringList adhesionReduced = {
     ":/icons/ST_02.svg", // reduced             =  1,
 };
 const QStringList ordersAndAnnouncementofTrackConditionIcons = {
-    ":/icons/blanc.svg",//
+    ":/icons/blanc.svg",//                                                        =  0,
     ":/icons/TC01.svg", // Pantograph lowered, grey                               =  1,
     ":/icons/TC02.svg", // Lower pantograph, grey                                 =  2,
     ":/icons/TC03.svg", // Lower pantograph, yellow                               =  3,
@@ -232,6 +254,7 @@ const QColor red = QColor(191,0,2);
 const QColor paspDark = QColor(33,45,74);
 const QColor paspLight = QColor(41,74,107);
 const QColor darkYellow = QColor(255,219,0); // Not Official from Era! Just looks good!
+const QColor veryDarkYellow = QColor(112,112,0);// Not Official from Era! Just looks good!
 
 //const QColor era::black = QColor(255,0,0);
 //const QColor era::shadow = QColor(0,127,127);

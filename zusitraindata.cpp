@@ -26,14 +26,19 @@ void zusiTraindata::setEtcsAvailable(bool available){
 void zusiTraindata::setKeycommand(quint16 command){                         // To use in case of using Wachsamtaste
     if(validBra && validBrh && validZl && validVmz && command == 0x33){
         validated = true;
-        emit newTraindataLzb(enteredBra.toInt(), enteredBrh.toInt(), enteredZl.toInt(), enteredVmz.toInt(), validated);
+        emit newTraindataLzb(enteredBra.toShort(), enteredBrh.toShort(), enteredZl.toShort(), enteredVmz.toShort(), validated);
     }
 }
-
+void zusiTraindata::setTrainRunningNumber(QString trn){
+    trainRunningNumber = trn;
+}
+void zusiTraindata::setDriverId(QString ID){
+    driverId = ID;
+}
 void zusiTraindata::dataValidButtonPressed(QString buttonText){
     if(buttonText == "Ja" || buttonText == "Yes"){
         validated = true;
-        emit newTraindataLzb(enteredBra.toInt(), enteredBrh.toInt(), enteredZl.toInt(), enteredVmz.toInt(), validated);
+        emit newTraindataLzb(enteredBra.toShort(), enteredBrh.toShort(), enteredZl.toShort(), enteredVmz.toShort(), validated);
         finalizeDataEntry();
         emit closeDataEntryWindow();
     }
@@ -59,27 +64,22 @@ void zusiTraindata::setTextFromKeyboard(QString text){
         enteredDataString.chop(1);
         text = "";
     }
-  /*if(enabledBrh || enabledZl || enabledVmz){
-      //if( hasUnderline)enteredDataString = enteredDataString + "_";
-      //if(!hasUnderline)enteredDataString.remove("_");
-        enteredDataString = enteredDataString + text;
-    }*/
-  //if((enabledTct || enabledAxl || enabledAit || enabledLdg) && text != "")enteredDataString = text;
-    if(enabledBra){
-        enteredDataString = text;
-        emit newBehavBraBtn(enteredDataString, true, enabledBra, validBra, true);
-    }
-    if(enabledBrh && enteredDataString.length() <=2){
+    if(enteredDataString.length() >2) enteredDataString = "";
+    if(enabledBrh){
         enteredDataString = enteredDataString + text;
         emit newBehavBrhBtn(enteredDataString, true, enabledBrh, validBrh, true);
     }
-    if(enabledZl && enteredDataString.length() <=2){
+    if(enabledZl){
         enteredDataString = enteredDataString + text;
         emit newBehavZlBtn (enteredDataString, true, enabledZl,  validZl,  lzbApplicable);
     }
-    if(enabledVmz && enteredDataString.length() <=2){
+    if(enabledVmz){
         enteredDataString = enteredDataString + text;
         emit newBehavVmzBtn(enteredDataString, true, enabledVmz, validVmz, lzbApplicable);
+    }
+    if(enabledBra){
+        enteredDataString = text;
+        emit newBehavBraBtn(enteredDataString, true, enabledBra, validBra, true);
     }
     if(enabledTct){
         enteredDataString = text;
@@ -133,8 +133,7 @@ void zusiTraindata::setBra(QString BRA, bool btnEnabled){
         enteredBra = BRA;
         validBra = true;
         validated = false;
-        emit newTraindataLzb(enteredBra.toInt(), enteredBrh.toInt(), enteredZl.toInt(), enteredVmz.toInt(), validated);
-        emit newTraindataEtcs(enteredBrh.toInt(), enteredTct, enteredZl.toInt(), enteredVmz.toInt(), enteredAxl, enteredAit, enteredLdg, validated);
+        emit newTraindataLzb(enteredBra.toShort(), enteredBrh.toShort(), enteredZl.toShort(), enteredVmz.toShort(), validated);
         enabledBrh = true;
         emit requestDataEntrStrInitials(4, enteredBrh);
         emit requestKeyboardLayout(P_Keyboard_Numeric);
@@ -163,8 +162,8 @@ void zusiTraindata::setBrh(QString BRH, bool btnEnabled){
         if(enteredBrh == "0")BRH = BRH.remove("0");
         validBrh = true;
         validated = false;
-        emit newTraindataLzb(enteredBra.toInt(), enteredBrh.toInt(), enteredZl.toInt(), enteredVmz.toInt(), validated);
-        emit newTraindataEtcs(enteredBrh.toInt(), enteredTct, enteredZl.toInt(), enteredVmz.toInt(), enteredAxl, enteredAit, enteredLdg, validated);
+        emit newTraindataLzb(enteredBra.toShort(), enteredBrh.toShort(), enteredZl.toShort(), enteredVmz.toShort(), validated);
+        emit newTraindataEtcs(enteredBrh.toShort(), TCT_out, enteredZl.toShort(), enteredVmz.toShort(), AXL_out, enteredAit, enteredLdg);
         if(lzbApplicable)enabledZl = true;
         emit requestDataEntrStrInitials(3, enteredZl);
         if(enteredZl == "0")
@@ -191,8 +190,8 @@ void zusiTraindata::setZl (QString ZL,  bool btnEnabled){
         enteredZl =  ZL;
         validZl = true;
         validated = false;
-        emit newTraindataLzb(enteredBra.toInt(), enteredBrh.toInt(), enteredZl.toInt(), enteredVmz.toInt(), validated);
-        emit newTraindataEtcs(enteredBrh.toInt(), enteredTct, enteredZl.toInt(), enteredVmz.toInt(), enteredAxl, enteredAit, enteredLdg, validated);
+        emit newTraindataLzb(enteredBra.toShort(), enteredBrh.toShort(), enteredZl.toShort(), enteredVmz.toShort(), validated);
+        emit newTraindataEtcs(enteredBrh.toShort(), TCT_out, enteredZl.toShort(), enteredVmz.toShort(), AXL_out, enteredAit, enteredLdg);
         enabledVmz = true;
         emit requestDataEntrStrInitials(3, enteredVmz);
         if(enteredVmz == "0")
@@ -219,8 +218,8 @@ void zusiTraindata::setVmz(QString VMZ, bool btnEnabled){
         enteredVmz = VMZ;
         validVmz = true;
         validated = false;
-        emit newTraindataLzb(enteredBra.toInt(), enteredBrh.toInt(), enteredZl.toInt(), enteredVmz.toInt(), validated);
-        emit newTraindataEtcs(enteredBrh.toInt(), enteredTct, enteredZl.toInt(), enteredVmz.toInt(), enteredAxl, enteredAit, enteredLdg, validated);
+        emit newTraindataLzb(enteredBra.toShort(), enteredBrh.toShort(), enteredZl.toShort(), enteredVmz.toShort(), validated);
+        emit newTraindataEtcs(enteredBrh.toShort(), TCT_out, enteredZl.toShort(), enteredVmz.toShort(), AXL_out, enteredAit, enteredLdg);
         if(etcsApplicable){
             enabledTct = true;
             enteredDataString = enteredTct;
@@ -246,7 +245,19 @@ void zusiTraindata::setTct(QString TCT, bool btnEnabled){
         enteredTct = TCT;
         validTct = true;
         validated = false;
-        emit newTraindataEtcs(enteredBrh.toInt(), enteredTct, enteredZl.toInt(), enteredVmz.toInt(), enteredAxl, enteredAit, enteredLdg, validated);
+        if(TCT == "PASS1") TCT_out =  1;// FIXME: I'ts unknown, which categorys are supported and how the are associated
+        if(TCT == "PASS2") TCT_out =  2;
+        if(TCT == "PASS3") TCT_out =  3;
+        if(TCT == "FP1"  ) TCT_out =  4;
+        if(TCT == "FP2"  ) TCT_out =  5;
+        if(TCT == "FP3"  ) TCT_out =  6;
+        if(TCT == "FP4"  ) TCT_out =  7;
+        if(TCT == "FG1"  ) TCT_out =  8;
+        if(TCT == "FG2"  ) TCT_out =  9;
+        if(TCT == "FG3"  ) TCT_out = 10;
+        if(TCT == "FG4"  ) TCT_out = 11;
+        if(TCT == "TILT1") TCT_out = 12;
+        emit newTraindataEtcs(enteredBrh.toShort(), TCT_out, enteredZl.toShort(), enteredVmz.toShort(), AXL_out, enteredAit, enteredLdg);
         enabledAxl = true;
         emit requestKeyboardLayout(P_Keyboard_axleLoad);
         emit requestDataEntrStrInitials(3, enteredAxl);
@@ -267,7 +278,21 @@ void zusiTraindata::setAxl(QString AXL, bool btnEnabled){
         enteredAxl = AXL;
         validAxl = true;
         validated = false;
-        emit newTraindataEtcs(enteredBrh.toInt(), enteredTct, enteredZl.toInt(), enteredVmz.toInt(), enteredAxl, enteredAit, enteredLdg, validated);
+        if(AXL == "A"   ) AXL_out =  1;// FIXME: I'ts unknown, which axle load categorys are supported and how the are associated
+        if(AXL == "B1"  ) AXL_out =  2;
+        if(AXL == "B2"  ) AXL_out =  3;
+        if(AXL == "C2"  ) AXL_out =  4;
+        if(AXL == "C3"  ) AXL_out =  5;
+        if(AXL == "C4"  ) AXL_out =  6;
+        if(AXL == "D2"  ) AXL_out =  7;
+        if(AXL == "D3"  ) AXL_out =  8;
+        if(AXL == "D4"  ) AXL_out =  9;
+        if(AXL == "D4XL") AXL_out = 10;
+        if(AXL == "E4"  ) AXL_out = 11;
+        if(AXL == "E5"  ) AXL_out = 12;
+
+
+        emit newTraindataEtcs(enteredBrh.toShort(), TCT_out, enteredZl.toShort(), enteredVmz.toShort(), AXL_out, enteredAit, enteredLdg);
         enabledAit = true;
         emit requestKeyboardLayout(P_Keyboard_yesNo);
         emit requestDataEntrStrInitials(3, enteredAit);
@@ -288,7 +313,7 @@ void zusiTraindata::setAit(QString AIT, bool btnEnabled){
         enteredAit = AIT;
         validAit = true;
         validated = false;
-        emit newTraindataEtcs(enteredBrh.toInt(), enteredTct, enteredZl.toInt(), enteredVmz.toInt(), enteredAxl, enteredAit, enteredLdg, validated);
+        emit newTraindataEtcs(enteredBrh.toShort(), TCT_out, enteredZl.toShort(), enteredVmz.toShort(), AXL_out, enteredAit, enteredLdg);
         enabledLdg = true;
         emit requestKeyboardLayout(P_Keyboard_loadingGauge);
         emit requestDataEntrStrInitials(3, enteredLdg);
@@ -306,10 +331,10 @@ void zusiTraindata::setLdg(QString LDG, bool btnEnabled){
     emit requestKeyboardLayout(P_Keyboard_loadingGauge);
     disableAllButtons();
     if(btnEnabled){
-        enteredLdg = LDG;
+        enteredLdg = LDG;    
         validLdg = true;
         validated = false;
-        emit newTraindataEtcs(enteredBrh.toInt(), enteredTct, enteredZl.toInt(), enteredVmz.toInt(), enteredAxl, enteredAit, enteredLdg, validated);
+        emit newTraindataEtcs(enteredBrh.toShort(), TCT_out, enteredZl.toShort(), enteredVmz.toShort(), AXL_out, enteredAit, enteredLdg);
     }
     else{
         emit requestDataEntrStrInitials(3, enteredLdg);

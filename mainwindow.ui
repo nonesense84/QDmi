@@ -67,7 +67,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>1024</width>
+      <width>1032</width>
       <height>600</height>
      </rect>
     </property>
@@ -269,7 +269,7 @@
                    <number>0</number>
                   </property>
                   <item>
-                   <widget class="dmiLabel" name="fieldA1" native="true">
+                   <widget class="timetoindication" name="fieldA1" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>0</horstretch>
@@ -295,7 +295,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="dmiLabel" name="fieldA3" native="true">
+                   <widget class="targetDistance" name="fieldA3" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>0</horstretch>
@@ -601,6 +601,9 @@
                        <height>82</height>
                       </rect>
                      </property>
+                     <property name="styleSheet">
+                      <string notr="true">background-color: rgba(0, 0, 0, 0);  /* Schwarz mit 0% Deckkraft */</string>
+                     </property>
                      <layout class="QHBoxLayout" name="horizontalLayout_11">
                       <property name="spacing">
                        <number>0</number>
@@ -624,6 +627,9 @@
                           <horstretch>36</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
+                        </property>
+                        <property name="styleSheet">
+                         <string notr="true"/>
                         </property>
                         <layout class="QVBoxLayout" name="verticalLayout_10">
                          <property name="spacing">
@@ -649,9 +655,11 @@
                              <verstretch>46</verstretch>
                             </sizepolicy>
                            </property>
+                           <property name="autoFillBackground">
+                            <bool>false</bool>
+                           </property>
                            <property name="styleSheet">
-                            <string notr="true">background:rgb(3,17,34)
-</string>
+                            <string notr="true"/>
                            </property>
                           </widget>
                          </item>
@@ -681,8 +689,7 @@
                          </sizepolicy>
                         </property>
                         <property name="styleSheet">
-                         <string notr="true">background:rgb(3,17,34)
-</string>
+                         <string notr="true"/>
                         </property>
                        </widget>
                       </item>
@@ -694,9 +701,11 @@
                           <verstretch>0</verstretch>
                          </sizepolicy>
                         </property>
+                        <property name="autoFillBackground">
+                         <bool>false</bool>
+                        </property>
                         <property name="styleSheet">
-                         <string notr="true">background:rgb(200,150,150)
-</string>
+                         <string notr="true"/>
                         </property>
                         <property name="currentIndex">
                          <number>1</number>
@@ -727,8 +736,7 @@
                              </sizepolicy>
                             </property>
                             <property name="styleSheet">
-                             <string notr="true">background:rgb(3,17,34)
-</string>
+                             <string notr="true"/>
                             </property>
                            </widget>
                           </item>
@@ -820,8 +828,7 @@
                                 </sizepolicy>
                                </property>
                                <property name="styleSheet">
-                                <string notr="true">background:rgb(3,17,34)
-</string>
+                                <string notr="true"/>
                                </property>
                               </widget>
                              </item>
@@ -851,8 +858,7 @@
                              </sizepolicy>
                             </property>
                             <property name="styleSheet">
-                             <string notr="true">background:rgb(3,17,34)
-</string>
+                             <string notr="true"/>
                             </property>
                            </widget>
                           </item>
@@ -884,7 +890,7 @@
                              </sizepolicy>
                             </property>
                             <property name="styleSheet">
-                             <string notr="true">background:rgb(3,17,34)
+                             <string notr="true">background:rgba(3,17,34,0)
 </string>
                             </property>
                            </widget>
@@ -975,8 +981,7 @@
                          </sizepolicy>
                         </property>
                         <property name="styleSheet">
-                         <string notr="true">background:rgb(3,17,34)
-</string>
+                         <string notr="true"/>
                         </property>
                        </widget>
                       </item>
@@ -1013,8 +1018,7 @@
                             </sizepolicy>
                            </property>
                            <property name="styleSheet">
-                            <string notr="true">background:rgb(3,17,34)
-</string>
+                            <string notr="true"/>
                            </property>
                           </widget>
                          </item>
@@ -1361,7 +1365,7 @@
                           </widget>
                          </item>
                          <item>
-                          <widget class="dmiLabel" name="FieldE8to9" native="true">
+                          <widget class="EtcsTextWidget" name="FieldE8to9" native="true">
                            <property name="sizePolicy">
                             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                              <horstretch>0</horstretch>
@@ -1371,82 +1375,6 @@
                            <property name="styleSheet">
                             <string notr="true"/>
                            </property>
-                           <widget class="QTableView" name="FieldEEtcsTexts">
-                            <property name="enabled">
-                             <bool>false</bool>
-                            </property>
-                            <property name="geometry">
-                             <rect>
-                              <x>1</x>
-                              <y>1</y>
-                              <width>310</width>
-                              <height>48</height>
-                             </rect>
-                            </property>
-                            <property name="styleSheet">
-                             <string notr="true">background-color: transparent;</string>
-                            </property>
-                            <property name="frameShape">
-                             <enum>QFrame::NoFrame</enum>
-                            </property>
-                            <property name="lineWidth">
-                             <number>0</number>
-                            </property>
-                            <property name="verticalScrollBarPolicy">
-                             <enum>Qt::ScrollBarAlwaysOff</enum>
-                            </property>
-                            <property name="horizontalScrollBarPolicy">
-                             <enum>Qt::ScrollBarAlwaysOff</enum>
-                            </property>
-                            <property name="sizeAdjustPolicy">
-                             <enum>QAbstractScrollArea::AdjustToContents</enum>
-                            </property>
-                            <property name="autoScroll">
-                             <bool>true</bool>
-                            </property>
-                            <property name="editTriggers">
-                             <set>QAbstractItemView::NoEditTriggers</set>
-                            </property>
-                            <property name="alternatingRowColors">
-                             <bool>false</bool>
-                            </property>
-                            <property name="verticalScrollMode">
-                             <enum>QAbstractItemView::ScrollPerItem</enum>
-                            </property>
-                            <property name="showGrid">
-                             <bool>false</bool>
-                            </property>
-                            <property name="gridStyle">
-                             <enum>Qt::DashLine</enum>
-                            </property>
-                            <attribute name="horizontalHeaderVisible">
-                             <bool>false</bool>
-                            </attribute>
-                            <attribute name="horizontalHeaderHighlightSections">
-                             <bool>false</bool>
-                            </attribute>
-                            <attribute name="horizontalHeaderStretchLastSection">
-                             <bool>true</bool>
-                            </attribute>
-                            <attribute name="verticalHeaderVisible">
-                             <bool>false</bool>
-                            </attribute>
-                            <attribute name="verticalHeaderCascadingSectionResizes">
-                             <bool>false</bool>
-                            </attribute>
-                            <attribute name="verticalHeaderMinimumSectionSize">
-                             <number>5</number>
-                            </attribute>
-                            <attribute name="verticalHeaderDefaultSectionSize">
-                             <number>11</number>
-                            </attribute>
-                            <attribute name="verticalHeaderHighlightSections">
-                             <bool>false</bool>
-                            </attribute>
-                            <attribute name="verticalHeaderStretchLastSection">
-                             <bool>false</bool>
-                            </attribute>
-                           </widget>
                           </widget>
                          </item>
                         </layout>
@@ -1661,7 +1589,7 @@
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                    <horstretch>0</horstretch>
-                   <verstretch>70</verstretch>
+                   <verstretch>5</verstretch>
                   </sizepolicy>
                  </property>
                  <property name="styleSheet">
@@ -1699,7 +1627,7 @@
                    <number>0</number>
                   </property>
                   <item row="0" column="0">
-                   <widget class="dmiLabel" name="dataValidLabel1" native="true">
+                   <widget class="dmiLabel" name="dataValidLabel0" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>2</horstretch>
@@ -1713,7 +1641,7 @@
                    </widget>
                   </item>
                   <item row="0" column="1">
-                   <widget class="dmiLabel" name="dataValidValue1" native="true">
+                   <widget class="dmiLabel" name="dataValidValue0" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>1</horstretch>
@@ -1727,7 +1655,7 @@
                    </widget>
                   </item>
                   <item row="1" column="0">
-                   <widget class="dmiLabel" name="dataValidLabel2" native="true">
+                   <widget class="dmiLabel" name="dataValidLabel1" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>2</horstretch>
@@ -1741,7 +1669,7 @@
                    </widget>
                   </item>
                   <item row="1" column="1">
-                   <widget class="dmiLabel" name="dataValidValue2" native="true">
+                   <widget class="dmiLabel" name="dataValidValue1" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>1</horstretch>
@@ -1755,7 +1683,7 @@
                    </widget>
                   </item>
                   <item row="2" column="0">
-                   <widget class="dmiLabel" name="dataValidLabel3" native="true">
+                   <widget class="dmiLabel" name="dataValidLabel2" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>2</horstretch>
@@ -1769,7 +1697,7 @@
                    </widget>
                   </item>
                   <item row="2" column="1">
-                   <widget class="dmiLabel" name="dataValidValue3" native="true">
+                   <widget class="dmiLabel" name="dataValidValue2" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>1</horstretch>
@@ -1783,7 +1711,7 @@
                    </widget>
                   </item>
                   <item row="3" column="0">
-                   <widget class="dmiLabel" name="dataValidLabel4" native="true">
+                   <widget class="dmiLabel" name="dataValidLabel3" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>2</horstretch>
@@ -1797,7 +1725,7 @@
                    </widget>
                   </item>
                   <item row="3" column="1">
-                   <widget class="dmiLabel" name="dataValidValue4" native="true">
+                   <widget class="dmiLabel" name="dataValidValue3" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>1</horstretch>
@@ -1811,7 +1739,7 @@
                    </widget>
                   </item>
                   <item row="4" column="0">
-                   <widget class="dmiLabel" name="dataValidLabel5" native="true">
+                   <widget class="dmiLabel" name="dataValidLabel4" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>2</horstretch>
@@ -1825,7 +1753,7 @@
                    </widget>
                   </item>
                   <item row="4" column="1">
-                   <widget class="dmiLabel" name="dataValidValue5" native="true">
+                   <widget class="dmiLabel" name="dataValidValue4" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>1</horstretch>
@@ -1839,7 +1767,7 @@
                    </widget>
                   </item>
                   <item row="5" column="0">
-                   <widget class="dmiLabel" name="dataValidLabel6" native="true">
+                   <widget class="dmiLabel" name="dataValidLabel5" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>2</horstretch>
@@ -1853,12 +1781,18 @@
                    </widget>
                   </item>
                   <item row="5" column="1">
-                   <widget class="dmiLabel" name="dataValidValue6" native="true">
+                   <widget class="dmiLabel" name="dataValidValue5" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>1</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>0</height>
+                     </size>
                     </property>
                     <property name="styleSheet">
                      <string notr="true">background:rgb(10,52,240)
@@ -1867,7 +1801,7 @@
                    </widget>
                   </item>
                   <item row="6" column="0">
-                   <widget class="dmiLabel" name="dataValidLabel7" native="true">
+                   <widget class="dmiLabel" name="dataValidLabel6" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>2</horstretch>
@@ -1881,12 +1815,18 @@
                    </widget>
                   </item>
                   <item row="6" column="1">
-                   <widget class="dmiLabel" name="dataValidValue7" native="true">
+                   <widget class="dmiLabel" name="dataValidValue6" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>1</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>0</height>
+                     </size>
                     </property>
                     <property name="styleSheet">
                      <string notr="true">background:rgb(10,52,240)
@@ -1895,7 +1835,7 @@
                    </widget>
                   </item>
                   <item row="7" column="0">
-                   <widget class="dmiLabel" name="dataValidLabel8" native="true">
+                   <widget class="dmiLabel" name="dataValidLabel7" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>2</horstretch>
@@ -1909,7 +1849,153 @@
                    </widget>
                   </item>
                   <item row="7" column="1">
+                   <widget class="dmiLabel" name="dataValidValue7" native="true">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>1</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background:rgb(10,52,240)
+</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="8" column="0">
+                   <widget class="dmiLabel" name="dataValidLabel8" native="true">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>2</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background:rgb(10,52,240)
+</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="8" column="1">
                    <widget class="dmiLabel" name="dataValidValue8" native="true">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>1</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background:rgb(10,52,240)
+</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="9" column="0">
+                   <widget class="dmiLabel" name="dataValidLabel9" native="true">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>2</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background:rgb(10,52,240)
+</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="9" column="1">
+                   <widget class="dmiLabel" name="dataValidValue9" native="true">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>1</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background:rgb(10,52,240)
+</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="10" column="0">
+                   <widget class="dmiLabel" name="dataValidLabel10" native="true">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>2</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background:rgb(10,52,240)
+</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="10" column="1">
+                   <widget class="dmiLabel" name="dataValidValue10" native="true">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>1</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background:rgb(10,52,240)
+</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="11" column="0">
+                   <widget class="dmiLabel" name="dataValidLabel11" native="true">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>2</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background:rgb(10,52,240)
+</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="11" column="1">
+                   <widget class="dmiLabel" name="dataValidValue11" native="true">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>1</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background:rgb(10,52,240)
+</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="12" column="0">
+                   <widget class="dmiLabel" name="dataValidLabel12" native="true">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>2</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">background:rgb(10,52,240)
+</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="12" column="1">
+                   <widget class="dmiLabel" name="dataValidValue12" native="true">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>1</horstretch>
@@ -1930,7 +2016,7 @@
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                    <horstretch>0</horstretch>
-                   <verstretch>50</verstretch>
+                   <verstretch>5</verstretch>
                   </sizepolicy>
                  </property>
                  <property name="styleSheet">
@@ -2034,10 +2120,10 @@
 </string>
              </property>
              <property name="frameShape">
-              <enum>QFrame::NoFrame</enum>
+              <enum>QFrame::Shape::NoFrame</enum>
              </property>
              <property name="frameShadow">
-              <enum>QFrame::Plain</enum>
+              <enum>QFrame::Shadow::Plain</enum>
              </property>
              <property name="midLineWidth">
               <number>0</number>
@@ -2823,7 +2909,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="dmiLabel" name="fieldF6" native="true">
+                   <widget class="QWidget" name="fieldF6" native="true">
                     <property name="styleSheet">
                      <string notr="true">background:rgb(3,17,34)
 </string>
@@ -2831,7 +2917,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="dmiLabel" name="fieldF7" native="true">
+                   <widget class="QWidget" name="fieldF7" native="true">
                     <property name="styleSheet">
                      <string notr="true">background:rgb(3,17,34)
 </string>
@@ -2839,7 +2925,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="dmiLabel" name="fieldF8" native="true">
+                   <widget class="QWidget" name="fieldF8" native="true">
                     <property name="styleSheet">
                      <string notr="true">background:rgb(3,17,34)
 </string>
@@ -2847,7 +2933,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="dmiLabel" name="fieldF9" native="true">
+                   <widget class="QWidget" name="fieldF9" native="true">
                     <property name="styleSheet">
                      <string notr="true">background:rgb(3,17,34)
 </string>
@@ -3510,16 +3596,16 @@
                            </font>
                           </property>
                           <property name="layoutDirection">
-                           <enum>Qt::LeftToRight</enum>
+                           <enum>Qt::LayoutDirection::LeftToRight</enum>
                           </property>
                           <property name="styleSheet">
                            <string notr="true">background:rgb(85,85,85);color:rgb(195,195,195)</string>
                           </property>
                           <property name="frameShape">
-                           <enum>QFrame::NoFrame</enum>
+                           <enum>QFrame::Shape::NoFrame</enum>
                           </property>
                           <property name="frameShadow">
-                           <enum>QFrame::Plain</enum>
+                           <enum>QFrame::Shadow::Plain</enum>
                           </property>
                           <property name="lineWidth">
                            <number>3</number>
@@ -3531,7 +3617,7 @@
                            <bool>false</bool>
                           </property>
                           <property name="alignment">
-                           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                           </property>
                          </widget>
                         </item>
@@ -3550,16 +3636,16 @@
                            </font>
                           </property>
                           <property name="layoutDirection">
-                           <enum>Qt::LeftToRight</enum>
+                           <enum>Qt::LayoutDirection::LeftToRight</enum>
                           </property>
                           <property name="styleSheet">
                            <string notr="true">background:rgb(85,85,85);color:rgb(195,195,195)</string>
                           </property>
                           <property name="frameShape">
-                           <enum>QFrame::NoFrame</enum>
+                           <enum>QFrame::Shape::NoFrame</enum>
                           </property>
                           <property name="frameShadow">
-                           <enum>QFrame::Sunken</enum>
+                           <enum>QFrame::Shadow::Sunken</enum>
                           </property>
                           <property name="lineWidth">
                            <number>3</number>
@@ -3568,7 +3654,7 @@
                            <string>V-Soll:</string>
                           </property>
                           <property name="alignment">
-                           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                           </property>
                          </widget>
                         </item>
@@ -3587,16 +3673,16 @@
                            </font>
                           </property>
                           <property name="layoutDirection">
-                           <enum>Qt::LeftToRight</enum>
+                           <enum>Qt::LayoutDirection::LeftToRight</enum>
                           </property>
                           <property name="styleSheet">
                            <string notr="true">background:rgb(85,85,85);color:rgb(195,195,195)</string>
                           </property>
                           <property name="frameShape">
-                           <enum>QFrame::NoFrame</enum>
+                           <enum>QFrame::Shape::NoFrame</enum>
                           </property>
                           <property name="frameShadow">
-                           <enum>QFrame::Sunken</enum>
+                           <enum>QFrame::Shadow::Sunken</enum>
                           </property>
                           <property name="lineWidth">
                            <number>3</number>
@@ -3605,7 +3691,7 @@
                            <string>Textmeldungen</string>
                           </property>
                           <property name="alignment">
-                           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                           </property>
                          </widget>
                         </item>
@@ -3624,16 +3710,16 @@
                            </font>
                           </property>
                           <property name="layoutDirection">
-                           <enum>Qt::LeftToRight</enum>
+                           <enum>Qt::LayoutDirection::LeftToRight</enum>
                           </property>
                           <property name="styleSheet">
                            <string notr="true">background:rgb(85,85,85);color:rgb(195,195,195)</string>
                           </property>
                           <property name="frameShape">
-                           <enum>QFrame::NoFrame</enum>
+                           <enum>QFrame::Shape::NoFrame</enum>
                           </property>
                           <property name="frameShadow">
-                           <enum>QFrame::Sunken</enum>
+                           <enum>QFrame::Shadow::Sunken</enum>
                           </property>
                           <property name="lineWidth">
                            <number>3</number>
@@ -3642,7 +3728,7 @@
                            <string>Manometer:</string>
                           </property>
                           <property name="alignment">
-                           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                           </property>
                          </widget>
                         </item>
@@ -3661,16 +3747,16 @@
                            </font>
                           </property>
                           <property name="layoutDirection">
-                           <enum>Qt::LeftToRight</enum>
+                           <enum>Qt::LayoutDirection::LeftToRight</enum>
                           </property>
                           <property name="styleSheet">
                            <string notr="true">background:rgb(85,85,85);color:rgb(195,195,195)</string>
                           </property>
                           <property name="frameShape">
-                           <enum>QFrame::NoFrame</enum>
+                           <enum>QFrame::Shape::NoFrame</enum>
                           </property>
                           <property name="frameShadow">
-                           <enum>QFrame::Sunken</enum>
+                           <enum>QFrame::Shadow::Sunken</enum>
                           </property>
                           <property name="lineWidth">
                            <number>3</number>
@@ -3679,7 +3765,7 @@
                            <string>Mit Zusi 3</string>
                           </property>
                           <property name="alignment">
-                           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                           </property>
                          </widget>
                         </item>
@@ -3743,7 +3829,7 @@
                            </font>
                           </property>
                           <property name="focusPolicy">
-                           <enum>Qt::NoFocus</enum>
+                           <enum>Qt::FocusPolicy::NoFocus</enum>
                           </property>
                           <property name="styleSheet">
                            <string notr="true"/>
@@ -3758,10 +3844,10 @@
                            <number>3</number>
                           </property>
                           <property name="insertPolicy">
-                           <enum>QComboBox::InsertAtBottom</enum>
+                           <enum>QComboBox::InsertPolicy::InsertAtBottom</enum>
                           </property>
                           <property name="sizeAdjustPolicy">
-                           <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
+                           <enum>QComboBox::SizeAdjustPolicy::AdjustToContentsOnFirstShow</enum>
                           </property>
                           <property name="minimumContentsLength">
                            <number>0</number>
@@ -3795,7 +3881,7 @@
                            </font>
                           </property>
                           <property name="focusPolicy">
-                           <enum>Qt::NoFocus</enum>
+                           <enum>Qt::FocusPolicy::NoFocus</enum>
                           </property>
                           <property name="styleSheet">
                            <string notr="true"/>
@@ -3838,7 +3924,7 @@
                            </font>
                           </property>
                           <property name="focusPolicy">
-                           <enum>Qt::NoFocus</enum>
+                           <enum>Qt::FocusPolicy::NoFocus</enum>
                           </property>
                           <property name="styleSheet">
                            <string notr="true"/>
@@ -3878,7 +3964,7 @@
                            </font>
                           </property>
                           <property name="focusPolicy">
-                           <enum>Qt::NoFocus</enum>
+                           <enum>Qt::FocusPolicy::NoFocus</enum>
                           </property>
                           <property name="styleSheet">
                            <string notr="true"/>
@@ -3918,7 +4004,7 @@
                            </font>
                           </property>
                           <property name="focusPolicy">
-                           <enum>Qt::NoFocus</enum>
+                           <enum>Qt::FocusPolicy::NoFocus</enum>
                           </property>
                           <property name="styleSheet">
                            <string notr="true"/>
@@ -4661,7 +4747,7 @@
                   <string notr="true"/>
                  </property>
                  <property name="currentIndex">
-                  <number>9</number>
+                  <number>4</number>
                  </property>
                  <widget class="QWidget" name="numericKeyboard">
                   <layout class="QGridLayout" name="gridLayout_2">
@@ -5213,8 +5299,36 @@
                    <property name="spacing">
                     <number>0</number>
                    </property>
+                   <item row="1" column="1">
+                    <widget class="dmiLabel" name="braBtn6" native="true">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">background:rgb(20,104,255)
+</string>
+                     </property>
+                    </widget>
+                   </item>
                    <item row="0" column="0">
                     <widget class="dmiLabel" name="braBtn2" native="true">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">background:rgb(20,104,255)
+</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="0">
+                    <widget class="dmiLabel" name="braBtn9" native="true">
                      <property name="sizePolicy">
                       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                        <horstretch>0</horstretch>
@@ -5241,22 +5355,8 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="0">
-                    <widget class="dmiLabel" name="braBtn6" native="true">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">background:rgb(20,104,255)
-</string>
-                     </property>
-                    </widget>
-                   </item>
                    <item row="1" column="0">
-                    <widget class="dmiLabel" name="braBtn7" native="true">
+                    <widget class="dmiLabel" name="braBtn4" native="true">
                      <property name="sizePolicy">
                       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                        <horstretch>0</horstretch>
@@ -5279,34 +5379,6 @@
                      </property>
                      <property name="styleSheet">
                       <string notr="true"/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="1">
-                    <widget class="dmiLabel" name="braBtn4" native="true">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">background:rgb(20,104,255)
-</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="1">
-                    <widget class="dmiLabel" name="braBtn9" native="true">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">background:rgb(20,104,255)
-</string>
                      </property>
                     </widget>
                    </item>
@@ -6939,15 +7011,15 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>gauge</class>
+   <class>dmiLabel</class>
    <extends>QWidget</extends>
-   <header>gauge.h</header>
+   <header>dmilabel.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>dmiLabel</class>
+   <class>gauge</class>
    <extends>QWidget</extends>
-   <header location="global">dmilabel.h</header>
+   <header>gauge.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -6960,6 +7032,24 @@
    <class>manometer</class>
    <extends>QWidget</extends>
    <header>manometer.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>EtcsTextWidget</class>
+   <extends>QWidget</extends>
+   <header>etcstextwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>targetDistance</class>
+   <extends>QWidget</extends>
+   <header>targetdistance.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>timetoindication</class>
+   <extends>QWidget</extends>
+   <header location="global">timetoindication.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

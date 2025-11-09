@@ -2,7 +2,7 @@
 #include <QDebug>
 sep::sep(){}
 
-void sep::process(){
+void sep::initialize(){
     udpSocketSep = new QUdpSocket(this);
     udpSocketSep->bind(QHostAddress::Any, 10001);
     connect(udpSocketSep, SIGNAL(readyRead()),this,SLOT(readingPendingSep()));
@@ -16,35 +16,33 @@ quint16 sep::twoByteToquint16(qint8 lowByte, qint8 highByte){
 
 void sep::readingPendingSep(){
     #define pzbOffset        3
-    #define lzbOffset       17
-    #define speedOffset     24
-    #define trModOffset     26
-    #define forceOffset     27
-    #define MtdOffset       29
-    #define vmfzgOffset     34
-    #define dbcOffset       37
-    #define timeOffset      39
-    #define pressureOffset  43
-    #define geoPosOffset    46
-    #define trainNbrOffset  50
+    #define lzbOffset       16
+    #define speedOffset     23
+    #define trModOffset     25
+    #define forceOffset     26
+    #define MtdOffset       28
+    #define vmfzgOffset     33
+    #define dbcOffset       36
+    #define timeOffset      38
+    #define pressureOffset  42
+    #define geoPosOffset    45
+    #define trainNbrOffset  49
     QVector<quint8> lzbValuesToDecoder(7,0);
-    QVector<quint8> pzbLmsToDecoder(28,0);
+    QVector<quint8> pzbLmsToDecoder(30,0); // 28 only nedded. One extra with zeero, to indicate data as comming from SEP.
     QVector<quint8> lmsToDecoder(13,0);
     QByteArray datagram;
     while (udpSocketSep->hasPendingDatagrams()) {
         datagram.resize(udpSocketSep->pendingDatagramSize());
         udpSocketSep->readDatagram(datagram.data(), datagram.size(), &sender, &senderPort);
-        //qDebug() << datagram;
-        if(datagram.size() >= 46){
-            emit newLevelInforamtion(11);   // At the moment there is only PZB/LZB in SEP implemented.
+        if(datagram.size() == 53){
+            emit tcpConnectionSettings(0);  // To stop connicting to Zusi
             if (static_cast<quint8>(datagram[0]) != versionMajor)qDebug() << "TDF may by incompatible!";
             if (static_cast<quint8>(datagram[1]) != versionMinor)qDebug() << "May by there are new functions!";
             if (static_cast<quint8>(datagram[2]) != versionPatch)qDebug() << "May by there are hot fixes!";
             // ==================== Read PZB indicators ====================
             for(int i = 0; i < 14; i = i + 1){
                 pzbLmsToDecoder[i*2 +1] = lowNib(datagram[pzbOffset + i]);
-                pzbLmsToDecoder[i*2  ] =   upNib(datagram[pzbOffset + i]);
-                //qDebug() << pzbLmsToDecoder;
+                pzbLmsToDecoder[i*2   ] =  upNib(datagram[pzbOffset + i]);
             }
             emit newLzbIndicators(pzbLmsToDecoder);
             // ==================== Read LZB values ====================
@@ -69,6 +67,7 @@ void sep::readingPendingSep(){
                 case 2: lmsToDecoder[6] = 0x11;break;
                 default:lmsToDecoder[6] = 0x00;
             }
+
             lmsToDecoder[7] = !(lowNib(datagram[MtdOffset + 2]));           // IndMtMsO
             lmsToDecoder[8] =    upNib(datagram[MtdOffset + 3]);            // IndMtHvtl
             lmsToDecoder[9] =   lowNib(datagram[MtdOffset + 3]);            // InfDoorSystem - Not supported by Loksim -> Default 4 (TAV)
@@ -78,6 +77,7 @@ void sep::readingPendingSep(){
             emit newMtdIndicators(lmsToDecoder);
             emit newFzgVmaxTacho(twoByteToquint16(datagram[vmfzgOffset], datagram[vmfzgOffset + 1])+20);
             emit newAfbSoll(twoByteToquint16(datagram[dbcOffset], datagram[dbcOffset + 1]), upNib(datagram[MtdOffset + 5]) > 0);   // DbcSpeedSet, IndDbc
+            quint16 vsol = twoByteToquint16(datagram[dbcOffset], datagram[dbcOffset + 1]);
             simTime = static_cast<quint32>((static_cast<quint8>(datagram[timeOffset + 3]) << 24)
                                          + (static_cast<quint8>(datagram[timeOffset + 2]) << 16)
                                          + (static_cast<quint8>(datagram[timeOffset + 1]) <<  8)
@@ -90,15 +90,16 @@ void sep::readingPendingSep(){
             emit newHll(static_cast<quint8>(datagram[pressureOffset + 0]));
             emit newBrz(static_cast<quint8>(datagram[pressureOffset + 1]));
             emit newHlb(static_cast<quint8>(datagram[pressureOffset + 2]));
-            emit newGeoPos(static_cast<qint32>(( static_cast<quint8>(datagram[geoPosOffset + 3]) << 24)
-                        + (static_cast<quint8>(datagram[geoPosOffset + 2]) << 16)
-                        + (static_cast<quint8>(datagram[geoPosOffset + 1]) <<  8)
-                        +  static_cast<quint8>(datagram[geoPosOffset + 0])      ));
+            qint32 geoPos = static_cast<qint32>(( static_cast<quint8>(datagram[geoPosOffset + 3]) << 24)
+                                               + (static_cast<quint8>(datagram[geoPosOffset + 2]) << 16)
+                                               + (static_cast<quint8>(datagram[geoPosOffset + 1]) <<  8)
+                                               +  static_cast<quint8>(datagram[geoPosOffset + 0])      );
+            emit newGeoPos(geoPos);
             quint32 trainnumber = static_cast<quint32>(( static_cast<quint8>(datagram[trainNbrOffset + 3]) << 24)
                     + (static_cast<quint8>(datagram[trainNbrOffset + 2]) << 16)
                     + (static_cast<quint8>(datagram[trainNbrOffset + 1]) <<  8)
                     +  static_cast<quint8>(datagram[trainNbrOffset + 0])      );
-            if(trainnumber == 0){
+                if(trainnumber == 0){
                 emit newTrainnumber("");
             }
             else{

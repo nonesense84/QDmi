@@ -17,13 +17,16 @@ void zusiPower::setVIst(quint16 V){
     syncPowerIndicator();
 }
 void zusiPower::setBaureihe(QString fahrzeug){
+  //qDebug() << "fahrzeug " << fahrzeug;
     bool isLoko = false;
     fahrzeug.replace('E', '1');
     if(fahrzeug.indexOf(" ") > -1)fahrzeug.truncate(fahrzeug.indexOf(" "));
     int br = fahrzeug.toInt(&isLoko);
+  //qDebug() << "br " << br;
+  //qDebug() << "isLoko " << isLoko;
     if(isLoko){
         haveLokoInList = false;
-        for(int i = 0; i < 68; i++){
+        for(int i = 0; i < 69; i++){
             if(skalen[i][0] == br){ //{424,150,150,1,25,25,2,},
                 haveLokoInList = true;
                 // Typ1 kN, Ty2 kN/FM, typ3 %, Typ4 Stufen {111,140,145,1,70,75,2,},
@@ -33,6 +36,7 @@ void zusiPower::setBaureihe(QString fahrzeug){
                 zMinLine = skalen[i][2];
                 zMinCorr = skalen[i][4];
                 zMaxCorr = skalen[i][8];
+              //qDebug() << "zMaxCorr " << zMaxCorr;
                 unitBraking = unitType[skalen[i][3]];
                 unitAccelerating = unitType[skalen[i][7]];
                 driveModeDivisor = skalen[i][10];

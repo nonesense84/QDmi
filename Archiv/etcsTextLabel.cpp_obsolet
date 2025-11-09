@@ -1,0 +1,357 @@
+#include "etcsTextLabel.h"
+#include <QDebug>
+#include <QtSvg>
+
+etcsTextLabel::etcsTextLabel(QWidget *parent) : QWidget(parent){
+    fontFactor = 96 / QApplication::screens().at(0)->logicalDotsPerInch();
+    setTargetDistance(100,false, false, false);
+    QFontDatabase::addApplicationFont(":/fonts/FreeSans.ttf");
+    QFontDatabase::addApplicationFont(":/fonts/Segment7Standard.otf");
+}
+
+void etcsTextLabel::setDpi(qreal dpi){
+}
+
+void etcsTextLabel::attenuationRoutine(){
+    bool updateNedded = false;
+    qreal attenuation = 0.2;
+    if(targetDistanceGraph < targetDistanceDest){
+        targetDistanceGraph =targetDistanceDest;
+        updateNedded = true;
+    }
+    if(targetDistanceGraph > targetDistanceDest){
+        targetDistanceGraph = targetDistanceGraph - (targetDistanceGraph - targetDistanceDest) * attenuation;
+        if((targetDistanceGraph - targetDistanceDest) < 0.25){
+            targetDistanceGraph = targetDistanceDest;
+            attenuationTimer->stop();
+        }
+        updateNedded = true;
+    }
+    if(updateNedded)update();
+}
+
+void etcsTextLabel::mousePressEvent(QMouseEvent *event){
+    if(isEnab){
+        isPushed = true;
+        update();
+    }
+}
+
+void etcsTextLabel::mouseReleaseEvent(QMouseEvent *event){
+    isPushed = false;
+    static quint8 count = 0;
+    if(isEnab){
+        emit clicked(true);
+        if(isButton && !isDataEntryButton){
+            click1->stop();
+            click1->play();
+        }
+        update();
+        emit txtBtnClicked(emitText);
+    }
+    emit dataEntryBtnClicked(labelText, isEnab);
+}
+
+
+void etcsTextLabel::setTargetDistance(quint16 distance, bool barVisible, bool digitalVisible, bool fromEtcs){
+    if(targetDistanceFromEtcs != fromEtcs){
+        targetDistanceFromEtcs = fromEtcs;
+        setIsDistanceScale();
+    }
+    targetDistanceDest = distance;
+    targetDistance = distance;
+    targetDistanceBarVisible = barVisible;
+    targetDistanceDigitalVisible = digitalVisible;
+    if(targetDistance > distanceScale){
+        targetDistanceGraph = distanceScale;
+        attenuationTimer->stop();
+    }
+    else{
+        attenuationTimer->start();
+    }
+    update();
+}
+
+
+void etcsTextLabel::updateBlinking(){
+    blinkerSuperFast = !blinkerSuperFast;
+    if(blinkerSuperFast)blinkerFast = !blinkerFast;
+    if(blinkerFast) blinkerSlow = !blinkerSlow;
+    if((blinkFrequency != 0 && fileNameIsSet) || acklowedgeFrameActive){
+        update();
+    }
+}
+
+void etcsTextLabel::updateLabel(){
+    if(blinkFrequency == 0){
+        update();
+    }
+}
+
+void etcsTextLabel::setBorderThickness(int thickness){
+    borderThickness = thickness;
+}
+void etcsTextLabel::setCustomFontFactor(qreal factor){
+    customFontFactor = factor;
+}
+
+void etcsTextLabel::setCustomFontFactor(qreal factor, Qt::Alignment customAlignment){
+    setCustomFontFactor(factor);
+    hasCustomAlignment = true;
+    alignment = static_cast<int>(customAlignment);
+}
+
+void etcsTextLabel::setCustomFontFactor(qreal factor, Qt::Alignment customAlignment, quint8 style){
+    textStyle = style;
+    setCustomFontFactor(factor, customAlignment);
+}
+
+void etcsTextLabel::setAcklowedgeFrame(bool active){
+    acklowedgeFrameActive = active;
+}
+
+void etcsTextLabel::shiftTextMessageOffset(qint8 shift){
+    textMessageOffset = textMessageOffset + shift;
+    if(textMessageOffset < 0) textMessageOffset = 0;
+    if(textMessageOffset >= highestTextMessgePosition) textMessageOffset = highestTextMessgePosition - numTextFields + 1;
+    update();
+  //qDebug() << "textMessageOffset: " + QString::number(textMessageOffset);
+}
+
+void etcsTextLabel::setTextMessageOffset(qint8 offset){
+    textMessageOffset = offset;
+    if(textMessageOffset < 0) textMessageOffset = 0;
+    if(textMessageOffset >= highestTextMessgePosition) textMessageOffset = highestTextMessgePosition - numTextFields + 1;
+    update();
+}
+
+void etcsTextLabel::paintEvent(QPaintEvent *)
+{
+    if(isVisible){
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing);
+        QRect centralAreaLbl(  borderThickness * borderLClosed,
+                               borderThickness * borderTClosed,
+                               width() -  borderThickness * (borderRClosed + borderLClosed),
+                               height() - borderThickness * (borderBClosed + borderTClosed));
+        // First we have to draw the frame of the label.
+        // In case of a data entry button, there is no frame arround,
+        // so the buttom will be drawn by the frame itself, and without a frame if its pushed.
+        // If it is a regular button, we have to draw the button INSIDE the label with swaped border colors.
+        // ...But only, when its not pushed, because the we only need the frame.
+        if(isDataEntryButton && isPushed){ // Pushed data enrtry button. Entire label without a frame:
+            paintFrame(&painter, centralAreaLbl, bgColor,  bgColor, 0);
+        }
+        else{ // Regualar frame:
+         paintFrame(&painter, centralAreaLbl, borderColorButtomAndRight,  borderColorTopAndLeft, 0);
+        }
+        if(isButton && !isDataEntryButton){ // Regular button inside a frame, thats allready painted
+            QRect centralAreaBtn(2*borderThickness, 2 * borderThickness, width() - 4 * borderThickness, height() - 4 * borderThickness);
+            if(!isPushed){ // Regular bushed button inside a frame, thats allready painted
+                paintFrame(&painter, centralAreaBtn, borderColorTopAndLeft, borderColorButtomAndRight,  borderThickness);
+            }
+            paintIcon(&painter, centralAreaBtn);
+        }
+        if(acklowedgeFrameActive && blinkerSuperFast)       paintAckFrame(&painter, centralAreaLbl, era::yellow);
+        if(isTextField)                                     paintTextMessages(&painter, centralAreaLbl);
+        if(isSegment)                                       paintSegment(&painter, centralAreaLbl);
+        if(isTargetDistance)                                paintDistance(&painter, centralAreaLbl);
+        if(!isTargetDistance && !isSegment && !isButton)    paintIcon(&painter, centralAreaLbl);
+        if(labelText != "")                                 paintText(&painter, centralAreaLbl);
+    }
+}
+
+void etcsTextLabel::paintText(QPainter *iconPainter, QRect centralArea){
+    int lineHeight = centralArea.height();
+    int lineWidth = centralArea.width();
+    QRect field(centralArea.x(),centralArea.y(),lineWidth, lineHeight);
+    if(isEnab){
+        iconPainter->setPen(labelTextColorEnab);
+    }
+    else{
+        iconPainter->setPen(labelTextColorDisab);
+    }
+    iconPainter->setFont(QFont("FreeSans",
+                               static_cast<int>(fontFactor * customFontFactor * lineHeight),
+                               textStyle,
+                               false));
+
+    QRectF textRect = iconPainter->boundingRect(field,alignment,labelText);
+    if(alignment == Qt::AlignLeft){
+        textRect.moveLeft(5*borderThickness);
+        textRect.translate(0, field.height()/2 - textRect.height()/2);
+    }
+    if(alignment == Qt::AlignRight){
+        textRect.translate(0, field.height()/2 - textRect.height()/2);
+    }
+    iconPainter->drawText(textRect,labelText);
+}
+
+void etcsTextLabel::paintDistance(QPainter *iconPainter, QRect centralArea){
+    iconPainter->save();
+    if(targetDistanceBarVisible){
+        svgActive.load(fileForDistanceScale);
+        svgActive.render(iconPainter,centralArea);
+    }
+    iconPainter->scale(static_cast<qreal>(width()) / 58.0, static_cast<qreal>(height()) / 221.0);
+
+    QRect digitalDistPosition(8,5,48,18);
+    if(useEraStyle || targetDistanceFromEtcs){
+        iconPainter->setBrush(era::grey);
+        iconPainter->setPen(era::grey);
+        iconPainter->setFont(QFont("FreeSans",
+                                   static_cast<int>(12 * fontFactor),
+                                   QFont::Normal,
+                                   false));
+    }
+    else{
+        iconPainter->setBrush(era::darkYellow);
+        iconPainter->setPen(era::darkYellow);
+        iconPainter->setFont(QFont("Segment7",
+                                   static_cast<int>(12 * fontFactor),
+                                   QFont::Normal,
+                                   false));
+    }
+    QRect textRect = iconPainter->boundingRect(digitalDistPosition,Qt::AlignRight,QString::number(targetDistance));
+    digitalDistPosition.setLeft(45 - textRect.width());
+    //quint16 targetDistanceAnalog = targetDistance;
+    qreal tem = 0.0;
+    if(useEraStyle || targetDistanceFromEtcs){
+        if( targetDistanceFromEtcs && targetDistanceDigitalVisible)iconPainter->drawText(digitalDistPosition,QString::number(ceil((targetDistance / 10)) * 10));
+        if(!targetDistanceFromEtcs && targetDistanceBarVisible)iconPainter->drawText(digitalDistPosition,QString::number(ceil((targetDistance / 10)) * 10));
+        if(targetDistanceBarVisible){
+            if(targetDistanceGraph < 1000)
+                tem = -2.50582750582749E-10 * qPow(targetDistanceGraph,4)
+                      +7.07459207459205E-07 * qPow(targetDistanceGraph,3)
+                      -0.000815792540793 * qPow(targetDistanceGraph,2)
+                      +0.545314685314686 * targetDistanceGraph
+                      +0.300699300699198;
+            else
+                tem = 187;
+            QRectF distBar(30,217,10,-tem);
+            iconPainter->drawRect(distBar);
+        }
+    }
+    else{
+        if(targetDistanceDigitalVisible)iconPainter->drawText(digitalDistPosition,QString::number(ceil((targetDistance + 100)/ 200) * 200));
+        if(targetDistanceBarVisible){
+            if(targetDistance <= 100)
+                tem = 0.19135135136 * targetDistanceGraph + 1.58882185807825E-15;
+            if(targetDistanceGraph >  100 && targetDistanceGraph <= 1000)
+                tem = 0.09567567568 * targetDistanceGraph + 9.56756756800004;
+            if(targetDistanceGraph >  1000)
+                tem = 0.02391891892 * targetDistanceGraph + 81.3243243279999;
+            QRectF distBar(42,213,10,-tem);
+            iconPainter->drawRect(distBar);
+        }
+    }
+
+    iconPainter->restore();
+}
+
+void etcsTextLabel::paintSegment(QPainter *iconPainter, QRect centralArea){
+    iconPainter->save();
+    iconPainter->setPen(era::darkYellow);
+    iconPainter->setFont(QFont("Segment7",
+                               static_cast<int>(fontFactor * 0.6 * centralArea.height()),
+                               QFont::Normal,
+                               false));
+    QRect textRect = iconPainter->boundingRect(centralArea,Qt::AlignLeft,segmentText);
+    textRect.translate(centralArea.width()/1.5 - textRect.width()/1.5,
+                      (centralArea.height()/1.3 - textRect.height()/1.3));
+    iconPainter->drawText(textRect,segmentText);
+    iconPainter->restore();
+}
+
+void etcsTextLabel::paintTextMessages(QPainter *iconPainter, QRect centralArea){
+    int lineHeight = centralArea.height()/numTextFields;
+    QRect field(centralArea.x(),centralArea.y(),centralArea.width(), lineHeight);
+    iconPainter->save();
+    QFont font = QFont("FreeSans");
+    font.setBold(true);
+    font.setPointSizeF(fontFactor * 0.44 * lineHeight);
+    iconPainter->setFont(font);
+    for(quint8 i=0; i < numTextFields; i++){
+        if(i == numTextFields - 1){
+            field.setHeight(centralArea.height() - i * lineHeight);
+        }
+        iconPainter->setPen(Qt::NoPen);
+        iconPainter->setBrush(messageBackQolors[i + textMessageOffset]);
+        iconPainter->drawRect(field);
+        iconPainter->setPen(messageTextColors[i + textMessageOffset]);
+        QRect textRect = iconPainter->boundingRect(field,Qt::AlignLeft,messageTexts[i + textMessageOffset]);
+        textRect.moveLeft(3*borderThickness);
+        if(alignment == Qt::AlignLeft)textRect.translate(0, field.height()/2 - textRect.height()/2);
+        if(alignment == Qt::AlignRight)textRect.translate(field.width()-textRect.width(), field.height()/2 - textRect.height()/2);
+        if(alignment == Qt::AlignCenter)textRect.translate(field.width()/2-textRect.width()/2, field.height()/2 - textRect.height()/2);
+        iconPainter->drawText(textRect,messageTexts[i + textMessageOffset]);
+        field.translate(0,lineHeight);
+    }
+    iconPainter->restore();
+}
+
+void etcsTextLabel::paintIcon(QPainter *iconPainter, QRect centralArea){
+    centralArea = calcOptimalRect(centralArea,svgActive.viewBox());
+    if(((blinkFrequency == 1) &&  blinkerSlow && !isInvert) ||
+       ((blinkFrequency == 1) && !blinkerSlow &&  isInvert) ||
+       ((blinkFrequency == 2) &&  blinkerFast && !isInvert) ||
+       ((blinkFrequency == 2) && !blinkerFast &&  isInvert) ||
+       !isEnab){
+       svgInactive.render(iconPainter, centralArea);
+
+    }
+    else{
+        svgActive.render(iconPainter,centralArea);
+    }
+}
+
+QRect etcsTextLabel::calcOptimalRect(QRect destArea, QRect iconArea){
+    if(iconArea.width()>0 && isButton){
+        qreal relDest = static_cast<qreal>(destArea.width()) / static_cast<qreal>(destArea.height()); // >1 Breiter als hoch. Je größer, desto Breiter.
+        qreal relIcon = static_cast<qreal>(iconArea.width()) / static_cast<qreal>(iconArea.height());
+        qreal destRatio = static_cast<qreal>(destArea.height()) / static_cast<qreal>(destArea.width());
+        if(relDest > relIcon){   // Wenn das Widget breiter als das Icon
+            int originWidth = destArea.width();
+            destArea.setWidth(static_cast<int>(static_cast<qreal>(destArea.width())*destRatio));
+            destArea.moveLeft(originWidth/2 -destArea.width()/2 + destArea.left());
+        }
+        if(relDest < relIcon){   // Wenn das Widget schmaler als das Icon
+            int originHeight = destArea.height();
+            destArea.setHeight(static_cast<int>(static_cast<qreal>(destArea.height())/destRatio));
+            destArea.moveTop(originHeight/2 -destArea.height()/2 + destArea.top());
+        }
+    }
+    return destArea;
+}
+
+void etcsTextLabel::paintFrame(QPainter *framePainter,QRect centralArea, QColor colorLefUp, QColor colorRightDown, int offset){
+    int halfHeight = height()/2;
+    int halfWidth = width()/2;
+    QRect darkBorder(0 + offset, 0 + offset, width() - 2 * offset, height() - 2 * offset);
+    QPoint brightBorder[5];
+    brightBorder[0] = QPoint(width() - offset,  0        + offset);
+    brightBorder[1] = QPoint(width() - offset,  height() - offset);
+    brightBorder[2] = QPoint(0       + offset,  height() - offset);
+    if(halfWidth > halfHeight){
+        brightBorder[3] = QPoint(0 + halfHeight + offset,  halfHeight - offset);
+        brightBorder[4] = QPoint( width() - halfHeight - offset, halfHeight + offset);
+    }
+     else{
+        brightBorder[3] = QPoint(halfWidth + offset, height() - halfWidth - offset);
+        brightBorder[4] = QPoint(halfWidth - offset, halfWidth + offset);
+    }
+    framePainter->setPen(Qt::NoPen);
+    framePainter->setBrush(colorLefUp);
+    framePainter->drawRect(darkBorder);
+    framePainter->setBrush(colorRightDown);
+    framePainter->drawPolygon(brightBorder, 5);
+    framePainter->setBrush(bgColor);
+
+    framePainter->drawRect(centralArea);
+}
+void etcsTextLabel::paintAckFrame(QPainter *framePainter,QRect centralArea, QColor framecolor){
+    centralArea.adjust(borderThickness,borderThickness, -borderThickness, -borderThickness);
+    QPen pen(framecolor, 2 * borderThickness, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
+    framePainter->setPen(pen);
+    framePainter->drawRect(centralArea);
+}

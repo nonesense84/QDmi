@@ -143,6 +143,15 @@
         <file>icons/arrowLeft_ena.svg</file>
         <file>icons/arrowRight_dis.svg</file>
         <file>icons/arrowRight_ena.svg</file>
-        <file>icons/override.svg</file>
+        <file>icons/override_dis.svg</file>
+        <file>icons/override_ena.svg</file>
+        <file>icons/LmLzb_on.svg</file>
+        <file>icons/key_BrakeType_8.svg</file>
+        <file>icons/key_BrakeType_4.svg</file>
+        <file>icons/key_BrakeType_9.svg</file>
+        <file>icons/key_BrakeType_6.svg</file>
+        <file>icons/key_BrakeType_3.svg</file>
+        <file>icons/key_BrakeType_2.svg</file>
+        <file>icons/key_BrakeType_1.svg</file>
     </qresource>
 </RCC>

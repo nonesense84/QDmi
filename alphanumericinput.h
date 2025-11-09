@@ -10,13 +10,13 @@ class alphaNumericInput : public QObject
 public:
     alphaNumericInput();
 private:
-    QTimer *timerforkey;
+    bool timeout = true;
+    bool textHidden = true;
     quint8 counter = 0;
     QString enteredText;
     QString lastKeyCode;
     QString cursor = "";
-    bool timeout = true;
-    bool textHidden = true;
+    QTimer *timerforkey;
 
 private slots:
     void setTimeout();

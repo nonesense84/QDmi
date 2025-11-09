@@ -9,7 +9,7 @@ manometer::manometer(QWidget *parent) : QWidget(parent){
 }
 
 void manometer::setDpi(qreal dpi){
-    fontSiceDial = static_cast<int>(26.0 * 96 / dpi);
+    fontSizeDial = static_cast<int>(26.0 * 96 / dpi);
     fontSiceLabel = static_cast<int>(37.0 * 96 / dpi);
 }
 void manometer::setPressMaxDial(quint8 pressure){
@@ -20,9 +20,19 @@ void manometer::setPressMaxDial(quint8 pressure){
     if(pressMaxDial != newPressMaxDial){
         numNumbers = newPressMaxDial + 1;
         numShortLines = (newPressMaxDial * 5) + 1;
+        pressMaxDial = newPressMaxDial;
         scaleDegStep = arcOpenTotal / (numNumbers - 1);
         scaleDegStepSmall = arcOpenTotal / (numShortLines - 1);
-        pressMaxDial = newPressMaxDial;
+        if(pressMaxDial == 12){
+            switchAngle = 174;
+            switchPressure = 6;
+            degOffset = 1;
+        }
+        else{
+            degOffset = 0;
+            switchAngle = arcOpenTotal / 2;
+            switchPressure = pressMaxDial / 2;
+        }
         update();
     }
 }
@@ -56,19 +66,35 @@ void manometer::setPonter2Label(QString text){
         update();
     }
 }
-void manometer::setPressure1(quint16 pressure){
-    if(pressure1 != pressure){
-        pressure1 = pressure;
-        posNeedle1 = pressure / static_cast<float> (pressMaxDial * 10)
-                   * static_cast<float> (arcOpenTotal);
+void manometer::setPressure1(quint16 pressure) {
+    qreal p = static_cast<qreal>(pressure) / 10;
+    if(pressure1 != p){
+        pressure1 = p;
+        qreal hMp =   pressMaxDial / 2.0;    // half max pressure
+        if(p < hMp){
+            posNeedle1 = p / hMp * switchAngle;
+        }
+        else{
+            qreal ra = arcOpenTotal - switchAngle;  // Rest angle
+            qreal rp = p - switchPressure;  // Rest pressure
+            posNeedle1 = switchAngle + rp / hMp * ra;
+        }
         update();
     }
 }
 void manometer::setPressure2(quint16 pressure){
-    if(pressure2 != pressure){
-        pressure2 = pressure;
-        posNeedle2 = pressure / static_cast<float> (pressMaxDial * 10)
-                   * static_cast<float> (arcOpenTotal);
+    qreal p = static_cast<qreal>(pressure) / 10;
+    if(pressure2 != p){
+        pressure2 = p;
+        qreal hMp =   pressMaxDial / 2.0;    // half max pressure
+        if(p < hMp){
+            posNeedle2 = p / hMp * switchAngle;
+        }
+        else{
+            qreal ra = arcOpenTotal - switchAngle;  // Rest angle
+            qreal rp = p - switchPressure;  // Rest pressure
+            posNeedle2 = switchAngle + rp / hMp * ra;
+        }
         update();
     }
 }
@@ -180,43 +206,6 @@ void manometer::paintEvent(QPaintEvent *)
         QPoint(  362,	-1	)
 
     };
-    static const QPoint numberPositions6[7] = {
-        QPoint( -112, 154),   //0
-        QPoint( -189, 31),    //1
-        QPoint( -147, -104),  //2
-        QPoint( -9, -166),    //3
-        QPoint( 121, -107),   //4
-        QPoint( 165, 29),     //5
-        QPoint( 93, 149)      //6
-    };
-    static const QPoint numberPositions10[11] = {
-        QPoint( -112, 154),   //0
-        QPoint( -165, 85),    //1
-        QPoint( -182, -2),    //2
-        QPoint( -153, -87),   //3
-        QPoint( -85, -144),   //4
-        QPoint( -10, -162),   //5
-        QPoint( 72, -144),    //6
-        QPoint( 139, -87),    //7
-        QPoint( 164, -2),     //8
-        QPoint( 150, 85),     //9
-        QPoint( 81, 147)      //10
-    };
-    static const QPoint numberPositions12[13] = {
-        QPoint( -112, 154),   //0
-        QPoint( -165, 99),    //1
-        QPoint( -189, 31),    //2
-        QPoint( -178, -40),   //3
-        QPoint( -147, -104),  //4
-        QPoint( -86, -144),   //5
-        QPoint( -10, -166),   //6
-        QPoint( 60, -150),    //7
-        QPoint( 122, -108),   //8
-        QPoint( 154, -44),    //9
-        QPoint( 145, 25),     //10
-        QPoint( 128, 93),     //11
-        QPoint( 81, 147)      //12
-    };
     qreal side = qMin(width(), height());
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
@@ -224,38 +213,87 @@ void manometer::paintEvent(QPaintEvent *)
     quint16 normFactor = 548;
     qreal dimension = side / normFactor;
     painter.scale(dimension, dimension);
-    static QRectF labelUnit( -normFactor / 2 , normFactor / 3.4, normFactor, fontSiceDial * 1.5);
-    static QRectF labelRect1(-normFactor / 2 , normFactor / 20, normFactor, fontSiceDial * 1.5);
-    static QRectF labelRect2(-normFactor / 2 , normFactor / 8, normFactor, fontSiceDial * 1.5);
-    // Draw long lines ===============================================
+    static QRectF labelUnit( -normFactor / 2 , normFactor / 3.4, normFactor, fontSizeDial * 1.5);
+    static QRectF labelRect1(-normFactor / 2 , normFactor / 20, normFactor, fontSizeDial * 1.5);
+    static QRectF labelRect2(-normFactor / 2 , normFactor / 8, normFactor, fontSizeDial * 1.5);
+
     painter.save();
+    // Draw long lines ===============================================
     painter.setPen(QPen(Qt::white, 5));
     painter.rotate(startPosZero);
+    temp = 0;
     for (int i = 0; i < numNumbers; ++i) {
         painter.drawLine(outEndLines - lenLongLines, 0, outEndLines, 0);
-        painter.rotate(scaleDegStep);
+        if(i < (numNumbers / 2)){
+            painter.rotate(scaleDegStep+degOffset*5);
+            temp = temp + scaleDegStep+degOffset*5;
+            //qDebug() << "groß " <<  temp;
+        }
+        else{
+            painter.rotate(scaleDegStep-degOffset*5);
+            temp = temp + scaleDegStep-degOffset*5;
+            //qDebug() << "klein " <<  temp;
+        }
     }
     painter.rotate(scaleDegStep * numNumbers * -1);
+    painter.restore();
+
     // Draw short lines ===============================================
+    painter.save();
+    painter.rotate(startPosZero);
     painter.setPen(QPen(Qt::white, 3));
     for (int j = 0; j < numShortLines; ++j) {
         painter.drawLine(outEndLines - lenShortLines, 0, outEndLines, 0);
-        painter.rotate(scaleDegStepSmall);
+        if(j < (numShortLines / 2)){
+            painter.rotate(scaleDegStepSmall+degOffset);
+        }
+        else{
+            painter.rotate(scaleDegStepSmall-degOffset);
+        }
     }
     painter.rotate(scaleDegStepSmall * numShortLines * -1 - startPosZero);
+    painter.restore();
     // Draw Numbers ===============================================
     painter.setPen(Qt::white);
-    painter.setFont(QFont("FreeSans",fontSiceDial,QFont::Bold,false));
-    for (int i = 0; i < numNumbers; ++i) {
+    painter.setFont(QFont("FreeSans",fontSizeDial,QFont::Bold,false));
+  /*for (int i = 0; i < numNumbers; ++i) {
         if(pressMaxDial == 6)
             painter.drawText(numberPositions6[i],QString::number(i));
         if(pressMaxDial == 10)
             painter.drawText(numberPositions10[i],QString::number(i));
         if(pressMaxDial == 12)
             painter.drawText(numberPositions12[i],QString::number(i));
+    }*/
+    painter.save();
+    qreal numberRadius = outEndLines - lenLongLines - 20; // Distance of numbers to long lines
+    qreal angle = startPosZero;
+    for (quint8 i = 0; i < numNumbers; ++i) {
+        QString label = QString::number(i);
+        quint8 wRect = 30;
+        if (label.length() >= 2){
+           // In case of two digits:
+           // Distance of numbers to long lines bus be bigger and text rect must be wider
+            numberRadius = outEndLines - lenLongLines - 30;
+            wRect = 40;
+        }
+        qreal angleRad = qDegreesToRadians(angle);
+        qreal x = numberRadius * qCos(angleRad);
+        qreal y = numberRadius * qSin(angleRad);
+        QRectF textRect(-wRect/2, -15, wRect, 30);
+        painter.save();
+        painter.translate(x, y);
+        painter.drawText(textRect, Qt::AlignCenter, label);
+        painter.restore();
+        if (i < (numNumbers / 2)) {
+            angle += (scaleDegStep + degOffset*5);
+        } else {
+            angle += (scaleDegStep - degOffset*5);
+        }
     }
+    painter.restore();
+
     // Draw unit texts ============================================
-    painter.setFont(QFont("FreeSans",fontSiceDial,QFont::Normal,false));
+    painter.setFont(QFont("FreeSans",fontSizeDial,QFont::Normal,false));
     painter.drawText(labelUnit,Qt::AlignCenter, "bar");
     painter.setPen(colorPointer1);
     painter.drawText(labelRect1,Qt::AlignCenter, textLabel1);
@@ -269,10 +307,11 @@ void manometer::paintEvent(QPaintEvent *)
     painter.setPen(Qt::NoPen);
     // Draw needle 2 ==============================================
     if(pointer2used){
+        painter.save();
         painter.setBrush(colorPointer2);
         painter.rotate(static_cast<qreal>(posNeedle2));
         painter.drawConvexPolygon(airPointer, 95);
-        painter.rotate(static_cast<qreal>(-posNeedle2));
+        painter.restore();
     }
     // Draw needle 1 ==============================================
     painter.setBrush(colorPointer1);
@@ -286,3 +325,4 @@ void manometer::paintEvent(QPaintEvent *)
     painter.setBrush(Qt::darkGray);
     painter.drawEllipse(-diamNeedleHub/10,-diamNeedleHub/10,diamNeedleHub/5,diamNeedleHub/5);
 }
+

@@ -113,6 +113,7 @@ void power::setAbsoluteAccelerateScale(){
     updateUnits();
 }
 void power::setAbsoluteAccelerateMaximum(qint16 P){
+    // This function selects a suitable accelerating skale akkording to the maximum estimatet value.
     if(useAcceleratingRelative)P = 100;
     for(int i = 0; i < 8; i++){
       if(  0 < P && P <  26){
@@ -167,6 +168,7 @@ void power::setAbsoluteAccelerateMaximum(qint16 P){
     updateUnits();
 }
 void power::setAbsoluteBrakingMaximum(qint16 P){
+    // This function selects a suitable braking skale akkording to the maximum estimatet value.
     if(useAcceleratingRelative)P = 100;
     for(int i = 0; i < 8; i++){
         if(  0 < P && P <  101){
