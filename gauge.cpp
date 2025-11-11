@@ -352,22 +352,19 @@ void gauge::paintEvent(QPaintEvent *)
     }
     // Draw CSG and hooks ======================================
     if(csgVisible){
-        if(!useEraStyle && !dataFromEtcs){
-            paintLzbTriangular(&painter); // Old LZB Stlye
+        if(useEraStyle || (dataFromEtcs && useCsg)){
+            paintOverspeed(&painter);           // Draw over speed, if needed
+            paintReleaseSpeed(&painter, 0);
+            paintCircle(&painter);              // Then draw upper and lower part of the CSG (ring)
+            paintHookCsg(&painter);             // As last the hook, overlapping the upper part
+            paintReleaseSpeed(&painter, 1);
         }
-        else{
-            if(useCsg){
-                paintOverspeed(&painter);   // Draw over speed, if needed
-                paintReleaseSpeed(&painter, 0);
-                paintCircle(&painter);      // Then draw upper and lower part of the CSG (ring)
-                paintHookCsg(&painter);     // As last the hook, overlapping the upper part
-                paintReleaseSpeed(&painter, 1);
-
-            }
-            if(useBasicHooks && displayBasicHooks){ // Draw only the hooks, wihout CSG (ring)
-                paintBasicHookTarget(&painter);     // In case of just using basic hooks, vTarget mast be drawn as a hook. Req 8.2.1.5.7
-                paintBasicHookPerm(&painter);
-            }
+        if(dataFromEtcs && !useCsg){            // Draw only the hooks, wihout CSG (ring)
+            paintBasicHookTarget(&painter);     // In case of just using basic hooks, vTarget mast be drawn as a hook. Req 8.2.1.5.7
+            paintBasicHookPerm(&painter);
+        }
+        if(!useEraStyle && !dataFromEtcs){
+            paintLzbTriangular(&painter);       // Old LZB Stlye
         }
     }
     // Draw VSet ==============================================
