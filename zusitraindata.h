@@ -52,6 +52,7 @@ private:
     bool enabledAxl = false;// Editing of axle load category activ
     bool enabledAit = false;// Editing of airtight activ
     bool enabledLdg = false;// Editing of loading gauge activ
+    bool editJustStarted = false;// Editing a field just started
 
     bool validated = false;
     bool lzbApplicable = true;

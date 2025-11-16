@@ -11,8 +11,8 @@ MainWindow::MainWindow(QWidget *parent) :
     #endif
     settings = new QSettings("QDmi", "QDmi");
   //settings->setPath(QSettings::IniFormat, QSettings::SystemScope, ".");
-    this->setGeometry(0,0,settings->value("mainwindow/width").toInt(),settings->value("mainwindow/height").toInt());
-  //this->setGeometry(0,0,768,480); // For 4:3 800*600. For 16:9 848*480. For 16:10 768*480
+    restoreGeometry(settings->value("mainwindow/geometry").toByteArray());
+    //this->setGeometry(0,0,768,480); // For 4:3 800*600. For 16:9 848*480. For 16:10 768*480
   //showFullScreen();
     #ifdef Q_OS_ANDROID
     QTimer::singleShot(1000,this,SLOT(showFullScreen()));
@@ -961,8 +961,7 @@ void MainWindow::anableOverride(bool enable){
     }
 }
 void MainWindow::closeQDmi(){
-    settings->setValue("mainwindow/height", this->height());
-    settings->setValue("mainwindow/width", this->width());
+    settings->setValue("mainwindow/geometry", saveGeometry());
     #ifdef Q_PROCESSOR_ARM
     system("shutdown -P now");
     #endif
@@ -1034,7 +1033,8 @@ void MainWindow::applySettings(){
     emit newTextMessagesSettings(static_cast<quint8>(settings->value("pulldown_showTextmessages").toInt()));
     emit newManometerUse(showManometer);
     emit tcpConnectionSettings(static_cast<quint8>(settings->value("pulldown_tcpConnection").toUInt()));
-
+    if(showManometer) ui->fieldYResize->unsetCursor();
+    else ui->fieldYResize->setCursor(Qt::SizeFDiagCursor);
 }
 void MainWindow::applyClicked(QString data, bool enabled){
     if(enabled){
@@ -1136,7 +1136,7 @@ void MainWindow::resizeMe(){
         break;
     }
     ui->manoHolder->setSizePolicy(manoSizePol);
-    ui->manoHolder_Spacer->setSizePolicy(manoSizePol);
+    ui->manoHolder_Spacer1->setSizePolicy(manoSizePol);
 
     if ((windowWidth / windowHeight) < windowRatio){
         multi = windowWidth / defaultWidth;
@@ -1172,7 +1172,6 @@ void MainWindow::resizeMe(){
 
     ui->widgetTacho->setGeometry(tachoRect);
     ui->fielBHolders->setGeometry(fieldBHolderRect);
-
 
     #ifdef Q_PROCESSOR_ARM
     this->setCursor(Qt::BlankCursor);
@@ -1246,25 +1245,33 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
     lKilickPos = event->pos();
     #endif
 }
+#if not defined(Q_OS_ANDROID)
 void MainWindow::mouseMoveEvent(QMouseEvent *event){
-    #if not defined(Q_OS_ANDROID)
     if(event->buttons() & Qt::LeftButton){
         if (ui->fieldZ->underMouse()) {
             QPoint diff = event->pos() - lKilickPos;
             QPoint newPos = this->pos() + diff;
             this->move(newPos);
         }
-        if(ui->fieldYResize->underMouse()){
+            if((ui->fieldYResize->underMouse()    && showManometer==0)||
+               (ui->fieldManoResize->underMouse() && showManometer>=1))
+            {
             QPoint diff = event->pos();
             QRect newSize = this->geometry();
             newSize.setWidth(diff.x());
             newSize.setHeight(diff.y());
             this->setGeometry(newSize);
+            this->resize(ui->DmiManoHolder->width(),
+                         ui->DmiManoHolder->height());
         }
     }
-    #endif
 }
 
+void MainWindow::mouseDoubleClickEvent(QMouseEvent *event){
+    if (ui->fieldZ->underMouse()) showFullScreen();
+    (void)event;
+}
+#endif
 #ifdef Q_OS_ANDROID
 void MainWindow::keepScreenOn()
 {

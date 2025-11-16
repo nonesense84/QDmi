@@ -199,7 +199,10 @@ void zusi3etcs::setVehicleHasEtcsPS(quint8 hastCB){     vehicleHasEtcsPS    = ha
 void zusi3etcs::setVehicleHasEtcsRSW(quint8 hastRSW){   vehicleHasEtcsRSW   = hastRSW;}
 void zusi3etcs::setVehicleHasEtcsRSK(quint8 hastRSK){   vehicleHasEtcsRSK   = hastRSK;}
 void zusi3etcs::setEtcsCBState(quint8 cBState){         etcsCBState         = static_cast<circuitBreakerState>(cBState);}
-void zusi3etcs::setEvcTyte(QString type){               evcTyte             = type;}
+void zusi3etcs::setEvcType(QString type){
+    evcType = type;
+    emit newEvcPresent(true);
+}
 void zusi3etcs::setActiveLevel(quint16 level){
     if(level == 1)level = 6; // Workaround: 6 as level PZB/LZB, because we dont get info which NTC will be the next
     if(activeLevel != level){
@@ -214,7 +217,6 @@ void zusi3etcs::setActiveLevel(quint16 level){
 }
 void zusi3etcs::setActiveMode(quint16 mode){
     if(activeMode != mode){
-        emit newEvcPresent(true);
         activeMode = static_cast<etcsMode>(mode);
         emit newActiveMode(activeMode);
         emit newActiveModeIcon(era::modeIcons[mode]);
@@ -339,10 +341,12 @@ void zusi3etcs::setTargetSpeed(float speed){
     targetInfoPresent = targetSpeed < permittedSpeed;
     emit newVTarget(targetSpeed,  activeLevel > level_Stm, true);
     emit newTarDist(targetDistance, showTargetDistanceGraph, showTargetDistanceDigital, true);
-    //if(D)qDebug() << "09    TargetSpeed: " << targetSpeed;
+    if(D)qDebug() << "09    TargetSpeed: " << targetSpeed;
 }
 void zusi3etcs::setTargetDistance(float distance){
-    if(targetDistance != distance){
+    if(!((activeLevel == etcsLevel::level_1)||(activeLevel == etcsLevel::level_2))) // Workaround: Zusi also sends a target distance when there is no ETCS guiding
+        distance = -1;
+    if(targetDistance != static_cast<quint16>(distance)){
         targetDistance = static_cast<quint16>(distance);
         if(distance < 0){                               // Zielweg in m (Wert<0 → dunkel)
             emit newTarDist(0, false, false, true);
@@ -367,7 +371,7 @@ void zusi3etcs::setBrakeApplicationPointDistance(float distance){
     if(D)qDebug() << "0B    brakeApplicationPointDistance: " << brakeApplicationPointDistance;
 }
 void zusi3etcs::setReleaseSpeed(float speed){
-    if(activeLevel < etcsLevel::level_1)return;    // Workaround: Zusi also send a release speed if there is no ETCS
+    if(!(activeLevel == etcsLevel::level_1)||(activeLevel == etcsLevel::level_2))return; // Workaround: Zusi also send a release speed if there is no ETCS
     if(speed < 0) speed = 0;
     if(speed > 0) supState = supervisionStatus::state_RSM;
     if(releaseSpeed != static_cast<quint16>(qRound(speed * 3.6f))){

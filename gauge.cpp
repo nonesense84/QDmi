@@ -94,6 +94,7 @@ void gauge::setVAct(quint16 V){
 }
 
 void gauge::setVPerm(quint16 V, bool visible, bool fromEtcs){
+    if(V > VMaxDial)return; // Workarround: Zusi sends during startup wild values
     if((V != vPerm) || (visible != csgVisible)){
         vPerm = V;
         csgVisible = visible;

@@ -752,7 +752,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                 case 0x0015: myEtcs->setVehicleHasEtcsRSW(useData2Byte.byte[0]);return;         // Fahrzeug hat einen ETCS-Reset-Schalter
                 case 0x0016: myEtcs->setVehicleHasEtcsRSK(useData2Byte.byte[0]);return;         // Fahrzeug hat einen ETCS-Reset-Softkey
                 case 0x0017: myEtcs->setEtcsCBState(useData2Byte.byte[0]);return;               // ETCS-LSS
-                case 0x0019: myEtcs->setEvcTyte(QString::fromLatin1(useDataComplex));return;    // Bauart Zugbeeinflussungssystem als Text
+                case 0x0019: myEtcs->setEvcType(QString::fromLatin1(useDataComplex));return;    // Bauart Zugbeeinflussungssystem als Text
                 }
             case 0x0005:                                                                        // 11.3.3.3.4.9 System aus der ETCS-Familie – Betriebsdaten
                 dataContainsEtcs = true;

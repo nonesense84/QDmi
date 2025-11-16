@@ -263,7 +263,7 @@ private:
     quint8              vehicleHasEtcsRSW = 0;  // RSW: reset switch
     quint8              vehicleHasEtcsRSK = 0;  // RSK: reset softkey
     circuitBreakerState etcsCBState = circuitBreakerState::circuit_undefined; // CB: circuit breaker
-    QString             evcTyte = "";
+    QString             evcType = "";
 
     etcsLevel           activeLevel = etcsLevel::level_undefined;
     etcsMode            activeMode = etcsMode::mode_undefined;
@@ -351,7 +351,7 @@ public slots:
     void setVehicleHasEtcsRSW   (quint8  hastRSS);   // RSW: reset switch
     void setVehicleHasEtcsRSK   (quint8  hastRSK);   // RSK: reset softkey
     void setEtcsCBState         (quint8  cBState);   // CB: circuit breaker
-    void setEvcTyte             (QString type);
+    void setEvcType             (QString type);
 
     void setActiveLevel                 (quint16 level);
     void setActiveMode                  (quint16 mode);

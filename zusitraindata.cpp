@@ -64,7 +64,12 @@ void zusiTraindata::setTextFromKeyboard(QString text){
         enteredDataString.chop(1);
         text = "";
     }
-    if(enteredDataString.length() >2) enteredDataString = "";
+    if(editJustStarted){
+        enteredDataString = "";
+        editJustStarted = false;
+    }
+    else
+        if(enteredDataString.length() >2) return;
     if(enabledBrh){
         enteredDataString = enteredDataString + text;
         emit newBehavBrhBtn(enteredDataString, true, enabledBrh, validBrh, true);
@@ -125,6 +130,7 @@ void zusiTraindata::setBra(QString BRA, bool btnEnabled){
     BRA.remove("_");
     if(BRA == "") BRA = "0";
     disableAllButtons();
+    editJustStarted = true;
     if(lzbApplicable)
         emit requestKeyboardLayout(P_Keyboard_brakingRegimeLzb);
     else
@@ -156,6 +162,7 @@ void zusiTraindata::setBrh(QString BRH, bool btnEnabled){
     BRH.remove("_");
     if(BRH == "") BRH = "0";
     disableAllButtons();
+    editJustStarted = true;
     emit requestKeyboardLayout(P_Keyboard_Numeric);
     if(btnEnabled){
         enteredBrh = BRH;
@@ -185,6 +192,7 @@ void zusiTraindata::setZl (QString ZL,  bool btnEnabled){
     ZL.remove("_");
     if(ZL == "") ZL = "0";
     disableAllButtons();
+    editJustStarted = true;
     emit requestKeyboardLayout(P_Keyboard_Numeric);
     if(btnEnabled){
         enteredZl =  ZL;
@@ -214,6 +222,7 @@ void zusiTraindata::setVmz(QString VMZ, bool btnEnabled){
     if(VMZ == "") VMZ = "0";
     emit requestKeyboardLayout(P_Keyboard_Numeric);
     disableAllButtons();
+    editJustStarted = true;
     if(btnEnabled){
         enteredVmz = VMZ;
         validVmz = true;
@@ -241,6 +250,7 @@ void zusiTraindata::setTct(QString TCT, bool btnEnabled){
     TCT.remove("_");
     emit requestKeyboardLayout(P_Keyboard_TrainCategory);
     disableAllButtons();
+    editJustStarted = true;
     if(btnEnabled){
         enteredTct = TCT;
         validTct = true;
@@ -274,6 +284,7 @@ void zusiTraindata::setAxl(QString AXL, bool btnEnabled){
     AXL.remove("_");
     emit requestKeyboardLayout(P_Keyboard_axleLoad);
     disableAllButtons();
+    editJustStarted = true;
     if(btnEnabled){
         enteredAxl = AXL;
         validAxl = true;
@@ -309,6 +320,7 @@ void zusiTraindata::setAit(QString AIT, bool btnEnabled){
     AIT.remove("_");
     emit requestKeyboardLayout(P_Keyboard_yesNo);
     disableAllButtons();
+    editJustStarted = true;
     if(btnEnabled){
         enteredAit = AIT;
         validAit = true;
