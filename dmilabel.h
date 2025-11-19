@@ -11,7 +11,7 @@
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 #include <QAudioOutput>
 #endif
-#include <QMediaPlayer>
+#include <QSoundEffect>
 #include <QTimer>
 
 class dmiLabel : public QWidget
@@ -66,7 +66,7 @@ signals:
     void messaesOutOfView(bool outOfView);
 
 private:
-    QMediaPlayer *click1 =nullptr;          // workaround: QSound::play crash on some android devices
+    QSoundEffect *click1 =nullptr; // workaround: QSound::play crash on some android devices
     QTimer *attenuationTimer = new QTimer();
     bool fileNameIsSet;
     bool isTextField = false;

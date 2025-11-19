@@ -22,7 +22,6 @@ void dmiLabel::mouseReleaseEvent(QMouseEvent *event){
     if(isEnab){
         emit clicked();
         if(isButton && !isDataEntryButton){
-            click1->stop();
             click1->play();
         }
         update();
@@ -42,17 +41,10 @@ void dmiLabel::setAsButton(bool enabled, QString text){
 
 void dmiLabel::setAsButton(bool enabled, QString text, QString textToEmit){
     if(click1 == nullptr){
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        click1 = new QMediaPlayer(this);
-        click1->setMedia(QUrl("qrc:/sounds/click.wav"));
-        click1->setVolume(50);
-#else
-        click1 = new QMediaPlayer(this);
-        auto audioOutput = new QAudioOutput(this);
-        click1->setAudioOutput(audioOutput);
-        audioOutput->setVolume(0.5);
+        click1 = new QSoundEffect(this);
+        click1->setVolume(0.5);
         click1->setSource(QUrl("qrc:/sounds/click.wav"));
-#endif
+        click1->setLoopCount(1);
     }
     bool needUpdate = false;
     if(isEnab != enabled || labelText != text)needUpdate = true;
