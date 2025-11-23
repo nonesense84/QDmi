@@ -822,7 +822,9 @@ void MainWindow::setMode(quint16 mode){
         ui->fielBHolders->lower();
         ui->fieldC_holder->setCurrentIndex(0);  // ...the 3 widgehts below the speedometer must be displayed
         ui->fieldC_holder2->setCurrentIndex(1);
+        #if not defined(Q_OS_ANDROID)
         ui->fieldD->setCurrentIndex(1);         // Show planning area
+        #endif
     }
     ui->FieldELzbTexts->setSizePolicy(sp);
     actMode = mode;
@@ -1245,8 +1247,9 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
     lKilickPos = event->pos();
     #endif
 }
-#if not defined(Q_OS_ANDROID)
+
 void MainWindow::mouseMoveEvent(QMouseEvent *event){
+    #if not defined(Q_OS_ANDROID)
     if(event->buttons() & Qt::LeftButton){
         if (ui->fieldZ->underMouse()) {
             QPoint diff = event->pos() - lKilickPos;
@@ -1265,13 +1268,16 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event){
                          ui->DmiManoHolder->height());
         }
     }
+    #endif
 }
 
 void MainWindow::mouseDoubleClickEvent(QMouseEvent *event){
+    #if not defined(Q_OS_ANDROID)
     if (ui->fieldZ->underMouse()) showFullScreen();
     (void)event;
+    #endif
 }
-#endif
+
 #ifdef Q_OS_ANDROID
 void MainWindow::keepScreenOn()
 {
