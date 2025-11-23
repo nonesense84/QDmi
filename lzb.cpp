@@ -461,7 +461,6 @@ void lzb::setGrundZwangsbremnsung(Zwangsbremsungen value) {
         if (grundZwangsbrmnsung != GR::keine_Zwangsbremsung)
             removeTextmessage(lastLimitMessage);
         grundZwangsbrmnsung = value;
-        lmS = indicator::On; // Workaround: Zusi does not set the indicator reliable
         switch (value) {
             case GR::keine_Zwangsbremsung:
                 removeTextmessage(T::Zwangsbremsung);
@@ -472,28 +471,34 @@ void lzb::setGrundZwangsbremnsung(Zwangsbremsungen value) {
                 removeTextmessage(T::WT_nicht_zeitgerecht_betaetigt);
                 removeTextmessage(T::Hz2000_Beeinflussung);
                 removeTextmessage(T::Hz2000_Beeinflussung);
+                lmS = indicator::Off;
                 break;
             case GR::Wachsam:
                 emitTextmessage(T::WT_nicht_zeitgerecht_betaetigt);
                 emitTextmessage(T::Zwangsbremsung);
+                lmS = indicator::On; // Workaround: Zusi does not set the indicator reliable
                 break;
             case GR::Geschwindigkeitsueberschreitung_1000Hz:
             case GR::Geschwindigkeitsueberschreitung_500Hz:
                 emitTextmessage(T::Geschwindigkeitsueberschreitung);
                 emitTextmessage(T::Zwangsbremsung);
+                lmS = indicator::On; // Workaround: Zusi does not set the indicator reliable
                 break;
             case GR::Beinflussung_2000Hz:
                 emitTextmessage(T::Hz2000_Beeinflussung);
                 emitTextmessage(T::Zwangsbremsung);
+                lmS = indicator::On; // Workaround: Zusi does not set the indicator reliable
                 break;
             case GR::Unberechtigtige_Befreiung_vor_500Hz:
                 emitTextmessage(T::Unberechtigtes_Befreien);
                 emitTextmessage(T::Zwangsbremsung);
+                lmS = indicator::On; // Workaround: Zusi does not set the indicator reliable
                 break;
             case GR::LZB_Halt_ueberfahren:
                 emitTextmessage(T::LZB_Halt_ueberfahren);
                 emitTextmessage(T::Zwangsbremsung);
                 if (vAct <= 1) emitTextmessage(T::Fdl_beteiligen);
+                lmS = indicator::On; // Workaround: Zusi does not set the indicator reliable
                 break;
             default:
                 emitTextmessage(T::Zwangsbremsung);
