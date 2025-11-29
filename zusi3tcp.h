@@ -5,7 +5,6 @@
 #include <QTcpSocket>
 #include <QHostAddress>
 #include <QtMath>
-#include "zusiindicator.h"
 #include "zusi3etcs.h"
 #include <QHostInfo>
 #include <qthread.h>
@@ -15,6 +14,7 @@
 #include <QCoreApplication>
 #include <QProcess>
 #include <QNetworkInterface>
+#include <QTimer>
 
 #define zusiMajor  3
 #define zusiMinor  5
@@ -43,6 +43,7 @@ private slots:
     void transmitMtdIndicators();
     void removeTechniccalMessages();
     QDateTime convertZusiTime(double daysSince2000);
+    quint8 checkPlzbType(QString value);
 
 public slots:
     void setNwSettingsOpen(bool open);
@@ -87,7 +88,6 @@ public slots:
     void setEtcsBaseline();
 public:
     zusi3Tcp();
-    zusiIndicator *myIndicators;
     zusiPower *myPower;
     zusi3etcs *myEtcs;
 
@@ -129,6 +129,7 @@ private:
     quint8 currentType;
     quint8 stromabnehmerLok;
     quint8 stromabnehmerSteuerwagen;
+    bool afbAn = false;
     bool plzbDataWasReceived= 0;
     bool autoReconnect = true;
     bool reconnectOnes = false;
@@ -177,8 +178,12 @@ private:
     void sendKeyboardCommand(quint16 mapping, quint8  command, qint16 position);
     void sendEtcsSettingsByte(quint8 ID, quint8  value);
     void sendEtcsSettingsWord(quint8 ID, quint16 value);
+    uint8_t plzbDevice = 7;
+    uint8_t indusiDevice = 7;
 
 public: signals:
+    void newAfbSoll(quint16 vSoll, bool visible);
+    void newFzgVmaxTacho(quint16 speed);
     void newKilometrierung(qint32 kilometrierung);
     void newLzbIndicators(QVector<quint8> lmsToDecoder);
     void newLzbValues(QVector<quint8> lmsToDecoder);

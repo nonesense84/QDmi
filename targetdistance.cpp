@@ -87,8 +87,7 @@ void targetDistance::paintEvent(QPaintEvent *){
     qreal tem = 0.0;
     if(useEraStyle || targetDistanceFromEtcs){
         bool digiVisib = targetDistanceDigitalVisible;
-        if(targetDistanceFromEtcs && !targetDistanceBarVisible && targetDistanceDigitalVisible) // Assumption, we are in mode OS
-            digiVisib = displayDigitalInOs;
+        if(mode == zusi3etcs::etcsMode::mode_OS)                digiVisib = displayDigitalInOs;
         if( targetDistanceFromEtcs && digiVisib)                painter.drawText(digitalDistPosition,QString::number(targetDistanceIs));
         if(!targetDistanceFromEtcs && targetDistanceBarVisible) painter.drawText(digitalDistPosition,QString::number(targetDistanceIs));
         if(targetDistanceBarVisible){
@@ -162,4 +161,11 @@ void targetDistance::mousePressEvent(QMouseEvent *event){
 void targetDistance::setDigitalInOs(bool active){
     displayDigitalInOs = active;
     update();
+}
+
+void targetDistance::setMode(quint16 newMode){
+    if(mode != newMode){
+        mode = newMode;
+        update();
+    }
 }

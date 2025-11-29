@@ -200,8 +200,10 @@ void zusi3etcs::setVehicleHasEtcsRSW(quint8 hastRSW){   vehicleHasEtcsRSW   = ha
 void zusi3etcs::setVehicleHasEtcsRSK(quint8 hastRSK){   vehicleHasEtcsRSK   = hastRSK;}
 void zusi3etcs::setEtcsCBState(quint8 cBState){         etcsCBState         = static_cast<circuitBreakerState>(cBState);}
 void zusi3etcs::setEvcType(QString type){
-    evcType = type;
-    emit newEvcPresent(true);
+    if(evcType != type){
+        evcType = type;
+        emit newEvcPresent(true);
+    }
 }
 void zusi3etcs::setActiveLevel(quint16 level){
     if(level == 1)level = 6; // Workaround: 6 as level PZB/LZB, because we dont get info which NTC will be the next

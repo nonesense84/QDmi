@@ -79,25 +79,6 @@ struct IndicatorIcon {
     QString offIcon;
 };
 
-const QVector<QColor> lzb::MeldungsFarbenBg = {
-    QColor(191,0,2), QColor(191,0,2), QColor(191,0,2), QColor(191,0,2), QColor(191,0,2), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0),
-    QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0),
-    QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0),
-    QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan,
-    Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan,
-    Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::gray, Qt::gray, Qt::gray, Qt::gray,
-    QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), Qt::gray, QColor(191,0,2), Qt::gray, QColor(255,219,0), QColor(255,219,0)
-};
-
-const QVector<QColor> lzb::MeldungsFarbenTxt = {
-    Qt::white, Qt::white, Qt::white, Qt::white, Qt::white, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,
-    Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,
-    Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,
-    Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,
-    Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,
-    Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,
-    Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black
-};
 lzb::lzb(){
 }
 void lzb::setSilent(bool silient){
@@ -393,9 +374,14 @@ void lzb::interpretSpeedlimitsByLm(){
     fuenfhuBeinflNr = lm1000Hz == I::Off && lm500Hz == I::On && !restriktiv;
     fuenfhuBeinflRe = lm1000Hz == I::Off && lm500Hz == I::On &&  restriktiv;
     zweitauBeinfl   = lmBefehl == I::On;
+    bool noPZB90    = lmIndusi == I::On;
     bool zAO        = zugart   == Z::Obere;
     bool zAM        = zugart   == Z::Mittlere;
     bool zAU        = zugart   == Z::Untere;
+    bool thIndusiO  = noPZB90  && zAO && lm1000Hz==I::On;
+    bool thIndusiM  = noPZB90  && zAM && lm1000Hz==I::On;
+    bool thIndusiU  = noPZB90  && zAU && lm1000Hz==I::On;
+    bool fhIndusi   = lm95==I::On && lm75==I::On && lm60==I::On && lm500Hz==I::On;
     if(Uebertragungsausfall == U::Kein_Ausfall){
         if(zAO && blauBlink )       emitLimitTextmessage(T::V_Ueberwachung_85kmh);
         if(zAM && blauBlink )       emitLimitTextmessage(T::V_Ueberwachung_70kmh);
@@ -406,13 +392,20 @@ void lzb::interpretSpeedlimitsByLm(){
         if(tausendBeinflRe)         emitLimitTextmessage(T::V_Ueberwachung_45kmh);
         if(fuenfhuBeinflRe)         emitLimitTextmessage(T::V_Ueberwachung_25kmh);
         if(zweitauBeinfl)           emitLimitTextmessage(T::V_Ueberwachung_40kmh);
+        if(thIndusiO)               emitLimitTextmessage(T::V_Ueberwachung_95kmh);
+        if(thIndusiM)               emitLimitTextmessage(T::V_Ueberwachung_75kmh);
+        if(thIndusiU)               emitLimitTextmessage(T::V_Ueberwachung_60kmh);
+        if(fhIndusi)                emitLimitTextmessage(T::V_Ueberwachung_45kmh);
     }
     // =========== Geschwindigkeitsueberschreitung ================================
     if(isBlinking(lmG))                emitTextmessage(  T::Geschwindigkeitsueberschreitung);
     if(lmG == I::Off && lmS == I::Off) removeTextmessage(T::Geschwindigkeitsueberschreitung);
     // =========== Leuchtnelder anpassen an Systeme mit Texten ====================
-    if(!blauBlink && !fuenfhuBeinflNr && !fuenfhuBeinflRe && !zweitauBeinfl && !fuenfhuBeinflRe && !tausendBeinflRe)
+    if(!(blauBlink || fuenfhuBeinflNr || fuenfhuBeinflRe || zweitauBeinfl || fuenfhuBeinflRe || tausendBeinflRe || thIndusiO || thIndusiM || thIndusiU || fhIndusi))
         removeTextmessage(lastLimitMessage);
+    /*if(!blauBlink && !fuenfhuBeinflNr && !fuenfhuBeinflRe && !zweitauBeinfl && !fuenfhuBeinflRe &&
+       !tausendBeinflRe && !thIndusiO && !thIndusiM && !thIndusiU && !fhIndusi)
+        removeTextmessage(lastLimitMessage);*/
     if(restriktiv){
         lm85 = I::Off;
         lm70 = I::Off;
@@ -424,6 +417,17 @@ void lzb::interpretSpeedlimitsByLm(){
         }
     }
     if(ZB){lm500Hz = I::Off;lm1000Hz = I::Off;lmS = I::On;}
+    if(noPZB90){    // Workaround: Zusi does not set the indictors for Indusi older than I60R like e.g. I54
+        if(!ZB && zAO       ) lm95 = I::On;
+        if(!ZB && zAM       ) lm75 = I::On;
+        if(!ZB && zAU       ) lm60 = I::On;
+        if(!ZB && thIndusiO ) lm95 = I::BlinkFast;
+        if(!ZB && thIndusiM ) lm75 = I::BlinkFast;
+        if(!ZB && thIndusiU ) lm60 = I::BlinkFast;
+        if( ZB && zAO       ) lm95 = I::Off;
+        if( ZB && zAM       ) lm75 = I::Off;
+        if( ZB && zAU       ) lm60 = I::Off;
+    }
 }
 // ================================================================================
 void lzb::setGrundZwangsbremnsung(Zwangsbremsungen value) {
@@ -448,6 +452,7 @@ void lzb::setGrundZwangsbremnsung(Zwangsbremsungen value) {
     /// 27: Allgemeine Störung
     /// 28: Stromversorgung fehlt
     using GR = Zwangsbremsungen;
+    using I = indicator;
     using LZ = LzbZustaende;
     using T = texte;
     using MWZ = ModusWirksameZugdaten;
@@ -471,34 +476,28 @@ void lzb::setGrundZwangsbremnsung(Zwangsbremsungen value) {
                 removeTextmessage(T::WT_nicht_zeitgerecht_betaetigt);
                 removeTextmessage(T::Hz2000_Beeinflussung);
                 removeTextmessage(T::Hz2000_Beeinflussung);
-                lmS = indicator::Off;
                 break;
             case GR::Wachsam:
                 emitTextmessage(T::WT_nicht_zeitgerecht_betaetigt);
                 emitTextmessage(T::Zwangsbremsung);
-                lmS = indicator::On; // Workaround: Zusi does not set the indicator reliable
                 break;
             case GR::Geschwindigkeitsueberschreitung_1000Hz:
             case GR::Geschwindigkeitsueberschreitung_500Hz:
                 emitTextmessage(T::Geschwindigkeitsueberschreitung);
                 emitTextmessage(T::Zwangsbremsung);
-                lmS = indicator::On; // Workaround: Zusi does not set the indicator reliable
                 break;
             case GR::Beinflussung_2000Hz:
                 emitTextmessage(T::Hz2000_Beeinflussung);
                 emitTextmessage(T::Zwangsbremsung);
-                lmS = indicator::On; // Workaround: Zusi does not set the indicator reliable
                 break;
             case GR::Unberechtigtige_Befreiung_vor_500Hz:
                 emitTextmessage(T::Unberechtigtes_Befreien);
                 emitTextmessage(T::Zwangsbremsung);
-                lmS = indicator::On; // Workaround: Zusi does not set the indicator reliable
                 break;
             case GR::LZB_Halt_ueberfahren:
                 emitTextmessage(T::LZB_Halt_ueberfahren);
                 emitTextmessage(T::Zwangsbremsung);
                 if (vAct <= 1) emitTextmessage(T::Fdl_beteiligen);
-                lmS = indicator::On; // Workaround: Zusi does not set the indicator reliable
                 break;
             default:
                 emitTextmessage(T::Zwangsbremsung);
@@ -507,9 +506,13 @@ void lzb::setGrundZwangsbremnsung(Zwangsbremsungen value) {
     }
     if(ktp && value != GR::keine_Zwangsbremsung){
         // During EMB 1000Hz and 500Hz must not flash if text messages are used
-        lm1000Hz = indicator::Off;
-        lm500Hz  = indicator::Off;
+        lm1000Hz = I::Off;
+        lm500Hz  = I::Off;
     }
+    if(value != GR::keine_Zwangsbremsung && value != GR::HLL_kl_3bar)
+        lmS = I::On; // Workaround: Zusi does not set the indicator reliable
+    else
+        lmS = I::Off;
 }
 void lzb::setZustandZugbeeinflussung(ZustandZugbeeinflussung value) {
     if(zustZugbeeinflussung == value) return;

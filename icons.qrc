@@ -153,5 +153,7 @@
         <file>icons/key_BrakeType_3.svg</file>
         <file>icons/key_BrakeType_2.svg</file>
         <file>icons/key_BrakeType_1.svg</file>
+        <file>icons/wheel_spin.svg</file>
+        <file>icons/slippery_rail.svg</file>
     </qresource>
 </RCC>

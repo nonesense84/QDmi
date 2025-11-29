@@ -8,6 +8,7 @@
 #include <QPainter>
 #include <QtSvg>
 #include "era.h"
+#include "zusi3etcs.h"
 
 class targetDistance : public QWidget
 {
@@ -22,6 +23,7 @@ public slots:
     void setTargetDistance(quint16 dist, bool barVisible, bool digitalVisible, bool fromEtcs);
     void setEraUse(bool useEra);
     void setDigitalInOs(bool active);
+    void setMode(quint16 newMode);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -37,6 +39,7 @@ private:
     quint16 distanceScale;
     quint16 targetDistanceIs;
     quint16 targetDistanceDest;
+    quint16 mode = 0;
     bool targetDistanceBarVisible = false;
     bool targetDistanceDigitalVisible = false;
     bool targetDistanceFromEtcs = false;

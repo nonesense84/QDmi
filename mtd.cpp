@@ -34,6 +34,8 @@ void mtd::setStates(QVector<quint8> states){
     InfDoorStatL  = states[10];
     InfDoorStatR  = states[11];
     tractionType  = states[12];
+    indWheelSpin = states[13];
+    indSlipperyRail = states[14];
     if(!initialized)initialize();
 
     if(InfDoorSystem > 0){
@@ -97,5 +99,13 @@ void mtd::setStates(QVector<quint8> states){
     }
     emit newIconBehavG4(indMainSwitch, 0, false);
     emit newIconBehavG5(indTrainLine, 0, false);
+    if(indWheelSpin){
+        emit newIconG9(indicatorFiles[10][0],indicatorFiles[10][1]);  // Wheel spin
+        emit newIconBehavG9(indWheelSpin, 0, false);
+    }
+    else{
+        emit newIconG9(indicatorFiles[11][0],indicatorFiles[11][1]);  // Slippery rail
+        emit newIconBehavG9(indSlipperyRail, 0, false);
+    }
 
 }

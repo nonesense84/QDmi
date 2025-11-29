@@ -75,7 +75,8 @@ public:
         LZB_Rueckrollueberwachung                           = 25,
         LZB_Ueberschreitung_200m_nach_Befehl_40_blinkend    = 26,
         Allgemeine_Stoerung                                 = 27,
-        Stromversorgung_fehlt                               = 28
+        Stromversorgung_fehlt                               = 28,
+        HLL_kl_3bar                                         = 255   // Not official in Zusi-Docu
     };Q_ENUM(Zwangsbremsungen)
     enum class LzbMelderbild: quint8{
         Normalzustand                           = 0,
@@ -257,6 +258,9 @@ private:
     quint8 userKtp=0;
     bool ersatzauftrag = false;
 
+    QColor yellow = QColor(255,219,0);
+    QColor red    = QColor(191,0,2);
+
     enum class texte : int {
         Zwangsbremsung = 0,
         LZB_Halt_ueberfahren,
@@ -333,22 +337,33 @@ private:
         Count
     };
     const QColor textBgColors[74]{
-        QColor(191,0,2), QColor(191,0,2), QColor(191,0,2), QColor(191,0,2), QColor(191,0,2), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0),
-        QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0),
-        QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0),
-        QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), QColor(255,219,0), Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan,
+        red, red, red, red, red, yellow, yellow, yellow, yellow, yellow,
+        yellow, yellow, yellow, yellow, yellow, yellow, yellow, yellow, yellow, yellow,
+        yellow, yellow, yellow, yellow, yellow, yellow, yellow, yellow, yellow, yellow,
+        yellow, yellow, yellow, yellow, yellow, yellow, yellow, yellow, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan,
         Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan,
         Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::gray, Qt::gray, Qt::gray, Qt::gray,
-        QColor(255,219,0),QColor(255,219,0),QColor(255,219,0),QColor(255,219,0),QColor(255,219,0),Qt::gray, QColor(191,0,2),Qt::gray, QColor(255,219,0), QColor(255,219,0), QColor(255,219,0)
+        yellow,yellow,yellow,yellow,yellow,Qt::gray, red,Qt::gray, yellow, yellow, yellow
     };
-    const QColor textFontColors[74]{
+
+    const QVector<QColor> MeldungsFarbenBg = {
+        red, red, red, red, red, yellow, yellow, yellow, yellow, yellow,
+        yellow, yellow, yellow, yellow, yellow, yellow, yellow, yellow, yellow, yellow,
+        yellow, yellow, yellow, yellow, yellow, yellow, yellow, yellow, yellow, yellow,
+        yellow, yellow, yellow, yellow, yellow, yellow, yellow, yellow, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan,
+        Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan,
+        Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::cyan, Qt::gray, Qt::gray, Qt::gray, Qt::gray,
+        yellow, yellow, yellow, yellow, yellow, Qt::gray, red, Qt::gray, yellow, yellow
+    };
+
+    const QVector<QColor> MeldungsFarbenTxt = {
         Qt::white, Qt::white, Qt::white, Qt::white, Qt::white, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,
-        Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,Qt::black,
-        Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,Qt::black,
+        Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,
+        Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,Qt::black, Qt::black, Qt::black,
+        Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,Qt::black, Qt::black, Qt::black, Qt::black,
         Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,
         Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,
-        Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black,
-        Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black, Qt::black
+        Qt::black, Qt::black, Qt::black, Qt::black,Qt::black, Qt::black, Qt::black, Qt::black
     };
     const QString indicatorFiles[26][2] = {
         {   ":/icons/LmB_on.svg",       ":/icons/LmB_off.svg",},        // 0
@@ -383,8 +398,8 @@ private:
     //static const std::array<QColor, static_cast<int>(texte::Count)> MeldungsFarbenTxt;
 
     static const QVector<QString>  MeldungsTexte;
-    static const QVector<QColor> MeldungsFarbenBg;
-    static const QVector<QColor> MeldungsFarbenTxt;
+    //static const QVector<QColor> MeldungsFarbenBg;
+    //static const QVector<QColor> MeldungsFarbenTxt;
     void emitTextmessage(texte text);
     void emitLimitTextmessage(texte text);
     void removeTextmessage(texte text);

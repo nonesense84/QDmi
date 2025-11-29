@@ -423,6 +423,7 @@ void gauge::paintReleaseSpeed(QPainter *painter, quint8 part){
     }
 }
 void gauge::paintBasicHookPerm(QPainter *painter){
+    if(!displayBasicHooks) return; // Dont draw basic hook if not required by the user
     int t = int(dimensionMatrix) - widthCsgRing;
     painter->rotate(posCsg);
     painter->setPen(hookWhite);        // Req 8.2.1.5.7
@@ -431,6 +432,7 @@ void gauge::paintBasicHookPerm(QPainter *painter){
 }
 void gauge::paintBasicHookTarget(QPainter *painter){
     if(mode == zusi3etcs::mode_SH)return; // Dont draw basic hook of vTarget in case of shunting. Req 8.2.1.5.7
+    if(!displayBasicHooks) return; // Dont draw basic hook if not required by the user
     int t = int(dimensionMatrix) - widthCsgRing;
     painter->rotate(posTarget);
     painter->setPen(hookMediumGrey);        // Req 8.2.1.5.7

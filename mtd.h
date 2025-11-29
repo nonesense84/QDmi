@@ -28,11 +28,13 @@ private:
     //bool indPantoUp;
     uint8_t InfPanto;
     bool indMainSwitch;
+    bool indWheelSpin;
+    bool indSlipperyRail;
     uint8_t InfDoorSystem;
     uint8_t InfDoorStatL;
     uint8_t InfDoorStatR;
     uint8_t tractionType;
-    QString indicatorFiles[10][2] = {
+    QString indicatorFiles[12][2] = {
         {   ":/icons/sifa_off.svg",         ":/icons/blanc.svg",},
         {   ":/icons/doors_open.svg",       ":/icons/blanc.svg",},
         {   ":/icons/panto_down.svg",       ":/icons/blanc.svg",},
@@ -42,7 +44,9 @@ private:
         {   ":/icons/sifaWarn2.svg",        ":/icons/blanc.svg",},
         {   ":/icons/sifaBrake.svg",        ":/icons/blanc.svg",},
         {   ":/icons/doors_closed.svg",     ":/icons/doors_closed_inv.svg",},
-        {   ":/icons/panto_up.svg",         ":/icons/panto_up_arr.svg",}
+        {   ":/icons/panto_up.svg",         ":/icons/panto_up_arr.svg",},
+        {   ":/icons/wheel_spin.svg",       ":/icons/blanc.svg",},
+        {   ":/icons/slippery_rail.svg",    ":/icons/blanc.svg",}
     };         
 private slots:
 

@@ -289,39 +289,39 @@ void MainWindow::initialize(){
     connect(ui->levelOkBtn,              &dmiLabel::dataEntryBtnClicked, this, &MainWindow::applyClicked);
 
     connect(ui->systemVersionClose, &dmiLabel::clicked,              this,               &MainWindow::settingsCloseClicked);
-    connect(mySep,                  &sep::newLzbIndicators,          myLzb,              &lzb::setIndicators);
-    connect(myTcp,                  &zusi3Tcp::newLzbIndicators,     myLzb,              &lzb::setIndicators);
-    connect(myLzb,                  &lzb::newLzbTextMessage,         ui->FieldELzbTexts, &dmiLabel::addTextLzbMessage);
-    connect(myLzb,                  &lzb::removeMessage,             ui->FieldELzbTexts, &dmiLabel::removeTextMessage);
-    connect(myTcp->myIndicators,    &zusiIndicator::newAfbSoll,      ui->widgetTacho,    &gauge::setVSet);
-    connect(mySep,                  &sep::newAfbSoll,                ui->widgetTacho,    &gauge::setVSet);
-    connect(mySep,                  &sep::newFzgVmaxTacho,           ui->widgetTacho,    &gauge::setVMaxDial);
-    connect(myTcp->myIndicators,    &zusiIndicator::newFzgVmaxTacho, ui->widgetTacho,    &gauge::setVMaxDial);
-    connect(mySep,                  &sep::newLzbValues,              myLzb,              &lzb::setAnalogValues);
-    connect(myTcp,                  &zusi3Tcp::newLzbValues,         myLzb,              &lzb::setAnalogValues);
-    connect(mySep,                  &sep::newMtdIndicators,          myMtd,              &mtd::setStates);
-    connect(myTcp,                  &zusi3Tcp::newMtdIndicators,     myMtd,              &mtd::setStates);
-    connect(mySep,                  &sep::newSpeed,                  ui->widgetTacho,    &gauge::setVAct);
-    connect(myTcp,                  &zusi3Tcp::newSpeed,             ui->widgetTacho,    &gauge::setVAct);
-    connect(mySep,                  &sep::newSpeed,                  myLzb,              &lzb::setVAct);
-    connect(myTcp,                  &zusi3Tcp::newSpeed,             myLzb,              &lzb::setVAct);
-    connect(myLzb,                  &lzb::speedGt0,                  this,               &MainWindow::enableTde);
-    connect(myLzb,                  &lzb::speedGt40,                 this,               &MainWindow::anableOverride);
-    connect(myTcp,                  &zusi3Tcp::newHlb,               ui->widgetMano1,    &manometer::setPressure1);
-    connect(myTcp,                  &zusi3Tcp::newHll,               ui->widgetMano1,    &manometer::setPressure2);
-    connect(myTcp,                  &zusi3Tcp::newBrz,               ui->widgetMano2,    &manometer::setPressure1);
-    connect(mySep,                  &sep::newHlb,                    ui->widgetMano1,    &manometer::setPressure1);
-    connect(mySep,                  &sep::newHll,                    ui->widgetMano1,    &manometer::setPressure2);
-    connect(mySep,                  &sep::newBrz,                    ui->widgetMano2,    &manometer::setPressure1);
-    connect(myTcp,                  &zusi3Tcp::newKilometrierung,    this,               &MainWindow::setGeoPosition);
-    connect(mySep,                  &sep::newGeoPos,                 this,               &MainWindow::setGeoPosition);
-    connect(myTcp,                  &zusi3Tcp::newLzbBra,            myZusiTrainData,    &zusiTraindata::setActiveBra);
-    connect(myTcp,                  &zusi3Tcp::newLzbBrh,            myZusiTrainData,    &zusiTraindata::setActiveBrh);
-    connect(myTcp,                  &zusi3Tcp::newLzbZl,             myZusiTrainData,    &zusiTraindata::setActiveZl);
-    connect(myTcp,                  &zusi3Tcp::newLzbVmz,            myZusiTrainData,    &zusiTraindata::setActiveVmz);
-    connect(myTcp,                  &zusi3Tcp::changedTrain,         myZusiTrainData,    &zusiTraindata::finalizeDataEntry);
-    connect(myTcp,                  &zusi3Tcp::changedTrain,         this,               &MainWindow::reset);
-    connect(myTcp,                  &zusi3Tcp::changedTrain,         ui->widgetTacho,    &gauge::reset);
+    connect(mySep, &sep::newLzbIndicators,          myLzb,              &lzb::setIndicators);
+    connect(myTcp, &zusi3Tcp::newLzbIndicators,     myLzb,              &lzb::setIndicators);
+    connect(myLzb, &lzb::newLzbTextMessage,         ui->FieldELzbTexts, &dmiLabel::addTextLzbMessage);
+    connect(myLzb, &lzb::removeMessage,             ui->FieldELzbTexts, &dmiLabel::removeTextMessage);
+    connect(myTcp, &zusi3Tcp::newAfbSoll,           ui->widgetTacho,    &gauge::setVSet);
+    connect(mySep, &sep::newAfbSoll,                ui->widgetTacho,    &gauge::setVSet);
+    connect(mySep, &sep::newFzgVmaxTacho,           ui->widgetTacho,    &gauge::setVMaxDial);
+    connect(myTcp, &zusi3Tcp::newFzgVmaxTacho,      ui->widgetTacho,    &gauge::setVMaxDial);
+    connect(mySep, &sep::newLzbValues,              myLzb,              &lzb::setAnalogValues);
+    connect(myTcp, &zusi3Tcp::newLzbValues,         myLzb,              &lzb::setAnalogValues);
+    connect(mySep, &sep::newMtdIndicators,          myMtd,              &mtd::setStates);
+    connect(myTcp, &zusi3Tcp::newMtdIndicators,     myMtd,              &mtd::setStates);
+    connect(mySep, &sep::newSpeed,                  ui->widgetTacho,    &gauge::setVAct);
+    connect(myTcp, &zusi3Tcp::newSpeed,             ui->widgetTacho,    &gauge::setVAct);
+    connect(mySep, &sep::newSpeed,                  myLzb,              &lzb::setVAct);
+    connect(myTcp, &zusi3Tcp::newSpeed,             myLzb,              &lzb::setVAct);
+    connect(myLzb, &lzb::speedGt0,                  this,               &MainWindow::enableTde);
+    connect(myLzb, &lzb::speedGt40,                 this,               &MainWindow::anableOverride);
+    connect(myTcp, &zusi3Tcp::newHlb,               ui->widgetMano1,    &manometer::setPressure1);
+    connect(myTcp, &zusi3Tcp::newHll,               ui->widgetMano1,    &manometer::setPressure2);
+    connect(myTcp, &zusi3Tcp::newBrz,               ui->widgetMano2,    &manometer::setPressure1);
+    connect(mySep, &sep::newHlb,                    ui->widgetMano1,    &manometer::setPressure1);
+    connect(mySep, &sep::newHll,                    ui->widgetMano1,    &manometer::setPressure2);
+    connect(mySep, &sep::newBrz,                    ui->widgetMano2,    &manometer::setPressure1);
+    connect(myTcp, &zusi3Tcp::newKilometrierung,    this,               &MainWindow::setGeoPosition);
+    connect(mySep, &sep::newGeoPos,                 this,               &MainWindow::setGeoPosition);
+    connect(myTcp, &zusi3Tcp::newLzbBra,            myZusiTrainData,    &zusiTraindata::setActiveBra);
+    connect(myTcp, &zusi3Tcp::newLzbBrh,            myZusiTrainData,    &zusiTraindata::setActiveBrh);
+    connect(myTcp, &zusi3Tcp::newLzbZl,             myZusiTrainData,    &zusiTraindata::setActiveZl);
+    connect(myTcp, &zusi3Tcp::newLzbVmz,            myZusiTrainData,    &zusiTraindata::setActiveVmz);
+    connect(myTcp, &zusi3Tcp::changedTrain,         myZusiTrainData,    &zusiTraindata::finalizeDataEntry);
+    connect(myTcp, &zusi3Tcp::changedTrain,         this,               &MainWindow::reset);
+    connect(myTcp, &zusi3Tcp::changedTrain,         ui->widgetTacho,    &gauge::reset);
     connect(myTcp, &zusi3Tcp::newLzbBra, ui->dataValidValue1, &dmiLabel::setSegmentText);
     connect(myTcp, &zusi3Tcp::newLzbBrh, ui->dataValidValue2, &dmiLabel::setSegmentText);
     connect(myTcp, &zusi3Tcp::newLzbZl,  ui->dataValidValue3, &dmiLabel::setSegmentText);
@@ -330,6 +330,7 @@ void MainWindow::initialize(){
     connect(myTcp, &zusi3Tcp::newEvcZl,  ui->dataValidValue7, static_cast<void (dmiLabel::*)(quint16)>(&dmiLabel::setText));
     connect(myTcp, &zusi3Tcp::newEvcVmz, ui->dataValidValue8, static_cast<void (dmiLabel::*)(quint16)>(&dmiLabel::setText));
 
+    connect(myTcp->myEtcs,       &zusi3etcs::newActiveMode,                  ui->fieldA3,         &targetDistance::setMode);
     connect(ui->widgetTacho,     &gauge::activatedSpeedHooks,                ui->fieldA3,         &targetDistance::setDigitalInOs);
     connect(ui->fieldA3,         &targetDistance::activatedDigitalInOs,      ui->widgetTacho,     &gauge::setBasicSpeedHooks);
 
@@ -352,9 +353,9 @@ void MainWindow::initialize(){
     connect(myTcp->myEtcs,       &zusi3etcs::newBehavBtndriverId,            ui->mainBtn2,        &dmiLabel::setEnabled);
     connect(myTcp->myEtcs,       &zusi3etcs::newBehavBtnTde,                 ui->mainBtn3,        &dmiLabel::setEnabled);
     connect(myTcp->myEtcs,       &zusi3etcs::newBehavBtnTrn,                 ui->mainBtn6,        &dmiLabel::setEnabled);
-  //connect(myTcp->myEtcs,       &zusi3etcs::newBehavBtnExitShunting,        TBD,                 &dmiLabel::setEnabled); // Button not aimplemented jet
-  //connect(myTcp->myEtcs,       &zusi3etcs::newBehavBtnMaintainShunting,    ui->mainBtn9,        &dmiLabel::setEnabled); // Button not aimplemented jet
-  //connect(myTcp->myEtcs,       &zusi3etcs::newBehavBtnRadio,               ui->mainBtn10,       &dmiLabel::setEnabled); // Button not aimplemented jet
+  //connect(myTcp->myEtcs,       &zusi3etcs::newBehavBtnExitShunting,        TBD,                 &dmiLabel::setEnabled); // Button not implemented jet
+  //connect(myTcp->myEtcs,       &zusi3etcs::newBehavBtnMaintainShunting,    ui->mainBtn9,        &dmiLabel::setEnabled); // Button not implemented jet
+  //connect(myTcp->myEtcs,       &zusi3etcs::newBehavBtnRadio,               ui->mainBtn10,       &dmiLabel::setEnabled); // Button not implemented jet
     connect(myTcp->myEtcs,       &zusi3etcs::newBehavBtnEoa,                 ui->overrideBtn1,    &dmiLabel::setEnabled);
 
     connect(myZusiTrainData,     &zusiTraindata::newTraindataLzb,            myTcp,               &zusi3Tcp::setTrainDataLzb);
@@ -704,11 +705,13 @@ void MainWindow::connectPzbIcons(){
 }
 void MainWindow::connectMtdIcons(){
     connect(myMtd, &mtd::newIconBehavG10, ui->fieldG10,&dmiLabel::setWorking);
+    connect(myMtd, &mtd::newIconBehavG9 , ui->fieldG9, &dmiLabel::setWorking);
     connect(myMtd, &mtd::newIconBehavG2,  ui->fieldG2, &dmiLabel::setWorking);
     connect(myMtd, &mtd::newIconBehavG3,  ui->fieldG3, &dmiLabel::setWorking);
     connect(myMtd, &mtd::newIconBehavG4,  ui->fieldG4, &dmiLabel::setWorking);
     connect(myMtd, &mtd::newIconBehavG5,  ui->fieldG5, &dmiLabel::setWorking);
     connect(myMtd, &mtd::newIconG10,      ui->fieldG10,static_cast<void (dmiLabel::*)(QString, QString)>(&dmiLabel::setIcon));
+    connect(myMtd, &mtd::newIconG9,       ui->fieldG9 ,static_cast<void (dmiLabel::*)(QString, QString)>(&dmiLabel::setIcon));
     connect(myMtd, &mtd::newIconG2,       ui->fieldG2, static_cast<void (dmiLabel::*)(QString, QString)>(&dmiLabel::setIcon));
     connect(myMtd, &mtd::newIconG3,       ui->fieldG3, static_cast<void (dmiLabel::*)(QString, QString)>(&dmiLabel::setIcon));
     connect(myMtd, &mtd::newIconG4,       ui->fieldG4, static_cast<void (dmiLabel::*)(QString, QString)>(&dmiLabel::setIcon));
@@ -809,7 +812,7 @@ void MainWindow::setMode(quint16 mode){
     using M = ::zusi3etcs::etcsMode;
     QSizePolicy sp = ui->FieldELzbTexts->sizePolicy();
     if(mode == M::mode_IS ||
-       mode == M::mode_SN){                     // In these mode should PZB/LZB be displayed...
+       mode == M::mode_SN){                     // In these modes should PZB/LZB be displayed...
         sp.setVerticalStretch(3);               // ...show LZB text messages
         ui->fielBHolders->raise();              // ...the indicator for level change must be clickable on top
         ui->fieldC_holder->setCurrentIndex(1);  // ...and must be visible.

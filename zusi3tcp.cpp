@@ -5,10 +5,9 @@ zusi3Tcp::zusi3Tcp(){}
 
 void zusi3Tcp::initialize(){
     client = new QTcpSocket(this);
-    myIndicators = new zusiIndicator(this);
     myEtcs = new zusi3etcs(this);
     myPower = new zusiPower(this);
-    mtdLmsToDecoder.resize(13);
+    mtdLmsToDecoder.resize(15);
     connect(client, &QTcpSocket::readyRead, this, &zusi3Tcp::clientReadReady);
     connect(client, &QTcpSocket::disconnected, this, &zusi3Tcp::connectToZusi);
     connect(client, &QTcpSocket::connected, this, &zusi3Tcp::subscribeZusiData);
@@ -174,8 +173,8 @@ void zusi3Tcp::subscribeZusiData(){
     addAtribut(&abfrage, 0x85);  // Steuerwagen: Fahrstufe
     addAtribut(&abfrage, 0x17);  // AFB-Sollgeschwindigkeit
   //addAtribut(&abfrage, 0x20);  // LM Hochabbremsung Aus/Ein
-  //addAtribut(&abfrage, 0x1b);  // LM Schleudern
-  //addAtribut(&abfrage, 0x1c);  // LM Gleiten
+    addAtribut(&abfrage, 0x1b);  // LM Schleudern
+    addAtribut(&abfrage, 0x1c);  // LM Gleiten
     addAtribut(&abfrage, 0x36);  // AFB an
     addAtribut(&abfrage, 0x55);  // Stromabnehmer
     addAtribut(&abfrage, 0x61);  // Kilometrierung
@@ -617,7 +616,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
         case 0x0065:    // 11.3.3.3.4 Status Zugbeeinﬂussung
             switch (nodeIds[3]){
             case 0x0001:
-                lzSys = myIndicators->checkPlzbType(QString::fromLatin1(useDataComplex));return;// Grundblock 11.3.3.3.4.1 Bauart Zugbeeinflussungssystem als Text // Obsolet
+                lzSys = checkPlzbType(QString::fromLatin1(useDataComplex));return;// Grundblock 11.3.3.3.4.1 Bauart Zugbeeinflussungssystem als Text // Obsolet
             case 0x0002:        // 11.3.3.3.4.2 System aus der Indusi-Familie - Einstellungen
                 plzbDataWasReceived = true;
                 switch(nodeIds[4]) {
@@ -658,8 +657,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                 case 0x000A: plzbLAH = useData2Byte.byte[0];return;                                         // Indusi-LuftabsperrhahnqDebug() << "Indusi-LH: " + QString::number(useData2Byte.byte[0]);
                 case 0x000B: zusiKtp = useData2Byte.byte[0];return;                                         // Klartextmeldungen
                 case 0x0011: sysStateLzb = useData2Byte.byte[0];return;                                     // Systemstatus LZB:// 3 = Aktiv
-                case 0x000D: lmPzb = useData2Byte.byte[0]==3;                                               // Systemstatus Indusi:// 3 = Aktiv
-                             sysStatePzb = useData2Byte.byte[0];
+                case 0x000D: sysStatePzb = useData2Byte.byte[0];return;                                     // Systemstatus Indusi:// 3 = Aktiv
                 }
                 return;
             case 0x0003:        // 11.3.3.3.4.2 System aus der Indusi-Familie - Betriebsdaten
@@ -906,7 +904,6 @@ void zusi3Tcp::zusiDecoderFahrpult(){
       //case 0x000E: fahrlSpng = useData4Byte.Single; guesTractionType(); return;
         case 0x0013:   // Hauptschalter
             hauptschalter = useData4Byte.Single > 0;
-            myIndicators->setLmHauptschalter(hauptschalter);
             setMtdIndicator(!hauptschalter ,7);
             if(useData4Byte.Single < 1 && istReisezug){    // ZS kommt nich von Zusi. Einfach verzögert von HS an und kein Güterz.
                 QTimer::singleShot(5000, this, SLOT(setSammelschine()));
@@ -921,35 +918,34 @@ void zusi3Tcp::zusiDecoderFahrpult(){
             return;
           case 0x0017:   // AFB-Sollgeschwindigkeit
             if(checkHysterise(&VSoll, mPerSecToKmh(useData4Byte.Single)))
-                myIndicators->setAfbSoll(VSoll);
+                emit newAfbSoll(VSoll, afbAn);
             return;
       //case 0x0020: return;  // Hohe Abbrems
-        case 0x001b: myIndicators->setLmSchleudern(useData4Byte.Single > 0);return;// LM Schleudern
-        case 0x001c: myIndicators->setLmGleiten(useData4Byte.Single > 0);return;// LM Gleiten
+        case 0x001b: setMtdIndicator(useData4Byte.Single > 0, 13);return;// LM Schleudern
+        case 0x001c: setMtdIndicator(useData4Byte.Single > 0, 14);return;// LM Gleiten
         case 0x0023: emit newSimTime(   QTime::fromMSecsSinceStartOfDay(static_cast<int>(useData4Byte.Single * 86400000)).toString());
                      myEtcs->setSimTime(QTime::fromMSecsSinceStartOfDay(static_cast<int>(useData4Byte.Single * 86400000)).toString("hh:mm"));
                      return;
-        case 0x0036: myIndicators->setAfbAn(useData4Byte.Single > 0);return;
+        case 0x0036:
+            afbAn = useData4Byte.Single > 0;
+            emit newAfbSoll(VSoll, afbAn);
+            return;
         case 0x0055:   //             Stromabnehmer
             stromabnehmerLok = static_cast<quint8>(useData4Byte.Single);
             if(stromabnehmerSteuerwagen > stromabnehmerLok){
               setMtdIndicator(stromabnehmerSteuerwagen ,6);
-              myIndicators->setStatusStromabnehmer(stromabnehmerSteuerwagen);
             }
             else{
               setMtdIndicator(stromabnehmerLok ,6);
-              myIndicators->setStatusStromabnehmer(stromabnehmerLok);
             }
             return;
         case 0x0088:   // Steuerwagen Stromabnehmer
             stromabnehmerSteuerwagen = static_cast<quint8>(useData4Byte.Single);
             if(stromabnehmerSteuerwagen > stromabnehmerLok){
                 setMtdIndicator(stromabnehmerSteuerwagen ,6);
-                myIndicators->setStatusStromabnehmer(stromabnehmerSteuerwagen);
             }
             else{
                 setMtdIndicator(stromabnehmerLok ,6);
-                myIndicators->setStatusStromabnehmer(stromabnehmerLok);
             }
             return;
         case 0x008E:  // 11.3.3.3.7 Status Zugverband
@@ -958,7 +954,7 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                 switch (nodeIds[4]){
                 case 0x0005:    // Fahrzeug
                     if(checkHysterise(&VMFzg, mPerSecToKmh(useData4Byte.Single)) && istVMaxErstesFahrzeug){
-                        myIndicators->setFzgVMax(VMFzg);
+                        emit newFzgVmaxTacho(VMFzg + 20);
                         istVMaxErstesFahrzeug = false;
                         QTimer::singleShot(2000, this, SLOT(resetVehicleBlocking()));
                     }
@@ -1157,11 +1153,11 @@ void zusi3Tcp::composeLzbInfos(){
     lm95     = lm85  * !pzb90;
     lm75     = lm70  * !pzb90;
     lm60     = lm55  * !pzb90;
-    lmIndusi = lm55  * !pzb90;
+    lmIndusi = sysStatePzb ==3 * !pzb90;
     lm85     = lm85  *  pzb90;
     lm70     = lm70  *  pzb90;
     lm55     = lm55  *  pzb90;
-    lmPzb    = lmPzb *  pzb90;
+    lmPzb    = sysStatePzb ==3 *  pzb90;
     if(lmUe == 4 || lmUe == 0)endeVerf = 0; // Endeverfahren zu ende, wenn Ü aus geht.
     QVector<quint8> sepIndicatorTelegram =
     {lmB, lm85,lm70, lm55,lmPzb, lmS, lmH,lmG, lmE4,lmV4, lmBF,lmTH, lmFH,lmEl, lmUe,           // LMs, wie sie auch im SEP kommen
@@ -1181,3 +1177,32 @@ void zusi3Tcp::composeLzbInfos(){
     plzbDataWasReceived = false;
     ersAuf=0; falAuf=0; vorAuf=0; elAuf=0; ueAusf=0; fUeLHpB=0; pzb90=0;
 }
+
+quint8 zusi3Tcp::checkPlzbType(QString value){
+    if(value.contains("ETCS"))return plzbDevice;
+    bool haseLzb = value.contains("LZB") || value.contains("EBICAB 2000");
+    bool indusiDevice = value.contains("Indusi");
+    if(haseLzb){
+        plzbDevice = 7;
+    }
+    else if(indusiDevice){
+        plzbDevice = 1;
+    }
+    else{
+        plzbDevice = 5;
+    }
+    return plzbDevice;
+    /*  Possible values from SEP Spec:
+     *  1. I60
+     *  2. I60 mit ER2
+     *  3. I60 mit ER24 und PZB90
+     *  4. I60R
+     *  5. I60R mit PZB90
+     *  6. I80
+     *  7. I80 mit PZB90
+     *  8. PZ80
+     *  9. PZ80R
+     *  10. PZ80R mit PZB90
+     */
+}
+
