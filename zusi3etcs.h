@@ -371,8 +371,7 @@ public slots:
     void setEmergencyBreakSpeed         (float speed);
     void setServBreakSpeed              (float speed);
     void setTargetSpeedMonitoring       (bool tsm);
-
-    void addPlanningInfo(quint16 origin, float speed, float distance, float gradient, quint16 parameter);
+    void addPlanningInfo(quint8 ZusiID, float value);
 /*
     void addPlanningInfoOrigin(quint16 origin, quint16 index);
     void addPlanningInfoSpeed(float speed, quint16 index);
@@ -434,6 +433,7 @@ signals:
   //void newBehavBtnNonLeading(bool enabled, QString btnText);
     void newTextMessages(const QList<EtcsTextMessage>& messages);
     void newTti(float tti, bool visible);
+    void newPlanningData(const QList<previewPoint> &points, float brakeApplicationPointDistance, bool useRelativeDistance);
     void newBehavBtnStart(bool enabled);
     void newBehavBtnLevel(bool enabled);
     void newBehavBtnShunting(bool enabled);

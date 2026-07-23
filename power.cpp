@@ -346,3 +346,6 @@ void power::updateUnits(){
         uniteAccelerating = "%";
     }
 }
+void power::mouseReleaseEvent(QMouseEvent *event){
+    emit clicked();
+}

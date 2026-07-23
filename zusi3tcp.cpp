@@ -790,16 +790,15 @@ void zusi3Tcp::zusiDecoderFahrpult(){
                 case 0x0010: myEtcs->setEmergencyBreakSpeed(useData4Byte.Single);return;        // Zwangsbremsgeschwindigkeit in m/s
                 case 0x0011: myEtcs->setTargetSpeedMonitoring(useData2Byte.byte[0]);return;     // Bremskurve läuft ab 0: nein 1: ja
                 case 0x0012:                                                                    // Vorschaupunkt
-                    static uint16_t  origin;
-                    static float     speed, distance, altitude;
-                    switch(nodeIds[5]) {
-                        case 0x0001: origin = useData2Byte.Word;return;                         // Herkunft
-                        case 0x0002: speed    = mPerSecToKmh(useData4Byte.Single);return;       // Geschwindigkeit in m/s (-1 bedeutet ETCS-Ende)
-                        case 0x0003: distance = useData4Byte.Single;return;                     // Abstand in m
-                        case 0x0004: altitude = useData4Byte.Single;return;                     // Höhenwert in m
-                        case 0x0005:                                                            // Parameter
-                            myEtcs->addPlanningInfo(origin, speed, distance, altitude, useData2Byte.Word);return;
+                    switch (nodeIds[5]) {
+                    case 0x0001: myEtcs->addPlanningInfo(1, useData2Byte.Word);return;          // Herkunft
+                    case 0x0002: myEtcs->addPlanningInfo(2, mPerSecToKmh(useData4Byte.Single));return;// Geschwindigkeit in m/s (-1 bedeutet ETCS-Ende)
+                    case 0x0003: myEtcs->addPlanningInfo(3, useData4Byte.Single);return;        // Abstand in m
+                    case 0x0004: return;                                                        // Höhenwert. Wird ignoriert, weil für D5 jetzt 0x0006 als Neigung genutzt wird.
+                    case 0x0005: myEtcs->addPlanningInfo(5, useData2Byte.Word);return;          // Parameter
+                    case 0x0006: myEtcs->addPlanningInfo(6, useData4Byte.Single);return;        // Neigung bis zu diesem Punkt in Promille
                     }
+                    return;
                 case 0x0013: myEtcs->setTrackAheadFreeRequestState(useData2Byte.byte[0]);return;// TAF-Status: 0: kein TAF aktiv 1: TAF wird nötig 2: TAF angefordert 3: TAF quittiert 4: TAF abgelehnt
                 case 0x0014: myEtcs->setOverrideActive(useData2Byte.byte[0]);return;            // Override aktiv (nur Zusi → Client) 1: Override aktiv
                 case 0x0015: myEtcs->setEmergencyStop(useData2Byte.byte[0]);return;             // Nothalt-Status 0: kein Nothalt 1: bedingter Nothalt aktiv 2: unbedingter Nothalt aktiv

@@ -434,10 +434,57 @@ void zusi3etcs::setTargetSpeedMonitoring(bool tsm){
             supState = supervisionStatus::state_CSM;
     if(D)qDebug() << "11    TargetSpeedMonitoring: " << tsm;
 }
-void zusi3etcs::addPlanningInfo(quint16 origin, float speed, float distance, float gradient, quint16 parameter){
-    previewPoint newPreviewPoint = { origin, speed, distance, gradient, parameter};
-    planningPreviewPoints.append(newPreviewPoint);
+
+void zusi3etcs::addPlanningInfo(quint8 ZusiID, float value){
+    static quint16 origin = 0;
+    static float speed = 0.0f;
+    static float distance = 0.0f;
+    static float gradient = 0.0f;
+    static quint16 parameter = 0;
+
+    static bool hasOrigin = false;
+    static bool hasSpeed = false;
+    static bool hasDistance = false;
+    static bool hasGradient = false;
+    static bool hasParameter = false;
+
+    auto flushPoint = [&]() {
+        if (!hasOrigin || !hasDistance) return;
+        previewPoint newPreviewPoint = { origin, speed, distance, gradient, parameter};
+        planningPreviewPoints.append(newPreviewPoint);
+        origin = 0; speed = 0.0f; distance = 0.0f; gradient = 0.0f; parameter = 0;
+        hasOrigin = false; hasSpeed = false; hasDistance = false; hasGradient = false; hasParameter = false;
+    };
+
+    switch (ZusiID){
+    case 1:
+        if (hasOrigin || hasSpeed || hasDistance || hasGradient || hasParameter)
+            flushPoint();
+        origin = static_cast<quint16>(value);
+        hasOrigin = true;
+        break;
+    case 2:
+        speed = static_cast<quint16>(value);
+        hasSpeed = true;
+        break;
+    case 3:
+        distance = static_cast<quint16>(value);
+        hasDistance = true;
+        break;
+    case 4: break;
+    case 5:
+        parameter = static_cast<quint16>(value);
+        hasParameter = true;
+        break;
+    case 6:
+        gradient = static_cast<quint16>(value);
+        hasGradient = true;
+        flushPoint();
+
+        break;
+    }
 }
+
 void zusi3etcs::setTrackAheadFreeRequestState(quint8 RequestState){
     trackAheadFreeRequestState = static_cast<tafState>(RequestState);
     if(D)qDebug() << "13    trackAheadFreeRequestState: " <<  QtEnumToString(trackAheadFreeRequestState);
@@ -497,7 +544,9 @@ void zusi3etcs::setTextMessage(uint32_t msgID, QDateTime timeStamp, uint16_t zus
 void zusi3etcs::doStuffAfterFinishOfZusiTelegram(){
     emit newTextMessages(messageList);
     messageList.clear();
+    emit newPlanningData(planningPreviewPoints, brakeApplicationPointDistance, false);
     planningPreviewPoints.clear();
+
     emit newEmrOrSrvBrakeState(                   reasonOfEmrBreakEnumeratiom != reason_noEmergencyBrake ||
                                                   reasonOfSrvBrakeEnumeration != reason_noEmergencyBrake);
     emit newEmrOrSrvBrakeIcon(era::emergencyBrake[reasonOfEmrBreakEnumeratiom != reason_noEmergencyBrake ||

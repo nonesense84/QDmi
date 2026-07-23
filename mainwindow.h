@@ -84,6 +84,7 @@ private slots:
     void fieldF2Clicked();
     void fieldF3Clicked();
     void fieldF4Clicked();
+    void swapPlanningPower();
     void openSettings();
     void connectTimers();
     void reset();

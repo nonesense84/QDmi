@@ -161,7 +161,7 @@ void MainWindow::initialize(){
     ui->systemVersionComp2Name->setTextFieldUsing(1, Qt::AlignRight);
     ui->systemVersionComp2Name->addTextLzbMessage("github.com/nones",era::grey,era::darkBlue,1);
     ui->systemVersionComp1Version->setFrameless();
-    ui->systemVersionComp1Version->addTextLzbMessage("1.4.0",era::grey,era::darkBlue,1);
+    ui->systemVersionComp1Version->addTextLzbMessage("1.4.1",era::grey,era::darkBlue,1);
     ui->systemVersionComp2Version->setFrameless();
     ui->systemVersionComp2Version->addTextLzbMessage("ense84/QDmi",era::grey,era::darkBlue,1);
     qRegisterMetaType< QVector<quint8> >("QVector<quint8>");
@@ -173,6 +173,8 @@ void MainWindow::initialize(){
     connect(ui->fieldF5,    &dmiLabel::clicked, this, &MainWindow::openSettings);
     connect(ui->fieldE10,   &dmiLabel::clicked, ui->FieldE8to9, &EtcsTextWidget::scrollUp);
     connect(ui->fieldE11,   &dmiLabel::clicked, ui->FieldE8to9, &EtcsTextWidget::scrollDown);
+    connect(ui->fieldDTopToggle, &dmiLabel::clicked, this, &MainWindow::swapPlanningPower);
+    connect(ui->widgetPower, &power::clicked, this, &MainWindow::swapPlanningPower);
     connect(ui->FieldE8to9, &EtcsTextWidget::enableScrollUp, ui->fieldE10, &dmiLabel::setEnabled);
     connect(ui->FieldE8to9, &EtcsTextWidget::enableScrollDown, ui->fieldE11, &dmiLabel::setEnabled);
     connect(ui->settingsBtn1, &dmiLabel::clicked, this, &MainWindow::settingsBtn1Clicked);
@@ -603,7 +605,10 @@ void MainWindow::initialize(){
     ui->loadingGaugeBtn3->setAsButton(true, "GB",        "GB"       );
     ui->loadingGaugeBtn4->setAsButton(true, "GC",        "GC"       );
     ui->loadingGaugeBtn5->setAsButton(true, "Out of GC", "Out of GC");
-
+    ui->fieldDTopToggle->setAsButton();
+    ui->fieldDTopToggle->setFrameless();
+    ui->fieldDTopToggle->setIcon(":/icons/fieldD_square_toggle_ena.svg");
+    ui->fieldDTopToggle->setText("", Qt::transparent, Qt::transparent);
     ui->zusiIpOkBtn->setAsButton();
     ui->zusiIpOkBtn->setAsDataEntryLabel("",true,true);//Nach Eingabe hier tippen
     ui->driverIdOkBtn->setAsButton();
@@ -701,7 +706,16 @@ void MainWindow::connectPzbIcons(){
     connect(myTcp->myEtcs, &zusi3etcs::newOverrideActive,    ui->fieldC7,     &dmiLabel::setVisib);
     connect(myTcp->myEtcs, &zusi3etcs::newIconB5,            ui->fieldB5,     static_cast<void (dmiLabel::*)(QString)>(&dmiLabel::setIcon));
     connect(myTcp->myEtcs, &zusi3etcs::newTti,               ui->fieldA1,     &timetoindication::setTti);
-  //connect(myTcp->myEtcs, &zusi3etcs::newNextLevelAckFrame, ui->FieldE8to9,  &EtcsTextWidget::setAcklowedgeFrame);
+
+  //connect(myTcp->myEtcs, &zusi3etcs::newPlanningData, this, &MainWindow::onPlanningDataFromTcp);
+    connect(myTcp->myEtcs, &zusi3etcs::newPlanningData, ui->widgetPlanning, &planningArea::setPlanningData);
+    connect(myLzb, &lzb::newVTarget,  ui->widgetPlanning, &planningArea::setLzbVTarget);    // LZB/PZB Fallback: Geschwindigkeitsdaten an Planning Area weiterleiten
+    connect(myLzb, &lzb::newVPermit,  ui->widgetPlanning, &planningArea::setLzbVPermit);
+    connect(myLzb, &lzb::newTarDist,  ui->widgetPlanning, &planningArea::setLzbTargetDist);
+    connect(myTcp->myEtcs, &zusi3etcs::newVPermit,  ui->widgetPlanning, &planningArea::setEtcsVPermit);
+    connect(myTcp->myEtcs, &zusi3etcs::newVTarget,  ui->widgetPlanning, &planningArea::setEtcsVTarget);
+    connect(myTcp->myEtcs, &zusi3etcs::newTarDist,  ui->widgetPlanning, &planningArea::setEtcsTargetDist);
+    //connect(myTcp->myEtcs, &zusi3etcs::newNextLevelAckFrame, ui->FieldE8to9,  &EtcsTextWidget::setAcklowedgeFrame);
 }
 void MainWindow::connectMtdIcons(){
     connect(myMtd, &mtd::newIconBehavG10, ui->fieldG10,&dmiLabel::setWorking);
@@ -825,7 +839,7 @@ void MainWindow::setMode(quint16 mode){
         ui->fielBHolders->lower();
         ui->fieldC_holder->setCurrentIndex(0);  // ...the 3 widgehts below the speedometer must be displayed
         ui->fieldC_holder2->setCurrentIndex(1);
-        #if not defined(Q_OS_ANDROID)
+        #if not defined(Q_OS_ANDROID)           // Dont display planning in android while its still under construction
         ui->fieldD->setCurrentIndex(1);         // Show planning area
         #endif
     }
@@ -858,6 +872,10 @@ void MainWindow::fieldF2Clicked(){
 }
 void MainWindow::fieldF3Clicked(){
   //QMetaObject::invokeMethod(myTcp, "setEtcsBaseline", Qt::QueuedConnection);
+}
+void MainWindow::swapPlanningPower(){
+    ui->fieldD->setCurrentIndex(ui->fieldD->currentIndex() == 1 ? 0 : 1);
+    resizeMe();
 }
 void MainWindow::fieldF4Clicked(){
 }
@@ -1174,7 +1192,13 @@ void MainWindow::resizeMe(){
     fieldBHolderRect.setX(static_cast<int>(     era::modeAreDefault.left() *  multi));
     fieldBHolderRect.setWidth(static_cast<int>( era::modeAreDefault.width() * multi));
     fieldBHolderRect.setHeight(static_cast<int>(era::modeAreDefault.height() *multi));
+    int planningWidth = ui->widgetPlanning->rect().width();
 
+    QRect togglePlanningPowerRect;
+    togglePlanningPowerRect.setLeft(planningWidth - planningWidth/5);
+    togglePlanningPowerRect.setHeight(planningWidth/5);
+    togglePlanningPowerRect.setWidth(planningWidth/5);
+    ui->fieldDTopToggle->setGeometry(togglePlanningPowerRect);
     ui->widgetTacho->setGeometry(tachoRect);
     ui->fielBHolders->setGeometry(fieldBHolderRect);
 

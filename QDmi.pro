@@ -3,10 +3,10 @@ QT += core gui svg network multimedia widgets
 TARGET = QDmi
 TEMPLATE = app
 
-ANDROID_VERSION_CODE = 35 #base-arm64
-#ANDROID_VERSION_CODE = 34 #armeabi
+#ANDROID_VERSION_CODE = *?* #base-arm64
+ANDROID_VERSION_CODE = 38 #armeabi
 
-ANDROID_VERSION_NAME = "1.4.0"
+ANDROID_VERSION_NAME = "1.4.1"
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
 DEFINES += QT_DEPRECATED_WARNINGS
@@ -65,11 +65,19 @@ RESOURCES += \
 DISTFILES += \
     android/AndroidManifest.xml \
     android/build.gradle \
+    android/build.gradle \
+    android/gradle.properties \
+    android/gradle/wrapper/gradle-wrapper.jar \
     android/gradle/wrapper/gradle-wrapper.jar \
     android/gradle/wrapper/gradle-wrapper.properties \
+    android/gradle/wrapper/gradle-wrapper.properties \
+    android/gradlew \
     android/gradlew \
     android/gradlew.bat \
-    android/res/values/libs.xml
+    android/gradlew.bat \
+    android/res/values/libs.xml \
+    android/res/values/libs.xml \
+    android/res/xml/qtprovider_paths.xml
 
 # Install rule for non-Android
 qnx: target.path = /tmp/$${TARGET}/bin

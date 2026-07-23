@@ -14,6 +14,9 @@ class power : public QWidget
 public:
     power(QWidget *parent = nullptr);
 
+signals:
+    void clicked();
+
 public slots:
     void setPowerRelative(qint16 P);
     void setPowerAbsolute(qint16 P);
@@ -118,6 +121,7 @@ private:
     void updateUnits();
 protected:
     void paintEvent(QPaintEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
 
 };
 

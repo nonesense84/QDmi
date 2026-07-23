@@ -155,5 +155,7 @@
         <file>icons/key_BrakeType_1.svg</file>
         <file>icons/wheel_spin.svg</file>
         <file>icons/slippery_rail.svg</file>
+        <file>icons/fieldD_square_toggle_dis.svg</file>
+        <file>icons/fieldD_square_toggle_ena.svg</file>
     </qresource>
 </RCC>
