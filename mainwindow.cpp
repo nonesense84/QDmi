@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
     settings = new QSettings("QDmi", "QDmi");
   //settings->setPath(QSettings::IniFormat, QSettings::SystemScope, ".");
     restoreGeometry(settings->value("mainwindow/geometry").toByteArray());
-    //this->setGeometry(0,0,768,480); // For 4:3 800*600. For 16:9 848*480. For 16:10 768*480
+    this->setGeometry(0,0,800,600); // For 4:3 800*600. For 16:9 848*480. For 16:10 768*480
   //showFullScreen();
     #ifdef Q_OS_ANDROID
     QTimer::singleShot(1000,this,SLOT(showFullScreen()));
@@ -174,6 +174,8 @@ void MainWindow::initialize(){
     connect(ui->fieldE10,   &dmiLabel::clicked, ui->FieldE8to9, &EtcsTextWidget::scrollUp);
     connect(ui->fieldE11,   &dmiLabel::clicked, ui->FieldE8to9, &EtcsTextWidget::scrollDown);
     connect(ui->fieldDTopToggle, &dmiLabel::clicked, this, &MainWindow::swapPlanningPower);
+    connect(ui->fieldDPlannZoomIn,  &dmiLabel::clicked, ui->widgetPlanning, &planningArea::zoomIn);
+    connect(ui->fieldDPlannZoomOut, &dmiLabel::clicked, ui->widgetPlanning, &planningArea::zoomOut);
     connect(ui->widgetPower, &power::clicked, this, &MainWindow::swapPlanningPower);
     connect(ui->FieldE8to9, &EtcsTextWidget::enableScrollUp, ui->fieldE10, &dmiLabel::setEnabled);
     connect(ui->FieldE8to9, &EtcsTextWidget::enableScrollDown, ui->fieldE11, &dmiLabel::setEnabled);
@@ -609,6 +611,13 @@ void MainWindow::initialize(){
     ui->fieldDTopToggle->setFrameless();
     ui->fieldDTopToggle->setIcon(":/icons/fieldD_square_toggle_ena.svg");
     ui->fieldDTopToggle->setText("", Qt::transparent, Qt::transparent);
+    ui->fieldDPlannZoomIn->setAsButton();
+    ui->fieldDPlannZoomIn->setFrameless();
+    ui->fieldDPlannZoomIn->setText("", Qt::transparent, Qt::transparent);
+    ui->fieldDPlannZoomOut->setAsButton();
+    ui->fieldDPlannZoomOut->setFrameless();
+    ui->fieldDPlannZoomOut->setText("", Qt::transparent, Qt::transparent);
+
     ui->zusiIpOkBtn->setAsButton();
     ui->zusiIpOkBtn->setAsDataEntryLabel("",true,true);//Nach Eingabe hier tippen
     ui->driverIdOkBtn->setAsButton();
@@ -1192,15 +1201,15 @@ void MainWindow::resizeMe(){
     fieldBHolderRect.setX(static_cast<int>(     era::modeAreDefault.left() *  multi));
     fieldBHolderRect.setWidth(static_cast<int>( era::modeAreDefault.width() * multi));
     fieldBHolderRect.setHeight(static_cast<int>(era::modeAreDefault.height() *multi));
-    int planningWidth = ui->widgetPlanning->rect().width();
-
-    QRect togglePlanningPowerRect;
-    togglePlanningPowerRect.setLeft(planningWidth - planningWidth/5);
-    togglePlanningPowerRect.setHeight(planningWidth/5);
-    togglePlanningPowerRect.setWidth(planningWidth/5);
-    ui->fieldDTopToggle->setGeometry(togglePlanningPowerRect);
+    int plnW  = ui->widgetPlanning->rect().width();
+    int plnH = ui->widgetPlanning->rect().height();
+    ui->fieldDTopToggle->setGeometry   (QRect(plnW - plnW/5, 0, plnW/5, plnW/5));
+    ui->fieldDPlannZoomIn->setGeometry (QRect(0, plnH - plnH/5, plnW/5, plnW/5));
+    ui->fieldDPlannZoomOut->setGeometry(QRect(0, 0, plnW/5, plnW/5));
     ui->widgetTacho->setGeometry(tachoRect);
     ui->fielBHolders->setGeometry(fieldBHolderRect);
+
+
 
     #ifdef Q_PROCESSOR_ARM
     this->setCursor(Qt::BlankCursor);
